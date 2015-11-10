@@ -13,3 +13,6 @@ A tool to manage smartcard resource.
 pyinstaller -F -npyResMan --version-file version.txt -w Main.py
 ```
 
+**Module Figure**
+
+![](./pyResMan.png)
