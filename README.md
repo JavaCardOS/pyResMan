@@ -27,8 +27,8 @@ pyinstaller -F -npyResMan --version-file version.txt -w Main.py
 * **Auto GetResponse**: If transmit protocol is T0, check the "Auto GetResponse" flag to auto get response
 * **Run APDU script**: Select script file, set run loop count, and run the script
 * **Run select APDU item**: Select single/multi item(s) in the APDU list view, and use the popup menu to run it/them
-* **Visit website**: Click the website url to visit our website
-* **Join discussion**: If have any problems, click the Discussion url to visit our forum to join discussion
+* **Visit website**: Click the website url to visit our [website](http://www.javacardos.com/)
+* **Join discussion**: If have any problems, click the Discussion url to visit our forum to join [discussion](http://www.javacardos.com/javacardforum/viewforum.php?f=39)
 
 **TODO**
 * Script editable
