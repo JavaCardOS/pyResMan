@@ -10,8 +10,16 @@ A tool to manage smartcard resource.
 **Compile**
 
 ```
-pyinstaller -F -npyResMan --version-file version.txt -w Main.py
+pyinstaller -F -npyResMan --version-file version.txt -w pyResMan/Main.py
 ```
+
+**Run as python program**
+
+```
+python pyResMan/Main.py
+```
+
+
 **User Interface**
 ![](./pyResMan-ui.png)
 
