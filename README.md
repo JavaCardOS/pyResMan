@@ -1,5 +1,5 @@
 # pyResMan
-A tool to manage smartcard resource.
+A opensource tool to manage smartcard resource.
 
 **Dependencies**
 
