@@ -85,6 +85,7 @@ class pyResManReader(object):
         '''
         Constructor
         '''
+        self.readername = ''
         self.reader = None
         self.readerConnection = None
         self.readerObserver = None
@@ -186,11 +187,11 @@ class pyResManReader(object):
                 if removedCard.reader == self.readername:
                     self.handleEvent(ICardMonitorEventHandler.MONITOR_EVENT_REMOVE, (self.readername))
     
-    def monitorCard(self):
+    def monitorCard(self, readername):
         if (self.cardMonitor == None):
             self.cardMonitor = CardMonitor()
         if self.cardObserver == None:
-            self.cardObserver = pyResManReader.__CardObserver(self.readername, self.cardMonitorHandlers)
+            self.cardObserver = pyResManReader.__CardObserver(readername, self.cardMonitorHandlers)
         self.cardMonitor.addObserver(self.cardObserver)
     
     def addCardMonitorHandler(self, monitorHandler):

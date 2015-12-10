@@ -16,6 +16,14 @@ class Util(object):
     HEXCHARS = '0123456789ABCDEFabcdef'
     
     @staticmethod
+    def removespace(s):
+        s = s.replace(' ', '')
+        s = s.replace('\t', '')
+        s = s.replace('\r', '')
+        s = s.replace('\n', '')
+        return s
+    
+    @staticmethod
     def c2v(c):
         """Get value of one char; Argument c is the input char;"""
         cv = ord(c)
@@ -31,10 +39,7 @@ class Util(object):
     @staticmethod
     def s2vl(s):
         """Convert string to value list; Argument s is the input string; ("00A4040000" => {0x00, 0xA4, 0x04, 0x00, 0x00})"""
-        s = s.replace(' ', '')
-        s = s.replace('\t', '')
-        s = s.replace('\r', '')
-        s = s.replace('\n', '')
+        s = Util.removespace(s)
         if (len(s) & 1) != 0:
             raise ValueError()
         for c in s:
@@ -44,6 +49,19 @@ class Util(object):
         for i in xrange(0, len(s) / 2):
             vl.append(Util.c2v(s[i * 2]) << 4 | Util.c2v(s[i * 2 + 1]))
         return vl
+
+    @staticmethod
+    def s2vs(s):
+        s = Util.removespace(s)
+        if (len(s) & 1) != 0:
+            raise ValueError()
+        for c in s:
+            if c not in Util.HEXCHARS:
+                raise ValueError()
+        vs = ''
+        for i in xrange(0, len(s) / 2):
+            vs += chr(Util.c2v(s[i * 2]) << 4 | Util.c2v(s[i * 2 + 1]))
+        return vs
     
     @staticmethod
     def vl2s(vl, pad):
@@ -64,3 +82,66 @@ class Util(object):
         else:
             timeStr = '%3.3fs' %(tv * (10 ** 0))
         return timeStr
+
+    @staticmethod
+    def isprint_keycode(kc): return kc >= 32 and kc <= 126
+
+    @staticmethod
+    def isprint_char(c): return ord(c) >= 32 and ord(c) <= 126
+
+    @staticmethod
+    def ishexchar_kc(kc):
+        isHexChar = False
+        if Util.isprint_keycode(kc):
+            if kc >= ord('0') and kc <= ord('9'):
+                isHexChar = True
+            elif kc >= ord('a') and kc <= ord('f'):
+                isHexChar = True
+            elif kc >= ord('A') and kc <= ord('F'):
+                isHexChar = True
+        else:
+            isHexChar = True
+        return isHexChar
+
+    @staticmethod
+    def ishexchar_c(c):
+        isHexChar = False
+        if Util.isprint_char(c):
+            if c >= '0' and c <= '9':
+                isHexChar = True
+            elif c >= 'a' and c <= 'f':
+                isHexChar = True
+            elif c >= 'A' and c <= 'F':
+                isHexChar = True
+        return isHexChar
+
+    @staticmethod
+    def isnumchar_kc(kc):
+        isNumChar = False
+        if Util.isprint_keycode(kc):
+            if kc >= ord('0') and kc <= ord('9'):
+                isNumChar = True
+        else:
+            isNumChar = True
+        return isNumChar
+
+    @staticmethod
+    def isnumchar_c(c):
+        isNumChar = False
+        if Util.isprint_char(c):
+            if c >= '0' and c <= '9':
+                isNumChar = True
+        else:
+            isNumChar = True
+        return isNumChar
+    
+    @staticmethod
+    def ishexstr(s):
+        s = Util.removespace(s)
+        ishexstr = True
+        for c in s:
+            if not Util.ishexchar_c(c):
+                ishexstr = False
+                break
+        return ishexstr
+    

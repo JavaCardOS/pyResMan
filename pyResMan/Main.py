@@ -21,7 +21,7 @@ class App(wx.App):
         '''
         
         # Display the main dialog;
-        dlg = pyResManDialog.pyResManDialog()
+        dlg = pyResManDialog.pyResManDialog(None)
         dlg.ShowModal()
         dlg.Bind(wx.EVT_CLOSE, self.OnDialogClose())
         return True
