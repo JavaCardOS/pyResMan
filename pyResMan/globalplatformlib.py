@@ -4,6 +4,8 @@
 Created on 2015-11-20
 
 @author: javacardos@gmail.com
+@organization: http://www.javacardos.com/
+@copyright: JavaCardOS Technologies. All rights reserved.
 '''
 
 import globalplatform as gp
