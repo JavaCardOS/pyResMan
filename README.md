@@ -5,6 +5,8 @@ A open source **smartcard** tool to manage smartcard resource. It is based on **
 
 * [Python](https://www.python.org/)
 * [pyScard] (http://pyscard.sourceforge.net/)
+* [pyGlobalPlatform] (https://github.com/JavaCardOS/pyGlobalPlatform)
+* [GlobalPlatform] (http://sourceforge.net/projects/globalplatform/)
 * Compiler: [pyInstaller](http://www.pyinstaller.org/)
 
 **Compile**
@@ -21,12 +23,19 @@ python pyResMan/Main.py
 
 
 **User Interface**
-![](./pyResMan-ui.png)
-
+***Basic APDU***
+![](./images/pyResMan-basic-apdu.png)
+***GlobalPlatform: Content Manager***
+![](./images/pyResMan-content-manager.png)
+***GlobalPlatform: Content Viewer***
+![](./images/pyResMan-content-viewer.png)
+***GlobalPlatform: Key Manager***
+![](./images/pyResMan-key-manager.png)
+***Script***
+![](./images/pyResMan-script.png)
 
 **Module Figure**
-
-![](./pyResMan.png)
+![](./images/pyResMan.png)
 
 **Operations**
 
