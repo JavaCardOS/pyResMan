@@ -82,6 +82,7 @@ python pyResMan/Main.py
 	* After the APDU script file selected, APDU commands in the script file will be listed in the list ctrl;
 	* Click "Run Script" button to run the APDU script;
 	* APDU command and response data displayed in the list ctrl.
+
 ##TODO
 * APDU Script editable;
 * GP compatible;
