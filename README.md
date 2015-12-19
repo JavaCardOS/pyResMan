@@ -1,5 +1,5 @@
 # pyResMan
-A open source **smartcard** tool to manage smartcard resource. It is based on **pyResMan** project and py**GlobalPlatform** project.
+A open source **smartcard** **APDU tool** to manage smartcard resource. It is based on **pyResMan** project and py**GlobalPlatform** project.
 
 ##Dependencies
 
