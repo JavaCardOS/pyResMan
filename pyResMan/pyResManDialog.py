@@ -25,8 +25,9 @@ class pyResManDialog ( pyResManDialogBase ):
         pyResManDialogBase.__init__(self, parent)
         
         readernames = pyResManReader.getReaderList()
-        self._readernameComboBox.InsertItems(readernames, 0)
-        self._readernameComboBox.Select(0)
+        if len(readernames) > 0:
+            self._readernameComboBox.InsertItems(readernames, 0)
+            self._readernameComboBox.Select(0)
         
         self.__controller = pyResManController(self)
         self.__logger = wx.LogTextCtrl(self._logTextCtrl)
