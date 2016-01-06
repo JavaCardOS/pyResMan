@@ -28,11 +28,11 @@ class pyResManDialog ( pyResManDialogBase ):
         
         readernames = pyResManReader.getReaderList()
         if len(readernames) > 0:
-            self._readernameComboBox.InsertItems(readernames, 0)
+            for readername in readernames:
+                self._readernameComboBox.Insert(readername, self._readernameComboBox.GetCount())
             self._readernameComboBox.Select(0)
         
         self.__controller = pyResManController(self)
-#         self.__logger = wx.LogTextCtrl(self._logRichTextCtrl)
         
         self._claTextCtrl.SetValue('00')
         self._insTextCtrl.SetValue('A4')
