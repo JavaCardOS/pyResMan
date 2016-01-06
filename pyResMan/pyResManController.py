@@ -230,6 +230,8 @@ class pyResManController(object):
         if not self.__checkContext(): return
         if not self.__checkCardInfo(): return
         
+        self.__handler.handleActionBegin("do mutual authentication")
+        
         try:
             self.__handler.handleLog('doMutualAuth(): Start...')
             # Select Card Manager first;
@@ -241,35 +243,41 @@ class pyResManController(object):
             
             if (scp in (1, 2)):
                 if (len(sencKey) != 16) or (len(smacKey) != 16) or (len(dekKey) != 16):
-                    self.__handler.handleLog('The key of SCP01 shall be 16 bytes long.')
+                    self.__handler.handleLog('The key of SCP01 shall be 16 bytes long.', wx.LOG_Warning)
                     return
             elif scp == 3:
                 keyLen1 = len(sencKey)
                 keyLen2 = len(smacKey)
                 keyLen3 = len(dekKey)
                 if (keyLen1 not in (16, 24, 32)) or (keyLen2 not in (16, 24, 32)) or (keyLen3 not in (16, 24, 32)):
-                    self.__handler.handleLog('The key of SCP03 shall be (16 or 24 or 32) bytes long.')
+                    self.__handler.handleLog('The key of SCP03 shall be (16 or 24 or 32) bytes long.', wx.LOG_Warning)
                     return
             
             kvn = 0
             self.__securityInfo = gp.mutualAuthentication(self.__context, self.__cardInfo, None, sencKey, smacKey, dekKey, kvn, 0, scp, scpi, 0, 0)
-            self.__handler.handleLog('doMutualAuth(): Succeeded.')
+            self.__handler.handleLog('doMutualAuth(): Succeeded.', wx.LOG_Info)
         except Exception, e:
             self.__handler.handleException(e)
+
+        self.__handler.handleActionEnd("do mutual authentication")
     
     def doMutualAuth(self, scp, scpi, sencKey, smacKey, dekKey):
         self.__doMutualAuthThread = _MethodThread(self.__handler, self.__doMutualAuth, (scp, scpi, sencKey, smacKey, dekKey), name="Do mutual auth thread")
         self.__doMutualAuthThread.start()
 
     def __readCapFileInfo(self, args):
+        self.__handler.handleActionBegin("read cap file information")
         capFilePath = args[0]
         try:
             self.__handler.handleLog('readCapFileInfo(): Start ...')
+
             capFileInfo = gp.readExecutableLoadFileParameters(capFilePath)
+            
             self.__handler.handleCapFileInfo(capFileInfo)
-            self.__handler.handleLog('readCapFileInfo(): Succeeded.')
+            self.__handler.handleLog('readCapFileInfo(): Succeeded.', wx.LOG_Info)
         except Exception, e:
             self.__handler.handleException(e)
+        self.__handler.handleActionEnd("read cap file information")
     
     def readCapFileInfo(self, capFilePath):
         self.__readCapFileInfoThread = _MethodThread(self.__handler, self.__readCapFileInfo, (capFilePath, ), name="Read cap file information thread")
@@ -286,7 +294,7 @@ class pyResManController(object):
             capFileInfo = gp.readExecutableLoadFileParameters(capFilePath)
             gp.installForLoad(self.__context, self.__cardInfo, self.__securityInfo, capFileInfo['loadFileAID'], gp.AID_ISD, '', '', 0, 0, 0)
             gp.load(self.__context, self.__cardInfo, self.__securityInfo, '', capFilePath)
-            self.__handler.handleLog('loadCapFile(): Succeeded.')
+            self.__handler.handleLog('loadCapFile(): Succeeded.', wx.LOG_Info)
         except Exception, e:
             self.__handler.handleException(e)
 
@@ -300,16 +308,19 @@ class pyResManController(object):
         if not self.__checkContext(): return
         if not self.__checkCardInfo(): return
         if not self.__checkSecurityInfo(): return
+        
+        self.__handler.handleActionBegin("install application")
 
         packageAID, moduleAID, appletAID, privileges, installParameters = args
         
         try:
             self.__handler.handleLog('installApplet(): Start ...')
             gp.installForInstallAndMakeSelectable(self.__context, self.__cardInfo, self.__securityInfo, packageAID, moduleAID, appletAID, privileges, 0, 0, installParameters, '')
-            self.__handler.handleLog('installApplet(): Succeeded.')
+            self.__handler.handleLog('installApplet(): Succeeded.', wx.LOG_Info)
         except Exception, e:
             self.__handler.handleException(e)
 
+        self.__handler.handleActionEnd("install application")
         self.__handler.handleCardContentChanged()
     
     def installApplet(self, packageAID, moduleAID, appletAID, privileges, installParameters):
@@ -321,6 +332,7 @@ class pyResManController(object):
         if not self.__checkCardInfo(): return
         if not self.__checkSecurityInfo(): return
 
+        self.__handler.handleActionBegin("get status")
         try:
             self.__handler.handleLog('getStatus: Start ...')
             status80 = None
@@ -330,27 +342,28 @@ class pyResManController(object):
             try:
                 status80 = gp.getStatus(self.__context, self.__cardInfo, self.__securityInfo, 0x80)
             except Exception, e:
-                self.__handler.handleLog('GetStatus(0x80): ' + e.message)
+                self.__handler.handleLog('GetStatus(0x80): ' + e.message, wx.LOG_Error)
                 pass
             try:
                 status40 = gp.getStatus(self.__context, self.__cardInfo, self.__securityInfo, 0x40)
             except Exception, e:
-                self.__handler.handleLog('GetStatus(0x40): ' + e.message)
+                self.__handler.handleLog('GetStatus(0x40): ' + e.message, wx.LOG_Error)
                 pass
             try:
                 status20 = gp.getStatus(self.__context, self.__cardInfo, self.__securityInfo, 0x20)
             except Exception, e:
-                self.__handler.handleLog('GetStatus(0x20): ' + e.message)
+                self.__handler.handleLog('GetStatus(0x20): ' + e.message, wx.LOG_Error)
                 pass
             try:
                 status10 = gp.getStatus(self.__context, self.__cardInfo, self.__securityInfo, 0x10)
             except Exception, e:
-                self.__handler.handleLog('GetStatus(0x10): ' + e.message)
+                self.__handler.handleLog('GetStatus(0x10): ' + e.message, wx.LOG_Error)
                 pass
             self.__handler.handleStatus({ 0x80 : status80, 0x40 : status40, 0x20 : status20, 0x10 : status10})
-            self.__handler.handleLog('getStatus: succeeded.')
+            self.__handler.handleLog('getStatus: succeeded.', wx.LOG_Info)
         except Exception, e:
             self.__handler.handleException(e)
+        self.__handler.handleActionEnd("get status")
     
     def getStatus(self):
         self.__getStatusThread = _MethodThread(self.__handler, self.__getStatus, (), name="Get status thread")
@@ -359,15 +372,19 @@ class pyResManController(object):
     def __selectApplication(self, args):
         if not self.__checkContext(): return
         if not self.__checkCardInfo(): return
+        
+        self.__handler.handleActionBegin("select application")
 
         instanceAID = args[0]
         
         try:
             self.__handler.handleLog('selectApplication: Start ...')
             gp.selectApplication(self.__context, self.__cardInfo, instanceAID)
-            self.__handler.handleLog('selectApplication: succeeded.')
+            self.__handler.handleLog('selectApplication: succeeded.', wx.LOG_Info)
         except Exception, e:
             self.__handler.handleException(e)
+
+        self.__handler.handleActionEnd("select application")
         
     def selectApplication(self, instanceAID):
         self.__selectApplicationThread = _MethodThread(self.__handler, self.__selectApplication, (instanceAID, ), name="Select application thread")
@@ -378,15 +395,18 @@ class pyResManController(object):
         if not self.__checkCardInfo(): return
         if not self.__checkSecurityInfo(): return
         
+        self.__handler.handleActionBegin("delete application")
+        
         appAID = args[0]
 
         try:
             self.__handler.handleLog('deleteApplication: Start ...')
             gp.deleteApplication(self.__context, self.__cardInfo, self.__securityInfo, (appAID, ))
-            self.__handler.handleLog('deleteApplication: succeeded.')
+            self.__handler.handleLog('deleteApplication: succeeded.', wx.LOG_Info)
         except Exception, e:
             self.__handler.handleException(e)
-        
+
+        self.__handler.handleActionEnd("delete application")
         self.__handler.handleCardContentChanged()
 
     def deleteApplication(self, appAID):
@@ -426,13 +446,17 @@ class pyResManController(object):
         if not self.__checkCardInfo(): return
         if not self.__checkSecurityInfo(): return
 
+        self.__handler.handleActionBegin("get key template information")
+        
         try:
             self.__handler.handleLog('getKeyTemplateInfo: Start ...')
             kits = gp.getKeyInformationTemplates(self.__context, self.__cardInfo, self.__securityInfo, 0)
             self.__handler.handleKeyInformationTemplates(kits)
-            self.__handler.handleLog('getKeyTemplateInfo: succeeded.')
+            self.__handler.handleLog('getKeyTemplateInfo: succeeded.', wx.LOG_Info)
         except Exception, e:
             self.__handler.handleException(e)
+
+        self.__handler.handleActionEnd("get key template information")
     
     def getKeyTemplateInfo(self):
         self.__getkeyTemplateInfoThread = _MethodThread(self.__handler, self.__getKeyTemplateInfo, (), name="Get key template information thread")
@@ -442,15 +466,19 @@ class pyResManController(object):
         if not self.__checkContext(): return
         if not self.__checkCardInfo(): return
         if not self.__checkSecurityInfo(): return
+        
+        self.__handler.handleActionBegin("put key")
 
         oldKVN, newKVN, key1, key2, key3 = args
         
         try:
             self.__handler.handleLog('putKey: Start ...')
             gp.putSCKey(self.__context, self.__cardInfo, self.__securityInfo, oldKVN, newKVN, None, key1, key2, key3)
-            self.__handler.handleLog('putKey: succeeded.')
+            self.__handler.handleLog('putKey: succeeded.', wx.LOG_Info)
         except Exception, e:
             self.__handler.handleException(e)
+        
+        self.__handler.handleActionEnd("put key")
         self.__handler.handleKeyChanged()
 
     def putKey(self, oldKVN, newKVN, key1, key2, key3):
@@ -464,6 +492,8 @@ class pyResManController(object):
         if not self.__checkCardInfo(): return
         if not self.__checkSecurityInfo(): return
         
+        self.__handler.handleActionBegin("delete key")
+        
         keysInfo = args[0]
 
         for keyInfo in keysInfo:
@@ -472,9 +502,11 @@ class pyResManController(object):
             try:
                 self.__handler.handleLog('deleteKey(%02X, %02X): Start ...' %(kvn, keyIndex))
                 gp.deleteKey(self.__context, self.__cardInfo, self.__securityInfo, kvn, keyIndex)
-                self.__handler.handleLog('deleteKey(%02X, %02X): succeeded.' %(kvn, keyIndex))
+                self.__handler.handleLog('deleteKey(%02X, %02X): succeeded.' %(kvn, keyIndex), wx.LOG_Info)
             except Exception, e:
                 self.__handler.handleException(e)
+
+        self.__handler.handleActionEnd("delete key")
         self.__handler.handleKeyChanged()
 
     def deleteKey(self, keysInfo):
@@ -540,4 +572,10 @@ class pyResManControllerEventHandler(object):
         pass
     
     def handleKeyChanged(self):
+        pass
+    
+    def handleActionBegin(self, action):
+        pass
+    
+    def handleActionEnd(self, action):
         pass

@@ -18,6 +18,8 @@ from datetime import datetime
 from pyResManInstallDialog import pyResManInstallDialog
 from pyResManDialogBase import pyResManDialogBase
 import wx
+import threading
+import time
 
 class pyResManDialog ( pyResManDialogBase ):
     
@@ -30,7 +32,7 @@ class pyResManDialog ( pyResManDialogBase ):
             self._readernameComboBox.Select(0)
         
         self.__controller = pyResManController(self)
-        self.__logger = wx.LogTextCtrl(self._logTextCtrl)
+#         self.__logger = wx.LogTextCtrl(self._logRichTextCtrl)
         
         self._claTextCtrl.SetValue('00')
         self._insTextCtrl.SetValue('A4')
@@ -65,6 +67,8 @@ class pyResManDialog ( pyResManDialogBase ):
         
         self._apduListCtrl.Bind(wx.EVT_CONTEXT_MENU, self._apduListCtrlOnContextMenu)
         self._scriptListCtrl.Bind(wx.EVT_CONTEXT_MENU, self._scriptListCtrlOnContextMenu)
+        
+        
     # Virtual event handlers, overide them in your derived class
     def _connectButtonOnButtonClick( self, event ):
         if (self._connectButton.GetLabelText() == 'Connect'):
@@ -96,7 +100,7 @@ class pyResManDialog ( pyResManDialogBase ):
                 
                 # Set status;
                 self._connectButton.SetLabel('Disconnect')
-                self._Log('Connected.')
+                self._Log('Connected.', wx.LOG_Info)
             except NoCardException, e:
                 self._Log('NoCardException: ' + e.args[1], wx.LOG_Error)
             except Exception, e:
@@ -108,7 +112,7 @@ class pyResManDialog ( pyResManDialogBase ):
                 
                 # Set status;
                 self._connectButton.SetLabel('Connect')
-                self._Log('Disconnected.')
+                self._Log('Disconnected.', wx.LOG_Info)
             except NoCardException, e:
                 self._Log('NoCardException: %s' %(e.args[1]), wx.LOG_Error)
             except Exception, e:
@@ -164,7 +168,7 @@ class pyResManDialog ( pyResManDialogBase ):
         le = self._leTextCtrl.GetValue()
         
         if (len(cls) == 0) or (len(ins) == 0) or (len(p1) == 0) or (len(p2) == 0):
-            self._Log('Please input command field.', wx.LOG_Error)
+            self._Log('Please input command field.', wx.LOG_Warning)
             return
         
         commandText = ''
@@ -206,6 +210,9 @@ class pyResManDialog ( pyResManDialogBase ):
         self.__controller.doMutualAuth(scp, scpi, key1, key2, key3)
     
     def _capFilePickerOnFileChanged( self, event ):
+        self._loadButton.Disable()
+        self._installButton.Disable()
+        self._capFileInformationTreeCtrl.DeleteAllItems()
         capFilePath = self._capFilePicker.GetPath()
         self.__controller.readCapFileInfo(capFilePath)
     
@@ -301,6 +308,8 @@ class pyResManDialog ( pyResManDialogBase ):
     def _selectCardContentOnButtonClick( self, event ):
         event.Skip()
         
+        self._selectCardContent.Disable()
+        
         selectedId = self._contentTreeCtrl.GetSelection();
         selectedItemData = self._contentTreeCtrl.GetItemData(selectedId)
         itemData = selectedItemData.GetData()
@@ -312,9 +321,10 @@ class pyResManDialog ( pyResManDialogBase ):
 
     def _deleteCardContentOnButtonClick( self, event ):
         selectedItem = self._contentTreeCtrl.GetSelection()
-        selectedItemData = self._contentTreeCtrl.GetItemData(selectedItem)
-        aid = selectedItemData.GetData()['aid']
-        self.__controller.deleteApplication(aid)
+        if selectedItem.IsOk():
+            selectedItemData = self._contentTreeCtrl.GetItemData(selectedItem)
+            aid = selectedItemData.GetData()['aid']
+            self.__controller.deleteApplication(aid)
         event.Skip()
     
     def _keyDataListCtrlOnListItemSelected( self, event ):
@@ -405,12 +415,12 @@ class pyResManDialog ( pyResManDialogBase ):
         event.Skip()
         
         if self._oldKVNTextCtrl.IsEmpty():
-            self._Log('Please input the old key version number.')
+            self._Log('Please input the old key version number.', wx.LOG_Warning)
             self._oldKVNTextCtrl.SetBackgroundColour('#FF6347')
             self._oldKVNTextCtrl.Refresh()
             return
         if self._newKVNTextCtrl.IsEmpty():
-            self._Log('Please input the new key version number.')
+            self._Log('Please input the new key version number.', wx.LOG_Warning)
             self._newKVNTextCtrl.SetBackgroundColour('#FF6347')
             self._newKVNTextCtrl.Refresh()
             return
@@ -584,7 +594,7 @@ class pyResManDialog ( pyResManDialogBase ):
                 self._onBrowseScriptFile()
                 scriptPathName = self._scriptPathNameEditor.GetValue()
             if not os.path.exists(scriptPathName):
-                self._Log('User cancel operation.', wx.LOG_Warning)
+                self._Log('User cancel operation.', wx.LOG_Info)
                 return
     
             # Get t0 auto getresponse value;
@@ -595,10 +605,6 @@ class pyResManDialog ( pyResManDialogBase ):
             self.__controller.runScript(scriptPathName, scriptLoopCount, autoGetResponse)
         else:
             self.__controller.stopScript()
-            
-    def _scrollToLine(self, listCtrl, lineIndex):
-        scrollPos = listCtrl.GetScrollPos(wx.VERTICAL)
-        listCtrl.ScrollLines(lineIndex - scrollPos)
     
     def handleAPDUCommand(self, commandStr, args=tuple()):
         """Handle controller's apdu command event, to display apdu command;"""
@@ -632,7 +638,7 @@ class pyResManDialog ( pyResManDialogBase ):
         datetimeItem.SetText(datetime.now().strftime("%c"))
         theListCtrl.SetItem(datetimeItem)
         
-        self._scrollToLine(theListCtrl, itemIndex)
+        theListCtrl.EnsureVisible(itemIndex)
     
     def handleAPDUResponse(self, responseStr, transtime, args=tuple()):
         """Handle controller's apdu response event, to display apdu result informations;"""
@@ -661,17 +667,33 @@ class pyResManDialog ( pyResManDialogBase ):
         indexItem.SetText('%d' %(itemIndex))
         theListCtrl.SetItem(indexItem)
 
-        self._scrollToLine(theListCtrl, itemIndex)
+        theListCtrl.EnsureVisible(itemIndex)
 
-    def _Log(self, msg, level=wx.LOG_Info):
+    def _Log(self, msg, level=wx.LOG_Message):
         """Display log with levels"""
         if msg.endswith('\r'):
             msg= msg[ : len(msg) - 1]
         if msg.endswith('\n'):
             msg= msg[ : len(msg) - 1]
-        self.__logger.LogTextAtLevel(level, msg)
+        
+        textColor = "#000000"
+        if level == wx.LOG_Info:
+            textColor = "#228B22"
+        elif level == wx.LOG_Error:
+            textColor = "#FF0000"
+        elif level == wx.LOG_Warning:
+            textColor = "#D2691E"
+        elif level == wx.LOG_Message:
+            pass
+        else:
+            pass
+
+        self._logTextCtrl.SetDefaultStyle(wx.TextAttr(colText=textColor))
+        self._logTextCtrl.AppendText(msg + '\n')
+        curSelTo = self._logTextCtrl.GetSelection()[1]
+        self._logTextCtrl.ShowPosition(curSelTo)
     
-    def handleLog(self, msg, level=wx.LOG_Info):
+    def handleLog(self, msg, level=wx.LOG_Message):
         self._Log(msg, level)
     
     def handleScriptBegin(self, status):
@@ -698,6 +720,7 @@ class pyResManDialog ( pyResManDialogBase ):
         for appletAID in info['applets']:
             tic = self._capFileInformationTreeCtrl.InsertItem(ti, tic, "".join("%02X" %(ord(c)) for c in appletAID), data=TreeItemData( { 'type' : 'applet', 'aid' : appletAID }))
         self._capFileInformationTreeCtrl.ExpandAll()
+        self._loadButton.Enable()
     
     def handleStatus(self, theStatus):
         self._contentTreeCtrl.DeleteAllItems()
@@ -787,3 +810,58 @@ class pyResManDialog ( pyResManDialogBase ):
     def handleCardContentChanged(self):
         self.__controller.getStatus()
     
+    def handleActionBegin(self, action):
+        if action == "do mutual authentication":
+            self._mutualAuthButton.Disable()
+        elif action == "read cap file information":
+            self._capFilePicker.Disable()
+        elif action == "get status":
+            self._refreshCardContent.Disable()
+            self._installCardContent.Disable()
+            self._selectCardContent.Disable()
+            self._deleteCardContent.Disable()
+        elif action == "select application":
+            self._selectCardContent.Disable()
+        elif action == "delete application":
+            self._deleteCardContent.Disable()
+        elif action == "get key template information":
+            self._getKeyTemplateInfoButton.Disable()
+        elif action == "put key":
+            self._putKeyButton.Disable()
+        elif action == "delete key":
+            self._deleteKeyButton.Disable()
+        else:
+            pass
+    
+    def handleActionEnd(self, action):
+        if action == "do mutual authentication":
+            self._mutualAuthButton.Enable()
+        elif action == "read cap file information":
+            self._capFilePicker.Enable()
+        elif action == "get status":
+            self._refreshCardContent.Enable()
+        elif action == "select application":
+            self._selectCardContent.Enable()
+        elif action == "delete application":
+            self._deleteCardContent.Enable()
+        elif action == "get key template information":
+            self._getKeyTemplateInfoButton.Enable()
+        elif action == "put key":
+            self._putKeyButton.Enable()
+        elif action == "delete key":
+            self._deleteKeyButton.Enable()
+        else:
+            pass
+    
+    def _capFileInformationTreeCtrlOnTreeSelChanged( self, event ):
+        event.Skip()
+        self._installButton.Disable()
+        selectedId = self._capFileInformationTreeCtrl.GetSelection()
+        if not selectedId.IsOk():
+            return
+        
+        selectedItemData = self._capFileInformationTreeCtrl.GetItemData(selectedId)
+        if selectedItemData != None:
+            if selectedItemData.GetData()['type'] == 'applet':
+                self._installButton.Enable()
+        

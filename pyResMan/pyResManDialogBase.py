@@ -241,13 +241,14 @@ class pyResManDialogBase ( wx.Dialog ):
         
         bSizer50 = wx.BoxSizer( wx.VERTICAL )
         
-        
-        bSizer50.AddSpacer( ( 0, 0), 1, wx.EXPAND, 5 )
-        
         self._loadButton = wx.Button( self._contentManagerPage, wx.ID_ANY, u"Load", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self._loadButton.Enable( False )
+        
         bSizer50.Add( self._loadButton, 0, wx.ALL, 5 )
         
         self._installButton = wx.Button( self._contentManagerPage, wx.ID_ANY, u"Install", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self._installButton.Enable( False )
+        
         bSizer50.Add( self._installButton, 0, wx.ALL, 5 )
         
         
@@ -286,6 +287,8 @@ class pyResManDialogBase ( wx.Dialog ):
         bSizer26.Add( self._selectCardContent, 0, wx.ALL, 5 )
         
         self._deleteCardContent = wx.Button( self._contentViewerPage, wx.ID_ANY, u"Delete", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self._deleteCardContent.Enable( False )
+        
         bSizer26.Add( self._deleteCardContent, 0, wx.ALL, 5 )
         
         
@@ -468,9 +471,20 @@ class pyResManDialogBase ( wx.Dialog ):
         
         bSizer43.AddSpacer( ( 0, 0), 1, wx.EXPAND, 5 )
         
+        bSizer401 = wx.BoxSizer( wx.HORIZONTAL )
+        
+        
+        bSizer401.AddSpacer( ( 0, 0), 1, wx.EXPAND, 5 )
+        
         self.m_staticText101 = wx.StaticText( self._aboutPagePanel, wx.ID_ANY, u"PyResMan v2.0", wx.DefaultPosition, wx.DefaultSize, wx.ALIGN_CENTRE )
         self.m_staticText101.Wrap( -1 )
-        bSizer43.Add( self.m_staticText101, 0, wx.ALL|wx.EXPAND, 5 )
+        bSizer401.Add( self.m_staticText101, 0, wx.ALL|wx.EXPAND, 5 )
+        
+        
+        bSizer401.AddSpacer( ( 0, 0), 1, wx.EXPAND, 5 )
+        
+        
+        bSizer43.Add( bSizer401, 0, wx.EXPAND, 5 )
         
         bSizer39 = wx.BoxSizer( wx.HORIZONTAL )
         
@@ -538,9 +552,7 @@ class pyResManDialogBase ( wx.Dialog ):
         self.m_panel15 = wx.Panel( self.m_splitter2, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
         bSizer49 = wx.BoxSizer( wx.HORIZONTAL )
         
-        self._logTextCtrl = wx.TextCtrl( self.m_panel15, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, wx.TE_MULTILINE|wx.TE_READONLY )
-        self._logTextCtrl.SetForegroundColour( wx.SystemSettings.GetColour( wx.SYS_COLOUR_WINDOWTEXT ) )
-        
+        self._logTextCtrl = wx.TextCtrl( self.m_panel15, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, wx.TE_MULTILINE|wx.TE_READONLY|wx.TE_RICH2 )
         bSizer49.Add( self._logTextCtrl, 1, wx.ALL|wx.EXPAND, 5 )
         
         
@@ -573,6 +585,7 @@ class pyResManDialogBase ( wx.Dialog ):
         self._scpiTextCtrl.Bind( wx.EVT_CHAR, self._scpiTextCtrlOnChar )
         self._mutualAuthButton.Bind( wx.EVT_BUTTON, self._mutualAuthButtonOnButtonClick )
         self._capFilePicker.Bind( wx.EVT_FILEPICKER_CHANGED, self._capFilePickerOnFileChanged )
+        self._capFileInformationTreeCtrl.Bind( wx.EVT_TREE_SEL_CHANGED, self._capFileInformationTreeCtrlOnTreeSelChanged )
         self._loadButton.Bind( wx.EVT_BUTTON, self._loadButtonOnButtonClick )
         self._installButton.Bind( wx.EVT_BUTTON, self._installButtonOnButtonClick )
         self._contentTreeCtrl.Bind( wx.EVT_TREE_SEL_CHANGED, self._contentTreeCtrlOnTreeSelChanged )
@@ -643,6 +656,9 @@ class pyResManDialogBase ( wx.Dialog ):
         event.Skip()
     
     def _capFilePickerOnFileChanged( self, event ):
+        event.Skip()
+    
+    def _capFileInformationTreeCtrlOnTreeSelChanged( self, event ):
         event.Skip()
     
     def _loadButtonOnButtonClick( self, event ):
