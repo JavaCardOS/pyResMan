@@ -71,6 +71,7 @@ class pyResManDialog ( pyResManDialogBase ):
         
     # Virtual event handlers, overide them in your derived class
     def _connectButtonOnButtonClick( self, event ):
+        self._connectButton.Disable()
         if (self._connectButton.GetLabelText() == 'Connect'):
             try:
                 # Get smartcard reader name;
@@ -117,7 +118,8 @@ class pyResManDialog ( pyResManDialogBase ):
                 self._Log('NoCardException: %s' %(e.args[1]), wx.LOG_Error)
             except Exception, e:
                 self._Log('Exception: ' %(str(e)), wx.LOG_Error)
-    
+        self._connectButton.Enable()
+
     def _claTextCtrlOnChar( self, event ):
         keyCode = event.KeyCode
         if Util.ishexchar_kc(keyCode):
@@ -490,6 +492,8 @@ class pyResManDialog ( pyResManDialogBase ):
     
     def _scriptClearResultButtonOnButtonClick( self, event ):
         event.Skip()
+        self._scriptListCtrl.DeleteAllItems()
+        self._loadScript()
     
     def m_splitter2OnIdle( self, event ):
         self.m_splitter2.SetSashPosition( 0 )
@@ -518,6 +522,9 @@ class pyResManDialog ( pyResManDialogBase ):
         theListCtrl = event.GetEventObject().GetInvokingWindow()
         if menuItemIndex == 0:
             theListCtrl.DeleteAllItems()
+            # Load script again;
+            if theListCtrl == self._scriptListCtrl:
+                self._loadScript()
         elif menuItemIndex == 1:
             self._listCtrlRunSelectedItems(theListCtrl)
 # 

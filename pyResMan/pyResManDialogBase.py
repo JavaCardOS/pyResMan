@@ -17,7 +17,7 @@ import wx.xrc
 class pyResManDialogBase ( wx.Dialog ):
     
     def __init__( self, parent ):
-        wx.Dialog.__init__ ( self, parent, id = wx.ID_ANY, title = u"pyResMan v2.0", pos = wx.DefaultPosition, size = wx.Size( 983,687 ), style = wx.DEFAULT_DIALOG_STYLE|wx.MAXIMIZE_BOX|wx.MINIMIZE_BOX|wx.RESIZE_BORDER|wx.TAB_TRAVERSAL )
+        wx.Dialog.__init__ ( self, parent, id = wx.ID_ANY, title = u"pyResMan v2.1", pos = wx.DefaultPosition, size = wx.Size( 983,687 ), style = wx.DEFAULT_DIALOG_STYLE|wx.MAXIMIZE_BOX|wx.MINIMIZE_BOX|wx.RESIZE_BORDER|wx.TAB_TRAVERSAL )
         
         self.SetSizeHintsSz( wx.DefaultSize, wx.DefaultSize )
         self.SetForegroundColour( wx.SystemSettings.GetColour( wx.SYS_COLOUR_WINDOWTEXT ) )
@@ -476,7 +476,7 @@ class pyResManDialogBase ( wx.Dialog ):
         
         bSizer401.AddSpacer( ( 0, 0), 1, wx.EXPAND, 5 )
         
-        self.m_staticText101 = wx.StaticText( self._aboutPagePanel, wx.ID_ANY, u"PyResMan v2.0", wx.DefaultPosition, wx.DefaultSize, wx.ALIGN_CENTRE )
+        self.m_staticText101 = wx.StaticText( self._aboutPagePanel, wx.ID_ANY, u"PyResMan v2.1", wx.DefaultPosition, wx.DefaultSize, wx.ALIGN_CENTRE )
         self.m_staticText101.Wrap( -1 )
         bSizer401.Add( self.m_staticText101, 0, wx.ALL|wx.EXPAND, 5 )
         
