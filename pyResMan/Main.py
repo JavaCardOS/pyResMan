@@ -10,6 +10,7 @@ Created on 2015-10-27
 
 import wx
 import pyResManDialog
+import signal
 
 class App(wx.App):
     '''

@@ -1,13 +1,19 @@
 # -*- mode: python -*-
 
+import os
+import sys
+
 block_cipher = None
 
-print dir()
 basepath = os.path.abspath(os.path.curdir)
+
+addlibpath = 'GpPcscConnectionPlugin.dll'
+if sys.platform.startswith('linux'):
+    addlibpath = "/usr/local/lib/libgppcscconnectionplugin.so.1"
 
 a = Analysis(['Main.py'],
              pathex=[basepath],
-             binaries=[('GPPcScConnectionPlugin.dll', '.')],
+             binaries=[(addlibpath, '.')],
              datas=None,
              hiddenimports=[],
              hookspath=None,
