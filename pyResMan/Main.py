@@ -9,7 +9,7 @@ Created on 2015-10-27
 '''
 
 import wx
-from pyResMan.Dialogs import pyResManDialog
+from Dialogs.pyResManDialog import pyResManDialog
 import signal
 
 class App(wx.App):
@@ -22,7 +22,7 @@ class App(wx.App):
         '''
         
         # Display the main dialog;
-        dlg = pyResManDialog.pyResManDialog(None)
+        dlg = pyResManDialog(None)
         dlg.ShowModal()
         dlg.Bind(wx.EVT_CLOSE, self.OnDialogClose())
         return True

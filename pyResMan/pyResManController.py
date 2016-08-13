@@ -16,8 +16,8 @@ import globalplatformlib as gp
 import wx
 import os
 from GPInterface import GPInterface
-from pyResMan.R502SpyLibrary import R502SpyLibrary
-from pyResMan.DebuggerScriptFile import DebuggerScriptFile
+from R502SpyLibrary import R502SpyLibrary
+from DebuggerScriptFile import DebuggerScriptFile
 
 class APDUItem(object):
     """Class for APDU item data;"""

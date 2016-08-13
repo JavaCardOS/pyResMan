@@ -7,9 +7,9 @@
 ## PLEASE DO "NOT" EDIT THIS FILE!
 ###########################################################################
 
-from pyResMan.BaseDialogs.pyResManCommandDialogBase_AnticollisionSelect import CommandDialogBase_AnticollisionSelect
-from win32con import IDOK, IDCANCEL
-from pyResMan.Util import Util, HexValidator
+from BaseDialogs.pyResManCommandDialogBase_AnticollisionSelect import CommandDialogBase_AnticollisionSelect
+from Util import IDOK, IDCANCEL
+from Util import Util, HexValidator
 
 ###########################################################################
 ## Class CommandDialog_AnticollisionSelect

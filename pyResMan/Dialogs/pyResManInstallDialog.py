@@ -9,9 +9,9 @@ Created on 2015-12-01
 @copyright: JavaCardOS Technologies. All rights reserved.
 '''
 
-from pyResMan.Util import Util
+from Util import Util
 from wx import CHK_UNCHECKED, CHK_CHECKED
-from pyResMan.BaseDialogs.pyResManInstallDialogBase import pyResManInstallDialogBase
+from BaseDialogs.pyResManInstallDialogBase import pyResManInstallDialogBase
 
 
 class pyResManInstallDialog(pyResManInstallDialogBase):

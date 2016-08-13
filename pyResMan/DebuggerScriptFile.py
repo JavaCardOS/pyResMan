@@ -8,7 +8,7 @@ Created on 2016-7-19
 @copyright: JavaCardOS Technologies. All rights reserved.
 '''
 
-from pyResMan.Util import Util
+from Util import Util
 
 
 class DebuggerScriptFile(object):

@@ -8,6 +8,9 @@ Created on 2015-10-30
 @copyright: JavaCardOS Technologies. All rights reserved.
 '''
 
+IDOK = 1
+IDCANCEL = 2
+
 class Util(object):
     '''
     Util functions;

@@ -7,9 +7,9 @@
 ## PLEASE DO "NOT" EDIT THIS FILE!
 ###########################################################################
 
-from pyResMan.BaseDialogs.pyResManCommandDialogBase_MifareBlockWrite import CommandDialogBase_MifareBlockWrite
-from win32con import IDOK, IDCANCEL
-from pyResMan.Util import HexValidator, Util
+from BaseDialogs.pyResManCommandDialogBase_MifareBlockWrite import CommandDialogBase_MifareBlockWrite
+from Util import IDOK, IDCANCEL
+from Util import HexValidator, Util
 
 ###########################################################################
 ## Class CommandDialog_MifareBlockWrite

@@ -7,9 +7,9 @@
 ## PLEASE DO "NOT" EDIT THIS FILE!
 ###########################################################################
 
-from win32con import IDOK, IDCANCEL
-from pyResMan.BaseDialogs.pyResManCommandDialogBase_HLTB import CommandDialogBase_HLTB
-from pyResMan.Util import HexValidator
+from Util import IDOK, IDCANCEL
+from BaseDialogs.pyResManCommandDialogBase_HLTB import CommandDialogBase_HLTB
+from Util import HexValidator
 
 ###########################################################################
 ## Class CommandDialog_Basic
