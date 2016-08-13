@@ -69,6 +69,11 @@ class Util(object):
         return pad.join("%02X" %(v) for v in vl)
 
     @staticmethod
+    def vs2s(vs, pad):
+        """Convert value list to string; ('\x00\xA4\x04\x00\x00' => "00A4040000")"""
+        return pad.join("%02X" %(ord(v)) for v in vs)
+
+    @staticmethod
     def getTimeStr(tv):
         """Get time string to display; tv is the time value;"""
         if tv < 0:
@@ -144,4 +149,58 @@ class Util(object):
                 ishexstr = False
                 break
         return ishexstr
+
+
+import wx
+
+class HexValidator(wx.PyValidator):
+    """Validate Hex strings"""
+    def __init__(self):
+        """Initialize the validator
+
+        """
+        super(HexValidator, self).__init__()
+
+        # Event Handlers
+        self.Bind(wx.EVT_CHAR, self.OnChar)
+
+    def Clone(self):
+        """Clones the current validator
+        @return: clone of this object
+
+        """
+        return HexValidator()
+
+#     def Validate(self, win):
+#         """Validate an window value
+#         @param win: window to validate
+# 
+#         """
+#         for char in val:
+#             if char not in Util.HEXCHARS:
+#                 return False
+#         else:
+#             return True
+
+    def OnChar(self, event):
+        """Process values as they are entered into the control
+        @param event: event that called this handler
+
+        """
+        key = event.GetKeyCode()
+        if event.CmdDown() or key < wx.WXK_SPACE or key == wx.WXK_DELETE or \
+           key > 255 or chr(key) in Util.HEXCHARS:
+            event.Skip()
+            return
+
+        if not wx.Validator_IsSilent():
+            wx.Bell()
+
+        return
     
+    def TransferFromWindow(self, *args, **kwargs):
+        return True
+    
+    def TransferToWindow(self, *args, **kwargs):
+        return True
+

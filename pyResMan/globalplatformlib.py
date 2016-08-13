@@ -8,7 +8,7 @@ Created on 2015-11-20
 @copyright: JavaCardOS Technologies. All rights reserved.
 '''
 
-import pyglobalplatform as gp
+from pyGlobalPlatform import pyglobalplatform as gp
 
 
 def establishContext():

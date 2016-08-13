@@ -11,6 +11,7 @@ Created on 2015-10-28
 from smartcard.pcsc.PCSCReader import PCSCReader
 from smartcard.ReaderMonitoring import ReaderObserver, ReaderMonitor
 from smartcard.CardMonitoring import CardMonitor, CardObserver
+import globalplatformlib as gp
 
 class pyResManReader(object):
     '''
@@ -100,8 +101,10 @@ class pyResManReader(object):
     @staticmethod
     def getReaderList():
         readernames = []
-        for reader in PCSCReader.readers():
+        c = gp.establishContext()
+        for reader in gp.listReaders(c):
             readernames.append(str(reader))
+        gp.releaseContext(c)
         return readernames
     
     def getName(self):
