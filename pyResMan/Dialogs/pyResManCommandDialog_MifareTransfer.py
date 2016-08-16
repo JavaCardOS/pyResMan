@@ -21,12 +21,12 @@ MODE_BUILDING = 2
 
 class CommandDialog_MifareTransfer ( CommandDialogBase_MifareTransfer ):
     def __init__( self, parent, bytesCount = 1 ):
+        print bytesCount
         CommandDialogBase_MifareTransfer.__init__ ( self, parent )
         self.__mode = MODE_IDLE
         self._textctrlCommandValue.SetMaxLength(bytesCount * 2)
         # Set validator;
-        self._textctrlCommandValue.SetValidator(HexValidator())
-        self._textctrlCommandValue.Disable()
+        #self._textctrlCommandValue.SetValidator(HexValidator())
         
         for bn in range(256):
             self._choiceBlockNumber.Append('%d' %(bn))
@@ -60,7 +60,7 @@ class CommandDialog_MifareTransfer ( CommandDialogBase_MifareTransfer ):
 #             # Check command type;
 #             if commandValue[0] != 0xB0:
 #                 pass
-            self._choiceBlockNumber.SetSelection(commandValue[1])
+#            self._choiceBlockNumber.SetSelection(commandValue[1])
             
             self.__mode = MODE_IDLE
         else:
@@ -76,6 +76,9 @@ class CommandDialog_MifareTransfer ( CommandDialogBase_MifareTransfer ):
             # Block Number;
             commandValue.append(self._choiceBlockNumber.GetSelection())
             # 
+            v = Util.vl2s(commandValue, '')
+            print v
+            print type(v)
             self._textctrlCommandValue.SetValue(Util.vl2s(commandValue, ''))
             
             self.__mode = MODE_IDLE

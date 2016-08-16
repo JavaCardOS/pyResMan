@@ -26,7 +26,6 @@ class CommandDialog_MifareBlockRead ( CommandDialogBase_MifareBlockRead ):
         self._textctrlCommandValue.SetMaxLength(bytesCount * 2)
         # Set validator;
         self._textctrlCommandValue.SetValidator(HexValidator())
-        self._textctrlCommandValue.Disable()
         
         for bn in range(256):
             self._choiceBlockNumber.Append('%d' %(bn))

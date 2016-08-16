@@ -26,7 +26,6 @@ class CommandDialog_MifareLoadKey ( CommandDialogBase_MifareLoadKey ):
         self._textctrlCommandValue.SetMaxLength(bytesCount * 2)
         # Set validator;
         self._textctrlCommandValue.SetValidator(HexValidator())
-        self._textctrlCommandValue.Disable()
     
     def _buttonOKOnButtonClick(self, event):
         self.EndModal(IDOK)

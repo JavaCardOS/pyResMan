@@ -52,13 +52,15 @@ class pyResManDialog (pyResManDialogBase):
     
     def __init__(self, parent):
         pyResManDialogBase.__init__(self, parent)
-        
-        readernames = pyResManReader.getReaderList()
-        if len(readernames) > 0:
-            for readername in readernames:
-                self._comboReaderName.Insert(readername, self._comboReaderName.GetCount())
-            self._comboReaderName.Select(0)
-        
+    
+        try:
+            readernames = pyResManReader.getReaderList()
+            if len(readernames) > 0:
+                for readername in readernames:
+                    self._comboReaderName.Insert(readername, self._comboReaderName.GetCount())
+                self._comboReaderName.Select(0)
+        except Exception, e:
+            self._Log(str(e), wx.LOG_Info)
         self.__controller = pyResManController(self)
         
         self._textctrlCLA.SetValue('00')
@@ -1091,28 +1093,28 @@ class pyResManDialog (pyResManDialogBase):
             commandDialog = CommandDialog_SBlock(self)
             defaultCommandValue = 'F201'
         elif commandName == 'AUTHENTICATION':
-            commandDialog = CommandDialog_MifareAuthentication(self)
+            commandDialog = CommandDialog_MifareAuthentication(self, 12)
             defaultCommandValue = '60 00 FFFFFFFFFFFF 00000000'
         elif commandName == 'READ_BLOCK':
-            commandDialog = CommandDialog_MifareBlockRead(self)
+            commandDialog = CommandDialog_MifareBlockRead(self, 2)
             defaultCommandValue = '30 00'
         elif commandName == 'WRITE_BLOCK':
-            commandDialog = CommandDialog_MifareBlockWrite(self)
-            defaultCommandValue = 'A0 00 000102030405060708090A0B0C0D0E0F'
+            commandDialog = CommandDialog_MifareBlockWrite(self, 18)
+            defaultCommandValue = 'A0 00 00000000FFFFFFFF0000000008F708F7'
         elif commandName == 'INCREMENT':
-            commandDialog = CommandDialog_MifareIncrement(self)
+            commandDialog = CommandDialog_MifareIncrement(self, 6)
             defaultCommandValue = 'C1 00 00000000'
         elif commandName == 'DECREMENT':
-            commandDialog = CommandDialog_MifareDecrement(self)
+            commandDialog = CommandDialog_MifareDecrement(self, 6)
             defaultCommandValue = 'C0 00 00000000'
         elif commandName == 'DECREMENT_TRANSFER':
-            commandDialog = CommandDialog_MifareDecrementTransfer(self)
+            commandDialog = CommandDialog_MifareDecrementTransfer(self, 6)
             defaultCommandValue = 'xx 00 00000000'
         elif commandName == 'TRANSFER':
-            commandDialog = CommandDialog_MifareTransfer(self)
+            commandDialog = CommandDialog_MifareTransfer(self, 2)
             defaultCommandValue = 'B0 00'
         elif commandName == 'RESTORE':
-            commandDialog = CommandDialog_MifareRestore(self)
+            commandDialog = CommandDialog_MifareRestore(self, 2)
             defaultCommandValue = 'C2 00'
         else:
             pass
