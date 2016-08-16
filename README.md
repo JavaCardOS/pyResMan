@@ -1,5 +1,5 @@
 # pyResMan
-A open source **smartcard** **APDU tool** to manage smartcard resource. It is based on **pyResMan** project and py**GlobalPlatform** project.
+A open source **smartcard** **APDU tool** to manage smartcard resource. It can be used to debug **ISO14443** protocol commands and **Mifare** commands with R502 SPY reader. It is based on **pyResMan** project and py**GlobalPlatform** project.
 
 ##Dependencies
 
@@ -25,6 +25,8 @@ Please visit: [pyResMan Discussions](http://javacardos.com/javacardforum/viewfor
 ![](./images/pyResMan-content-viewer.png)
 ###GlobalPlatform: Key Manager
 ![](./images/pyResMan-key-manager.png)
+###SmartCard Debugger
+![](./images/pyResMan-smartcard-debugger.png)
 ###Script
 ![](./images/pyResMan-script.png)
 
