@@ -10,7 +10,7 @@ A open source **smartcard** **APDU tool** to manage smartcard resource. It can b
 * Compiler: [pyInstaller](http://www.pyinstaller.org/)
 
 ##User Manual
-Please visit: [pyResMan User Manual](http://javacardos.com/javacardforum/viewtopic.php?f=39&t=397)
+Please visit: [pyResMan User Manual](http://javacardos.com/tools/pyresman.html)
 
 ##Discussions
 Please visit: [pyResMan Discussions](http://javacardos.com/javacardforum/viewforum.php?f=39)
