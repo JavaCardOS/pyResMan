@@ -7,9 +7,9 @@
 ## PLEASE DO "NOT" EDIT THIS FILE!
 ###########################################################################
 
-from BaseDialogs.pyResManCommandDialogBase_SlotMarker import CommandDialogBase_SlotMarker
-from Util import IDOK, IDCANCEL
-from Util import HexValidator
+from pyResMan.BaseDialogs.pyResManCommandDialogBase_SlotMarker import CommandDialogBase_SlotMarker
+from pyResMan.Util import IDOK, IDCANCEL
+from pyResMan.Util import HexValidator
 
 ###########################################################################
 ## Class CommandDialog_SlotMarker

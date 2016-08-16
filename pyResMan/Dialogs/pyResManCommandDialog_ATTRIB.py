@@ -7,9 +7,9 @@
 ## PLEASE DO "NOT" EDIT THIS FILE!
 ###########################################################################
 
-from Util import IDOK, IDCANCEL
-from BaseDialogs.pyResManCommandDialogBase_ATTRIB import CommandDialogBase_ATTRIB
-from Util import HexValidator
+from pyResMan.Util import IDOK, IDCANCEL
+from pyResMan.BaseDialogs.pyResManCommandDialogBase_ATTRIB import CommandDialogBase_ATTRIB
+from pyResMan.Util import HexValidator
 
 ###########################################################################
 ## Class CommandDialog_Basic

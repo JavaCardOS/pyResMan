@@ -7,9 +7,9 @@
 ## PLEASE DO "NOT" EDIT THIS FILE!
 ###########################################################################
 
-from BaseDialogs.pyResManCommandDialogBase_MifareRestore import CommandDialogBase_MifareRestore
-from Util import IDOK, IDCANCEL
-from Util import HexValidator, Util
+from pyResMan.BaseDialogs.pyResManCommandDialogBase_MifareRestore import CommandDialogBase_MifareRestore
+from pyResMan.Util import IDOK, IDCANCEL
+from pyResMan.Util import HexValidator, Util
 
 ###########################################################################
 ## Class CommandDialog_MifareRestore

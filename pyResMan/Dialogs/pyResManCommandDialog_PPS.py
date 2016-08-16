@@ -7,9 +7,9 @@
 ## PLEASE DO "NOT" EDIT THIS FILE!
 ###########################################################################
 
-from BaseDialogs.pyResManCommandDialogBase_PPS import CommandDialogBase_PPS
-from Util import IDOK, IDCANCEL
-from Util import Util, HexValidator
+from pyResMan.BaseDialogs.pyResManCommandDialogBase_PPS import CommandDialogBase_PPS
+from pyResMan.Util import IDOK, IDCANCEL
+from pyResMan.Util import Util, HexValidator
 
 ###########################################################################
 ## Class CommandDialog_PPS

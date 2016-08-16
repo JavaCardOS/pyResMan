@@ -7,9 +7,9 @@
 ## PLEASE DO "NOT" EDIT THIS FILE!
 ###########################################################################
 
-from BaseDialogs.pyResManCommandDialogBase_SBlock import CommandDialogBase_SBlock
-from Util import IDOK, IDCANCEL
-from Util import HexValidator, Util
+from pyResMan.BaseDialogs.pyResManCommandDialogBase_SBlock import CommandDialogBase_SBlock
+from pyResMan.Util import IDOK, IDCANCEL
+from pyResMan.Util import HexValidator, Util
 
 ###########################################################################
 ## Class CommandDialog_Basic

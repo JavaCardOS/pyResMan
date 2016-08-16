@@ -9,8 +9,7 @@ Created on 2015-10-27
 '''
 
 import wx
-from Dialogs.pyResManDialog import pyResManDialog
-import signal
+from pyResMan.Dialogs.pyResManDialog import pyResManDialog
 
 class App(wx.App):
     '''

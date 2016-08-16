@@ -9,7 +9,7 @@ basepath = os.path.abspath(os.path.curdir)
 
 addlibpath = 'GpPcscConnectionPlugin.dll'
 if sys.platform.startswith('linux'):
-    addlibpath = "/usr/local/lib/libgppcscconnectionplugin.so.1"
+    addlibpath = "/usr/lib/libgppcscconnectionplugin.so.1"
 
 a = Analysis(['Main.py'],
              pathex=[basepath],
