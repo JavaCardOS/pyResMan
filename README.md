@@ -10,11 +10,11 @@ A open source **smartcard** **APDU tool** to manage smartcard resource. It can b
 * Compiler: [pyInstaller](http://www.pyinstaller.org/)
 
 ##User Manual
-* [pyResMan User Manual](http://javacardos.com/tools/pyresman.html)
-* [R502 SPY debug User Manual](http://javacardos.com/wiki/index.php/home/article/detail/category/r502spy-usermanual.html)
+* [pyResMan User Manual](http://javacardos.com/tools/pyresman.html?ws=github&prj=pyResMan)
+* [R502 SPY debug User Manual](http://javacardos.com/wiki/index.php/home/article/detail/category/r502spy-usermanual.html?ws=github&prj=pyResMan)
 
 ##Discussions
-Please visit: [pyResMan Discussions](http://javacardos.com/javacardforum/viewforum.php?f=39)
+Please visit: [pyResMan Discussions](http://javacardos.com/javacardforum/viewforum.php?f=39?ws=github&prj=pyResMan)
 
 ##User Interface
 
