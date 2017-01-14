@@ -11,7 +11,7 @@ Created on 2015-10-28
 from smartcard.pcsc.PCSCReader import PCSCReader
 from smartcard.ReaderMonitoring import ReaderObserver, ReaderMonitor
 from smartcard.CardMonitoring import CardMonitor, CardObserver
-import globalplatformlib as gp
+from pyGlobalPlatform import globalplatformlib as gp
 
 class pyResManReader(object):
     '''

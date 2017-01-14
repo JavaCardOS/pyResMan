@@ -12,7 +12,7 @@ from pyResManReader import pyResManReader, ICardMonitorEventHandler, IReaderMoni
 from Util import Util
 import threading
 import timeit
-import globalplatformlib as gp
+from pyGlobalPlatform import globalplatformlib as gp
 import wx
 import os
 from GPInterface import GPInterface
@@ -85,8 +85,11 @@ class pyResManController(object):
 
     def disconnect(self):
         self.__gpInterface.disconnect()
-        self.__reader.removeCardMonitorHandler(self)
-        self.__reader.stopCardMonitor()
+        try:
+            self.__reader.removeCardMonitorHandler(self)
+            self.__reader.stopCardMonitor()
+        except:
+            pass
     
     def __transmit_impl(self, cmd, t0AutoGetResponse, handlerArgs):
         commandValue = Util.s2vs(cmd)

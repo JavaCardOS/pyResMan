@@ -4,13 +4,8 @@ Created on 2016-5-7
 @author: zhenkui
 '''
 
-import globalplatformlib as gp
+from pyGlobalPlatform import globalplatformlib as gp
 from SCInterface import SCInterface
-
-from globalplatformlib import AID_ISD
-from globalplatformlib import SCARD_PROTOCOL_T0
-from globalplatformlib import SCARD_PROTOCOL_T1
-from globalplatformlib import SCARD_PROTOCOL_Tx
 
 
 class GPInterface(SCInterface):

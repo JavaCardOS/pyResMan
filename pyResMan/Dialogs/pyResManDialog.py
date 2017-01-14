@@ -188,7 +188,11 @@ class pyResManDialog (pyResManDialogBase):
                     self._checkboxAutoGetResponse.SetValue(True)
                 
                 self.__controller.connect(readername, protocol, mode)
-                self.__controller.monitorCard()
+                try:
+                    self.__controller.monitorCard()
+                except:
+                    self._Log('Monitor card failed.', wx.LOG_Warning)
+                    pass
                 
                 # Set status;
                 self._buttonConnect.SetLabel('Disconnect')
