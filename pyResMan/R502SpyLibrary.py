@@ -44,6 +44,10 @@ class R502SpyLibrary(object):
     INS_MIFARE_TRANSFER             = 0xB0
     INS_MIFARE_RESTORE              = 0xC2
     
+    INS_MIFARE_DUMP                 = 0xA5
+    INS_MIFARE_CLONE                = 0x5A
+    INS_MIFARE_READ_CARD_DATA       = 0xAA
+
     RF_AUTO_MODE_MANUAL  = 0x00
     RF_AUTO_MODE_AUTO    = 0x01
 
@@ -227,4 +231,117 @@ class R502SpyLibrary(object):
         if rsp[-2 : ] == '\x90\x00':
             return True, rsp[ : -2]
         return False, rsp[0]
+
+    '''
+        ISO14443-3 command;
+    '''
+    def claREQA2(self, req_value):
+        cmd = '%s%s%s\x00\x00' %(chr(self.CLA_RF), chr(self.INS_RF_REQA), req_value)
+        rsp = self.__scInterface.transmit(cmd)
+        if rsp[-2 : ] == '\x90\x00':
+            return True, rsp[ : -2]
+        return False, rsp[0]
     
+    def claWUPA2(self, req_value):
+        cmd = '%s%s%s\x00\x00' %(chr(self.CLA_RF), chr(self.INS_RF_WUPA), req_value)
+        rsp = self.__scInterface.transmit(cmd)
+        if rsp[-2 : ] == '\x90\x00':
+            return True, rsp[ : -2]
+        return False, rsp[0]
+    
+    def claAnticollision2(self, sel, nvb):
+        cmd = '%s%s%s%s\x00' %(chr(self.CLA_RF), chr(self.INS_RF_ANTI), sel, nvb)
+        rsp = self.__scInterface.transmit(cmd)
+        if rsp[-2 : ] == '\x90\x00':
+            return True, rsp[ : -2]
+        return False, rsp[0]
+        
+    def claSelect2(self, sel, nvb, uid):
+        cmd = '%s%s%s%s\x04%s' %(chr(self.CLA_RF), chr(self.INS_RF_SEL), sel, nvb, uid)
+        rsp = self.__scInterface.transmit(cmd)
+        if rsp[-2 : ] == '\x90\x00':
+            return True, rsp[ : -2]
+        return False, rsp[0]
+
+    def claHLTA2(self):
+        cmd = '%s%s\x00\x00\x00' %(chr(self.CLA_RF), chr(self.INS_RF_HLTA))
+        rsp = self.__scInterface.transmit(cmd)
+        if rsp[-2 : ] == '\x90\x00':
+            return True, rsp[ : -2]
+        return False, rsp[0]
+
+    '''
+        ### Methods version 2; ###
+    '''
+    def mifareAuthentication2(self, keyType, blockNumber, key, uid):
+        if keyType not in [0, 1]:
+            raise Exception('Invalid key type.')
+        if len(key) != 4:
+            raise Exception('Wrong key length.')
+        if len(uid) != 4:
+            raise Exception('Wrong uid length.')
+        
+        cmd = '%s%s%s\x00%s%s' %(chr(self.CLA_MIFARE), chr(0x60 + keyType), chr(blockNumber), chr(len(key) + len(uid)), key + uid)
+        rsp = self.__scInterface.transmit(cmd)
+        if rsp[-2 : ] == '\x90\x00':
+            return True, rsp[ : -2]
+        return False, rsp[0]
+
+    def mifareBlockRead2(self, blockNumber):
+        cmd = '%s%s%s\x00\x10' %(chr(self.CLA_MIFARE), chr(R502SpyLibrary.INS_MIFARE_BLOCK_READ), chr(blockNumber))
+        rsp = self.__scInterface.transmit(cmd)
+        if rsp[-2 : ] == '\x90\x00':
+            return True, rsp[ : -2]
+        return False, rsp[0]
+
+    def mifareBlockWrite2(self, blockNumber, value):
+        if len(value) != 0x10:
+            raise Exception('Wrong value length.')
+        
+        cmd = '%s%s%s\x00%s%s' %(chr(self.CLA_MIFARE), chr(R502SpyLibrary.INS_MIFARE_BLOCK_WRITE), chr(blockNumber), chr(len(value)), value)
+        rsp = self.__scInterface.transmit(cmd)
+        if rsp[-2 : ] == '\x90\x00':
+            return True, rsp[ : -2]
+        return False, rsp[0]
+
+    def mifareIncrement2(self, blockNumber, incValue):
+        cmd = '%s%s%s\x00\x04%s' %(chr(self.CLA_MIFARE), chr(R502SpyLibrary.INS_MIFARE_INCREMENT), chr(blockNumber), incValue)
+        rsp = self.__scInterface.transmit(cmd)
+        if rsp[-2 : ] == '\x90\x00':
+            return True, rsp[ : -2]
+        return False, rsp[0]
+
+    def mifareDecrement2(self, blockNumber, decValue):
+        cmd = '%s%s%s\x00\x04%s' %(chr(self.CLA_MIFARE), chr(R502SpyLibrary.INS_MIFARE_DECREMENT), chr(blockNumber), decValue)
+        rsp = self.__scInterface.transmit(cmd)
+        if rsp[-2 : ] == '\x90\x00':
+            return True, rsp[ : -2]
+        return False, rsp[0]
+    
+    def mifareRestore2(self, blockNumber):
+        cmd = '%s%s%s\x00\x00' %(chr(self.CLA_MIFARE), chr(R502SpyLibrary.INS_MIFARE_RESTORE), chr(blockNumber))
+        rsp = self.__scInterface.transmit(cmd)
+        if rsp[-2 : ] == '\x90\x00':
+            return True, rsp[ : -2]
+        return False, rsp[0]
+    
+    def mifareTransfer2(self, blockNumber):
+        cmd = '%s%s%s\x00\x00' %(chr(self.CLA_MIFARE), chr(R502SpyLibrary.INS_MIFARE_TRANSFER), chr(blockNumber))
+        rsp = self.__scInterface.transmit(cmd)
+        if rsp[-2 : ] == '\x90\x00':
+            return True, rsp[ : -2]
+        return False, rsp[0]
+    
+    def mifareDumpCard(self):
+        cmd = '%s%s\x00\x00\x00' %(chr(self.CLA_MIFARE), chr(R502SpyLibrary.INS_MIFARE_DUMP))
+        rsp = self.__scInterface.transmit(cmd)
+        if rsp[-2 : ] == '\x90\x00':
+            return True, rsp[ : -2]
+        return False, rsp[0]
+
+    def mifareCloneCard(self):
+        cmd = '%s%s\x00\x00\x00' %(chr(self.CLA_MIFARE), chr(R502SpyLibrary.INS_MIFARE_CLONE))
+        rsp = self.__scInterface.transmit(cmd)
+        if rsp[-2 : ] == '\x90\x00':
+            return True, rsp[ : -2]
+        return False, rsp[0]

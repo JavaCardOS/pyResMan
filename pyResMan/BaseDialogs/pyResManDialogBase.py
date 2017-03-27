@@ -18,7 +18,7 @@ import wx.grid
 class pyResManDialogBase ( wx.Dialog ):
     
     def __init__( self, parent ):
-        wx.Dialog.__init__ ( self, parent, id = wx.ID_ANY, title = u"pyResMan", pos = wx.DefaultPosition, size = wx.Size( 983,687 ), style = wx.DEFAULT_DIALOG_STYLE|wx.MAXIMIZE_BOX|wx.MINIMIZE_BOX|wx.RESIZE_BORDER|wx.TAB_TRAVERSAL )
+        wx.Dialog.__init__ ( self, parent, id = wx.ID_ANY, title = u"pyResMan", pos = wx.DefaultPosition, size = wx.Size( 1028,687 ), style = wx.DEFAULT_DIALOG_STYLE|wx.MAXIMIZE_BOX|wx.MINIMIZE_BOX|wx.RESIZE_BORDER|wx.TAB_TRAVERSAL )
         
         self.SetSizeHintsSz( wx.DefaultSize, wx.DefaultSize )
         self.SetForegroundColour( wx.SystemSettings.GetColour( wx.SYS_COLOUR_WINDOWTEXT ) )
@@ -63,7 +63,7 @@ class pyResManDialogBase ( wx.Dialog ):
         bSizer46 = wx.BoxSizer( wx.VERTICAL )
         
         self.m_splitter2 = wx.SplitterWindow( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.SP_3D )
-        self.m_splitter2.SetSashGravity( 0.65 )
+        self.m_splitter2.SetSashGravity( 0.72 )
         self.m_splitter2.Bind( wx.EVT_IDLE, self.m_splitter2OnIdle )
         self.m_splitter2.SetMinimumPaneSize( 1 )
         
@@ -136,7 +136,7 @@ class pyResManDialogBase ( wx.Dialog ):
         self._panelApdu.SetSizer( _apduPageSizer )
         self._panelApdu.Layout()
         _apduPageSizer.Fit( self._panelApdu )
-        self._notebookPages.AddPage( self._panelApdu, u"Basic APDU", True )
+        self._notebookPages.AddPage( self._panelApdu, u"Basic APDU", False )
         self._panelGP = wx.Panel( self._notebookPages, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
         _gpPageSizer = wx.BoxSizer( wx.VERTICAL )
         
@@ -525,7 +525,7 @@ class pyResManDialogBase ( wx.Dialog ):
         bSizer411.Add( self.m_panel13, 0, wx.ALL|wx.EXPAND, 5 )
         
         self.m_splitter21 = wx.SplitterWindow( self._panelSCDebugger, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.SP_3D )
-        self.m_splitter21.SetSashGravity( 0.3 )
+        self.m_splitter21.SetSashGravity( 0.2 )
         self.m_splitter21.Bind( wx.EVT_IDLE, self.m_splitter21OnIdle )
         
         self.m_panel11 = wx.Panel( self.m_splitter21, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
@@ -580,6 +580,124 @@ class pyResManDialogBase ( wx.Dialog ):
         self._panelSCDebugger.Layout()
         bSizer411.Fit( self._panelSCDebugger )
         self._notebookPages.AddPage( self._panelSCDebugger, u"SmartCard Debugger", False )
+        self._panelMifare = wx.Panel( self._notebookPages, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
+        self._panelMifare.SetFont( wx.Font( wx.NORMAL_FONT.GetPointSize(), 70, 90, 90, False, wx.EmptyString ) )
+        
+        bSizer155 = wx.BoxSizer( wx.VERTICAL )
+        
+        bSizer161 = wx.BoxSizer( wx.HORIZONTAL )
+        
+        self.m_staticText92 = wx.StaticText( self._panelMifare, wx.ID_ANY, u"This function is only available for the online store product: ", wx.DefaultPosition, wx.DefaultSize, wx.ALIGN_RIGHT )
+        self.m_staticText92.Wrap( -1 )
+        bSizer161.Add( self.m_staticText92, 0, wx.ALL, 5 )
+        
+        self.m_hyperlink4 = wx.HyperlinkCtrl( self._panelMifare, wx.ID_ANY, u"Mifare Clone 1K", u"https://javacardos.com/store/mifare-clone-1k.php", wx.DefaultPosition, wx.DefaultSize, wx.HL_ALIGN_LEFT|wx.HL_DEFAULT_STYLE )
+        bSizer161.Add( self.m_hyperlink4, 0, wx.ALL, 5 )
+        
+        
+        bSizer155.Add( bSizer161, 1, wx.ALIGN_CENTER, 5 )
+        
+        bSizer157 = wx.BoxSizer( wx.HORIZONTAL )
+        
+        self._gridCardData = wx.grid.Grid( self._panelMifare, wx.ID_ANY, wx.DefaultPosition, wx.Size( -1,-1 ), 0 )
+        
+        # Grid
+        self._gridCardData.CreateGrid( 64, 16 )
+        self._gridCardData.EnableEditing( True )
+        self._gridCardData.EnableGridLines( True )
+        self._gridCardData.EnableDragGridSize( False )
+        self._gridCardData.SetMargins( 0, 0 )
+        
+        # Columns
+        self._gridCardData.AutoSizeColumns()
+        self._gridCardData.EnableDragColMove( False )
+        self._gridCardData.EnableDragColSize( True )
+        self._gridCardData.SetColLabelSize( 30 )
+        self._gridCardData.SetColLabelAlignment( wx.ALIGN_CENTRE, wx.ALIGN_CENTRE )
+        
+        # Rows
+        self._gridCardData.EnableDragRowSize( True )
+        self._gridCardData.SetRowLabelSize( 80 )
+        self._gridCardData.SetRowLabelAlignment( wx.ALIGN_CENTRE, wx.ALIGN_CENTRE )
+        
+        # Label Appearance
+        
+        # Cell Defaults
+        self._gridCardData.SetDefaultCellAlignment( wx.ALIGN_CENTRE, wx.ALIGN_CENTRE )
+        bSizer157.Add( self._gridCardData, 1, wx.ALL|wx.EXPAND, 5 )
+        
+        self.m_staticline3 = wx.StaticLine( self._panelMifare, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.LI_VERTICAL )
+        bSizer157.Add( self.m_staticline3, 0, wx.EXPAND|wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
+        
+        bSizer158 = wx.BoxSizer( wx.VERTICAL )
+        
+        self._buttonLoadCardData = wx.Button( self._panelMifare, wx.ID_ANY, u"Load Data From File ...", wx.DefaultPosition, wx.DefaultSize, 0 )
+        bSizer158.Add( self._buttonLoadCardData, 0, wx.ALL|wx.EXPAND, 5 )
+        
+        self._buttonSaveCardData = wx.Button( self._panelMifare, wx.ID_ANY, u"Save Data To File ...", wx.DefaultPosition, wx.DefaultSize, 0 )
+        bSizer158.Add( self._buttonSaveCardData, 0, wx.ALL|wx.ALIGN_CENTER_HORIZONTAL|wx.EXPAND, 5 )
+        
+        self.m_staticline4 = wx.StaticLine( self._panelMifare, wx.ID_ANY, wx.DefaultPosition, wx.Size( -1,-1 ), wx.LI_VERTICAL )
+        bSizer158.Add( self.m_staticline4, 0, wx.EXPAND |wx.ALL, 5 )
+        
+        bSizer160 = wx.BoxSizer( wx.HORIZONTAL )
+        
+        self.m_staticText91 = wx.StaticText( self._panelMifare, wx.ID_ANY, u"KeyA:", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_staticText91.Wrap( -1 )
+        bSizer160.Add( self.m_staticText91, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
+        
+        self._textctrlKeyA = wx.TextCtrl( self._panelMifare, wx.ID_ANY, u"FFFFFFFFFFFF", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self._textctrlKeyA.SetMaxLength( 12 ) 
+        bSizer160.Add( self._textctrlKeyA, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
+        
+        
+        bSizer158.Add( bSizer160, 0, wx.EXPAND, 5 )
+        
+        self._buttonDumpCard = wx.Button( self._panelMifare, wx.ID_ANY, u"Dump Card", wx.DefaultPosition, wx.DefaultSize, 0 )
+        bSizer158.Add( self._buttonDumpCard, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL|wx.EXPAND, 5 )
+        
+        self._buttonCloneCard = wx.Button( self._panelMifare, wx.ID_ANY, u"Clone Card", wx.DefaultPosition, wx.DefaultSize, 0 )
+        bSizer158.Add( self._buttonCloneCard, 0, wx.ALL|wx.EXPAND, 5 )
+        
+        self.m_staticline2 = wx.StaticLine( self._panelMifare, wx.ID_ANY, wx.DefaultPosition, wx.Size( -1,-1 ), wx.LI_VERTICAL )
+        bSizer158.Add( self.m_staticline2, 0, wx.EXPAND |wx.ALL, 5 )
+        
+        bSizer159 = wx.BoxSizer( wx.HORIZONTAL )
+        
+        self.m_staticText90 = wx.StaticText( self._panelMifare, wx.ID_ANY, u"UID:", wx.DefaultPosition, wx.Size( -1,-1 ), 0 )
+        self.m_staticText90.Wrap( -1 )
+        bSizer159.Add( self.m_staticText90, 1, wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL, 5 )
+        
+        self._textctrlUID = wx.TextCtrl( self._panelMifare, wx.ID_ANY, u"00000000", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self._textctrlUID.SetMaxLength( 8 ) 
+        bSizer159.Add( self._textctrlUID, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
+        
+        
+        bSizer158.Add( bSizer159, 0, wx.EXPAND|wx.ALIGN_CENTER_HORIZONTAL, 5 )
+        
+        self._buttonChangeUID = wx.Button( self._panelMifare, wx.ID_ANY, u"Change UID", wx.DefaultPosition, wx.DefaultSize, 0 )
+        bSizer158.Add( self._buttonChangeUID, 0, wx.ALL|wx.EXPAND, 5 )
+        
+        self._buttonUnblockCard = wx.Button( self._panelMifare, wx.ID_ANY, u"UnblockCard", wx.DefaultPosition, wx.DefaultSize, 0 )
+        bSizer158.Add( self._buttonUnblockCard, 0, wx.ALL|wx.EXPAND, 5 )
+        
+        self.m_staticline21 = wx.StaticLine( self._panelMifare, wx.ID_ANY, wx.DefaultPosition, wx.Size( -1,-1 ), wx.LI_VERTICAL )
+        bSizer158.Add( self.m_staticline21, 0, wx.EXPAND |wx.ALL, 5 )
+        
+        self._buttonClearCardData = wx.Button( self._panelMifare, wx.ID_ANY, u"Clear Data", wx.DefaultPosition, wx.DefaultSize, 0 )
+        bSizer158.Add( self._buttonClearCardData, 0, wx.ALL|wx.EXPAND, 5 )
+        
+        
+        bSizer157.Add( bSizer158, 0, wx.EXPAND, 5 )
+        
+        
+        bSizer155.Add( bSizer157, 1, wx.EXPAND, 5 )
+        
+        
+        self._panelMifare.SetSizer( bSizer155 )
+        self._panelMifare.Layout()
+        bSizer155.Fit( self._panelMifare )
+        self._notebookPages.AddPage( self._panelMifare, u"Mifare", True )
         self._panelAbout = wx.Panel( self._notebookPages, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
         bSizer331 = wx.BoxSizer( wx.HORIZONTAL )
         
@@ -757,6 +875,13 @@ class pyResManDialogBase ( wx.Dialog ):
         self._buttonDebuggerScriptStop.Bind( wx.EVT_BUTTON, self._buttonDebuggerScriptStopOnButtonClick )
         self._treectrlDebuggerCommands.Bind( wx.EVT_LEFT_DCLICK, self._treectrlDebuggerCommandsOnLeftDClick )
         self._listctrlDebuggerScriptCommand.Bind( wx.grid.EVT_GRID_CELL_LEFT_DCLICK, self._listctrlDebuggerScriptCommandOnGridCellLeftDClick )
+        self._buttonLoadCardData.Bind( wx.EVT_BUTTON, self._buttonLoadCardDataOnButtonClick )
+        self._buttonSaveCardData.Bind( wx.EVT_BUTTON, self._buttonSaveCardDataOnButtonClick )
+        self._buttonDumpCard.Bind( wx.EVT_BUTTON, self._buttonDumpCardOnButtonClick )
+        self._buttonCloneCard.Bind( wx.EVT_BUTTON, self._buttonCloneCardOnButtonClick )
+        self._buttonChangeUID.Bind( wx.EVT_BUTTON, self._buttonChangeUIDOnButtonClick )
+        self._buttonUnblockCard.Bind( wx.EVT_BUTTON, self._buttonUnblockCardOnButtonClick )
+        self._buttonClearCardData.Bind( wx.EVT_BUTTON, self._buttonClearCardDataOnButtonClick )
         self._buttonClearLog.Bind( wx.EVT_BUTTON, self._buttonClearLogOnButtonClick )
     
     def __del__( self ):
@@ -915,6 +1040,27 @@ class pyResManDialogBase ( wx.Dialog ):
         event.Skip()
     
     def _listctrlDebuggerScriptCommandOnGridCellLeftDClick( self, event ):
+        event.Skip()
+    
+    def _buttonLoadCardDataOnButtonClick( self, event ):
+        event.Skip()
+    
+    def _buttonSaveCardDataOnButtonClick( self, event ):
+        event.Skip()
+    
+    def _buttonDumpCardOnButtonClick( self, event ):
+        event.Skip()
+    
+    def _buttonCloneCardOnButtonClick( self, event ):
+        event.Skip()
+    
+    def _buttonChangeUIDOnButtonClick( self, event ):
+        event.Skip()
+    
+    def _buttonUnblockCardOnButtonClick( self, event ):
+        event.Skip()
+    
+    def _buttonClearCardDataOnButtonClick( self, event ):
         event.Skip()
     
     def _buttonClearLogOnButtonClick( self, event ):

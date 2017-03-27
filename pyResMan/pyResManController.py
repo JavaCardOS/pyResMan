@@ -18,6 +18,9 @@ import os
 from GPInterface import GPInterface
 from R502SpyLibrary import R502SpyLibrary
 from DebuggerScriptFile import DebuggerScriptFile
+from pyResMan.R502Interface import R502Interface
+from pyResMan.pyLibSC import LibSC
+from pyResMan import DebuggerUtils
 
 class APDUItem(object):
     """Class for APDU item data;"""
@@ -32,6 +35,7 @@ class APDUItem(object):
     def getTransArgs(self):
         return self._transArgs
 
+
 class pyResManController(object):
     """The controller of reResManDialog;"""
 
@@ -45,6 +49,8 @@ class pyResManController(object):
         self.__runScriptThread = None
         self.__gpInterface = GPInterface()
         self.__scDebugger = R502SpyLibrary(self.__gpInterface)
+        self.__r502_interface = R502Interface(self.__gpInterface)
+        self.__libsc = LibSC(self.__r502_interface)
         gp.enableTraceMode(1)
         
         self.__debuggerVariables = {}
@@ -565,6 +571,173 @@ class pyResManController(object):
     
     def setDebuggerVariables(self, name, value):
         self.__debuggerVariables[name] = value
+    
+    def __mifareSelectCard(self):
+        # Select the card;
+        self.__scDebugger.rfOn()
+        self.__scDebugger.rfManaul()
+        self.__scDebugger.claWUPA2(chr(0x52))
+        error, uid = self.__scDebugger.claAnticollision2(chr(0x93), chr(0x20))
+        print 'UID: ' + ''.join('%02X' %(ord(b)) for b in uid)
+        error, data = self.__scDebugger.claSelect2(chr(0x93), chr(0x70), uid)
+        print 'SELECT respoonse: ' + ''.join('%02X' %(ord(b)) for b in data)
+        return error, uid
+
+    def __mifareSetup(self):
+        self.__scDebugger.rfOn()
+        self.__scDebugger.rfManaul()
+        self.__scDebugger.claWUPA2(chr(0x52))
+        error, data = self.__scDebugger.claAnticollision2(chr(0x93), chr(0x20))
+        if not error:
+            self.__handler.handleException(Exception(data))
+            return
+        uid = data
+        print 'UID: ' + ''.join('%02X' %(ord(b)) for b in uid)
+        error, data = self.__scDebugger.claSelect2(chr(0x93), chr(0x70), uid)
+        if not error:
+            self.__handler.handleException(Exception(data))
+            return
+        print 'SELECT respoonse: ' + ''.join('%02X' %(ord(b)) for b in data)
+        self.__scDebugger.claHLTA2()
+        error = self.__libsc.M1_setup()
+        if error != 0:
+            self.__handler.handleException(Exception(DebuggerUtils.getErrorString(error)))
+            return
+        
+    def __mifareDumpCard(self, key_a):
+        # Read card data;
+        result = True
+        need_select = True
+        for block_index in range(64):
+            if need_select:
+                # Select the card;
+                try:
+                    error, uid = self.__mifareSelectCard()
+                    if not error:
+                        self.__handler.handleException(Exception('Select card failed, %s' %(DebuggerUtils.getErrorString(error))))
+                        return
+                    else:
+                        need_select = False
+                except Exception, e:
+                    self.__handler.handleException(e)
+                    continue
+
+            error = self.__libsc.M1_authentication(block_index, 0, key_a, uid)
+            if error == 0x00:
+                error, data = self.__libsc.M1_read_block(block_index)
+                if error == 0x00:
+                    self.__handler.handleMifareResponse(2, error, (block_index, data))
+                    need_select = False
+                else:
+                    self.__handler.handleException(Exception('Authenticate failed, %s' %(DebuggerUtils.getErrorString(error))))
+                    result = False
+                    need_select = True
+            else:
+                self.__handler.handleException(Exception('Authenticate failed, %s' %(DebuggerUtils.getErrorString(error))))
+                result = False
+                need_select = True
+        if result:
+            self.__handler.handleLog('Dump card data succeeded.')
+    
+    def __mifareCloneCard(self, card_data, key_a):
+        # Prepare;
+        try:
+            self.__mifareSetup()
+        except Exception, e:
+            self.__handler.handleException(e)
+            return
+
+        # Write data to the card;
+        for row_index in range(0, len(card_data)):
+            block_data = card_data[row_index]
+            if row_index in (3, 7, 11, 15, 19, 23, 27, 31, 35, 39, 43, 47, 51, 55, 59, 63):
+                block_data = key_a + block_data[6:]
+            error = self.__libsc.M1_write_block(row_index, block_data)
+            if error != 0:
+                self.__handler.handleException(Exception(DebuggerUtils.getErrorString(error)))
+            else:
+                self.__handler.handleMifareResponse(1, error, row_index)
+    
+    def __mifareReadSaveData(self, data, file_path_name):
+        with open(file_path_name, 'wb') as f:
+            f.write(data)
+            self.__handler.handleLog('Mifare card data saved.', wx.LOG_Info)
+    
+    def __mifareUnblockCard(self):
+        try:
+            self.__mifareOpenBackdoor()
+            error = self.__libsc.M1_write_block(0, '\x01\x02\x03\x04\x04\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00')
+            if error != 0:
+                self.__handler.handleException(Exception(DebuggerUtils.getErrorString(error)))
+            else:
+                self.__handler.handleLog('Mifare card unblocked.', wx.LOG_Info)
+        except Exception, e:
+            self.__handler.handleException(e)
+            return
+    
+    def __mifareChangeUID(self, new_uid):
+        # Read data of block 0;
+        try:
+            error, data = self.__mifareSelectCard()
+            if not error:
+                self.__handler.handleException(Exception('Select card failed, %s' %(DebuggerUtils.getErrorString(error))))
+                return
+        except Exception, e:
+            self.__handler.handleException(e)
+            return
+        
+        uid = data
+        error = self.__mifareTryAuthentication(0, uid)
+        if error != 0x00:
+            self.__handler.handleException(Exception('Authenticate failed, %s' %(DebuggerUtils.getErrorString(error))))
+            return
+        
+        error, data = self.__libsc.M1_read_block(0)
+        if error != 0:
+            self.__handler.handleException(Exception(DebuggerUtils.getErrorString(error)))
+            return
+        block_data = data
+        
+        # Write data to block 0;
+        try:
+            self.__mifareOpenBackdoor()
+        except Exception, e:
+            self.__handler.handleException(e)
+            return
+        
+        tck = 0
+        for i in range(len(new_uid)):
+            tck ^= ord(new_uid[i])
+        tck = chr(tck)
+        error = self.__libsc.M1_write_block(0, new_uid + tck + block_data[5 : ])
+        if error != 0:
+            self.__handler.handleException(Exception(DebuggerUtils.getErrorString(error)))
+        else:
+            self.__handler.handleLog('Mifare card unblocked.', wx.LOG_Info)
+        
+    def mifareDumpCard(self, key_a):
+        self.__mifareCommandThread = threading.Thread(target=self.__mifareDumpCard, args=(key_a, ));
+        self.__mifareCommandThread.start()
+    
+    def mifareCloneCard(self, card_data, key_a):
+        self.__mifareCommandThread = threading.Thread(target=self.__mifareCloneCard, args=(card_data, key_a, ));
+        self.__mifareCommandThread.start()
+    
+    def mifareReadCardData(self):
+        self.__mifareCommandThread = threading.Thread(target=self.__mifareReadCardData);
+        self.__mifareCommandThread.start()
+    
+    def mifareSaveData(self, card_data, file_path_name):
+        self.__mifareCommandThread = threading.Thread(target=self.__mifareReadSaveData, args = (card_data, file_path_name, ));
+        self.__mifareCommandThread.start()
+    
+    def mifareUnblockCard(self):
+        self.__mifareCommandThread = threading.Thread(target=self.__mifareUnblockCard);
+        self.__mifareCommandThread.start()
+    
+    def mifareChangeUID(self, uid):
+        self.__mifareCommandThread = threading.Thread(target=self.__mifareChangeUID, args=(uid, ));
+        self.__mifareCommandThread.start()
 
 class pyResManControllerEventHandler(object):
     '''
@@ -598,7 +771,7 @@ class pyResManControllerEventHandler(object):
     def handleLog(self):
         pass
 
-    def handleException(self):
+    def handleException(self, e):
         pass
     
     def handleCapFileInfo(self, info):
@@ -636,3 +809,6 @@ class pyResManControllerEventHandler(object):
 
     def handleDebuggerProcessing(self, cmdinfo):
         pass
+
+    def handleMifareResponse(self, action_type, result, data):
+            pass

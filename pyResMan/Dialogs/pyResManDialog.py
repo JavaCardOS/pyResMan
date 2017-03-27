@@ -40,6 +40,7 @@ from pyResMan.Dialogs.pyResManCommandDialog_MifareDecrementTransfer import Comma
 from pyResMan.Dialogs.pyResManCommandDialog_MifareTransfer import CommandDialog_MifareTransfer
 from pyResMan.Dialogs.pyResManCommandDialog_MifareRestore import CommandDialog_MifareRestore
 from pyResMan import DebuggerUtils
+from pyResMan.DebuggerUtils import getErrorString
 
 COMMAND_LIST_COL_INDEX = 0
 COMMAND_LIST_COL_COMMAND_NAME = 1
@@ -145,10 +146,10 @@ class pyResManDialog (pyResManDialogBase):
         self._listctrlDebuggerScriptCommand.SetSelectionMode(Grid.wxGridSelectRows)
         
         self._listctrlDebuggerScriptCommand.InsertCols(0, 5)
-        self._listctrlDebuggerScriptCommand.SetColSize(0, 50)
-        self._listctrlDebuggerScriptCommand.SetColSize(1, 100)
-        self._listctrlDebuggerScriptCommand.SetColSize(2, 100)
-        self._listctrlDebuggerScriptCommand.SetColSize(3, 150)
+        self._listctrlDebuggerScriptCommand.SetColSize(COMMAND_LIST_COL_INDEX, 50)
+        self._listctrlDebuggerScriptCommand.SetColSize(COMMAND_LIST_COL_COMMAND_NAME, 100)
+        self._listctrlDebuggerScriptCommand.SetColSize(COMMAND_LIST_COL_COMMAND_VALUE, 100)
+        self._listctrlDebuggerScriptCommand.SetColSize(COMMAND_LIST_COL_RESPONSE, 150)
         self._listctrlDebuggerScriptCommand.SetColLabelValue(COMMAND_LIST_COL_INDEX, 'Index')
         self._listctrlDebuggerScriptCommand.SetColLabelValue(COMMAND_LIST_COL_COMMAND_NAME, 'Command Name')
         self._listctrlDebuggerScriptCommand.SetColLabelValue(COMMAND_LIST_COL_COMMAND_VALUE, 'Command Value')
@@ -159,6 +160,18 @@ class pyResManDialog (pyResManDialogBase):
         self._listctrlApduList.Bind(wx.EVT_CONTEXT_MENU, self._listctrlApduListOnContextMenu)
         self._listctrlScriptList.Bind(wx.EVT_CONTEXT_MENU, self._listctrlScriptListOnContextMenu)
         
+        # Init Mifare page;
+        self.ClearMifareCardData()
+    
+    def ClearMifareCardData(self):
+        colCount = self._gridCardData.GetNumberCols();
+        rowCount = self._gridCardData.GetNumberRows();
+        for rowIndex in range(rowCount):
+            self._gridCardData.SetRowLabelValue(rowIndex, '%d' % (rowIndex))
+            for colIndex in range(colCount):
+                self._gridCardData.SetColSize(colIndex, 30)
+                self._gridCardData.SetColLabelValue(colIndex, '%X' % (colIndex))
+                self._gridCardData.SetCellValue(rowIndex, colIndex, '')
         
     # Virtual event handlers, overide them in your derived class
     def _buttonConnectOnButtonClick(self, event):
@@ -589,10 +602,6 @@ class pyResManDialog (pyResManDialogBase):
         event.Skip()
         self._listctrlScriptList.DeleteAllItems()
         self._loadScript()
-    
-    def m_splitter2OnIdle(self, event):
-        self.m_splitter2.SetSashPosition(0)
-        self.m_splitter2.Unbind(wx.EVT_IDLE)
     
     def _listctrlApduListOnContextMenu(self, event):
         """Display apdu list view popup menu;"""
@@ -1163,7 +1172,7 @@ class pyResManDialog (pyResManDialogBase):
             if (commandName != None) and (commandValue != None):
                 self._listctrlDebuggerScriptCommand.SetCellValue(rowIndex, COMMAND_LIST_COL_COMMAND_NAME, commandName)
                 self._listctrlDebuggerScriptCommand.SetCellValue(rowIndex, COMMAND_LIST_COL_COMMAND_VALUE, commandValue)
-    
+            
     def __handleDebuggerResponse(self, args):
         rsp = args[0]
         commandInfo = args[1]
@@ -1179,8 +1188,8 @@ class pyResManDialog (pyResManDialogBase):
         else:
             errorcode = ord(rsp[1])
             errorString = self.getDebuggerErrorString(errorcode)
-            self._Log('Command %d-%s-%s failed, error: %s (0x%02X). \n' %(commandIndex, commandName, Util.vs2s(commandValue, ''), errorString, errorcode), wx.LOG_Error)
-            self._listctrlDebuggerScriptCommand.SetCellValue(commandIndex, COMMAND_LIST_COL_DESCRIPTION, 'Error: %s (0x%02X)' %(errorString, errorcode))
+            self._Log('Command %d-%s-%s failed, error: %s (0x%02X). \n' % (commandIndex, commandName, Util.vs2s(commandValue, ''), errorString, errorcode), wx.LOG_Error)
+            self._listctrlDebuggerScriptCommand.SetCellValue(commandIndex, COMMAND_LIST_COL_DESCRIPTION, 'Error: %s (0x%02X)' % (errorString, errorcode))
             self._listctrlDebuggerScriptCommand.SetCellTextColour(commandIndex, COMMAND_LIST_COL_DESCRIPTION, '#FF0000')
             self._listctrlDebuggerScriptCommand.SetCellValue(commandIndex, COMMAND_LIST_COL_RESPONSE, '')
 
@@ -1209,7 +1218,7 @@ class pyResManDialog (pyResManDialogBase):
     def __refreshCommandItemIndex(self):
         rowsNumber = self._listctrlDebuggerScriptCommand.GetNumberRows()
         for i in range(rowsNumber):
-            self._listctrlDebuggerScriptCommand.SetCellValue(i, COMMAND_LIST_COL_INDEX, '%d' %(i))
+            self._listctrlDebuggerScriptCommand.SetCellValue(i, COMMAND_LIST_COL_INDEX, '%d' % (i))
         
     def _buttonDebuggerScriptRunOnButtonClick(self, event):
         commands = []
@@ -1309,7 +1318,7 @@ class pyResManDialog (pyResManDialogBase):
     def _buttonDebuggerScriptLoadFileOnButtonClick(self, event):
 #         scriptPathName = self._textctrlDebuggerScriptFilePathName.GetValue()
 #         if len(scriptPathName) == 0:
-        saveFileDialog = wx.FileDialog(self, "Load smartcard debugger script file ...", "", "", "SCD files (*.scd)|*.scd", wx.FD_OPEN | wx.FILE_MUST_EXIST )
+        saveFileDialog = wx.FileDialog(self, "Load smartcard debugger script file ...", "", "", "SCD files (*.scd)|*.scd", wx.FD_OPEN | wx.FILE_MUST_EXIST)
         if saveFileDialog.ShowModal() == wx.ID_CANCEL:
             return
         scriptPathName = saveFileDialog.GetPath()
@@ -1319,7 +1328,7 @@ class pyResManDialog (pyResManDialogBase):
     def _buttonDebuggerScriptSaveFileOnButtonClick(self, event):
         scriptPathName = self._textctrlDebuggerScriptFilePathName.GetValue()
         if len(scriptPathName) == 0:
-            saveFileDialog = wx.FileDialog(self, "Save smartcard debugger script file ...", "", "", "SCD files (*.scd)|*.scd", wx.FD_SAVE )
+            saveFileDialog = wx.FileDialog(self, "Save smartcard debugger script file ...", "", "", "SCD files (*.scd)|*.scd", wx.FD_SAVE)
             if saveFileDialog.ShowModal() == wx.ID_CANCEL:
                 return
             scriptPathName = saveFileDialog.GetPath()
@@ -1332,11 +1341,102 @@ class pyResManDialog (pyResManDialogBase):
     def _buttonClearLogOnButtonClick(self, event):
         self._textctrlLog.SetValue('')
         
+    def _buttonDumpCardOnButtonClick(self, event):
+        try:
+            key_a = self._getMifareKeyA()
+            self.__controller.mifareDumpCard(key_a)
+        except Exception, e:
+            self.handleException(e)
+    
+    def _buttonClearCardDataOnButtonClick(self, event):
+        self.ClearMifareCardData()
+    
+    def _getMifareKeyA(self):
+        key_a = self._textctrlKeyA.GetValue()
+        if (len(key_a) != 12):
+            raise Exception('KeyA shall be 8 bytes long.')
+            return
+        for i in range(len(key_a)):
+            if not Util.ishexchar_c(key_a[i]):
+                raise Exception('KeyA shall be input with hex characters.')
+                return
+        key_a_bin = ''
+        for i in range(len(key_a) / 2):
+            key_a_bin += chr(int(key_a[i * 2 : i * 2 + 2], 0x10))
+        return key_a_bin
+    
+    def _buttonCloneCardOnButtonClick(self, event):
+        try:
+            card_data = []
+            for row_index in range(self._gridCardData.GetNumberRows()):
+                row_data = ''
+                for col_index in range(self._gridCardData.GetNumberCols()):
+                    cell_value = self._gridCardData.GetCellValue(row_index, col_index)
+                    if len(cell_value) == 0:
+                        cell_value = '00'
+                    row_data += chr(int(cell_value, 0x10))
+                card_data.append(row_data)
+            key_a = self._getMifareKeyA()
+            self.__controller.mifareCloneCard(card_data, key_a)
+        except Exception, e:
+            self.handleException(e)
+    
+    def _buttonSaveCardDataOnButtonClick(self, event):
+        saveFileDialog = wx.FileDialog(self, "Save data to file ...", "", "", "All files (*.*)|*.*", wx.FD_SAVE)
+        if saveFileDialog.ShowModal() == wx.ID_CANCEL:
+            return
+        file_path_name = saveFileDialog.GetPath()
+
+        card_data = ''
+        for row_index in range(self._gridCardData.GetNumberRows()):
+            for col_index in range(self._gridCardData.GetNumberCols()):
+                card_data += chr(int(self._gridCardData.GetCellValue(row_index, col_index), 0x10))
+        self.__controller.mifareSaveData(card_data, file_path_name)
+    
+    def _buttonLoadCardDataOnButtonClick(self, event):
+        # Open file dialog;
+        saveFileDialog = wx.FileDialog(self, "Load data from file ...", "", "", "All files (*.*)|*.*", wx.FD_OPEN)
+        if saveFileDialog.ShowModal() == wx.ID_CANCEL:
+            return
+        file_path_name = saveFileDialog.GetPath()
+        
+        # Read card data from file;
+        with open(file_path_name, 'rb') as f:
+            card_data = f.read()
+        if len(card_data) != 1024:
+            self._Log('Invalid card data.', wx.LOG_Error)
+            return
+        
+        # Set card data to Grid;
+        for row_index in range(self._gridCardData.GetNumberRows()):
+            for col_index in range(self._gridCardData.GetNumberCols()):
+                self._gridCardData.SetCellValue(row_index, col_index, '%02X' % (ord(card_data[row_index * 0x10 + col_index])))
+        self._Log('Card data has been loaded from file: %s.' % (file_path_name), wx.LOG_Info)
+        return
+    
+    def _buttonUnblockCardOnButtonClick(self, event):
+        self.__controller.mifareUnblockCard()
+    
+    def _buttonChangeUIDOnButtonClick(self, event):
+        uid = self._textctrlUID.GetValue()
+        if (len(uid) != 8):
+            self._Log('UID shall be 8 bytes long.', wx.LOG_Error)
+            return
+        for i in range(len(uid)):
+            if not Util.ishexchar_c(uid[i]):
+                self._Log('UID shall be input with hex characters.', wx.LOG_Error)
+                return
+        
+        uid_bin = ''
+        for i in range(4):
+            uid_bin += chr(int(uid[i * 2 : i * 2 + 2], 0x10))
+        self.__controller.mifareChangeUID(uid_bin)
+    
     def __handleLoadDebuggerScriptEnd(self, commandsInfo):
         self._listctrlDebuggerScriptCommand.InsertRows(0, len(commandsInfo))
         for i in range(len(commandsInfo)):
             commandInfo = commandsInfo[i]
-            self._listctrlDebuggerScriptCommand.SetCellValue(i, COMMAND_LIST_COL_INDEX, '%d' %(i))
+            self._listctrlDebuggerScriptCommand.SetCellValue(i, COMMAND_LIST_COL_INDEX, '%d' % (i))
             self._listctrlDebuggerScriptCommand.SetCellValue(i, COMMAND_LIST_COL_COMMAND_NAME, commandInfo[0])
             self._listctrlDebuggerScriptCommand.SetCellValue(i, COMMAND_LIST_COL_COMMAND_VALUE, commandInfo[1])
     
@@ -1351,3 +1451,24 @@ class pyResManDialog (pyResManDialogBase):
     def handleLoadDebuggerScriptBegin(self):
         wx.CallAfter(self.__handleLoadDebuggerScriptBegin)
     
+    def handleMifareResponse(self, action_type, result, data):
+        if result:
+            self._Log(getErrorString(data[0]), wx.LOG_Error)
+            return
+        
+        if action_type == 0:
+            self._Log("Dump card succeeded.", wx.LOG_Info)
+        elif action_type == 1:
+            block_index = data
+            self._Log("Write block succeeded: %d." % (block_index), wx.LOG_Info)
+        elif action_type == 2:
+            block_index = data[0]
+            block_data = data[1]
+            for i in range(0x10):
+                self._gridCardData.SetCellValue(block_index, i, "%02X" % (ord(block_data[i])))
+        else:
+            self._Log("Invalid mifare response type: %d." % (action_type), wx.LOG_Error)
+        
+    def m_splitter2OnIdle( self, event ):
+#         self.m_splitter2.SetSashPosition( 0 )
+        self.m_splitter2.Unbind( wx.EVT_IDLE )
