@@ -1,7 +1,9 @@
 '''
 Created on 2017/3/15
 
-@author: JavaCardOS
+@author: javacardos@gmail.com
+@organization: http://www.javacardos.com/
+@copyright: JavaCardOS Technologies. All rights reserved.
 '''
 
 _TAG_BLOCK_NUMBER = '\x01'

@@ -1,7 +1,9 @@
 '''
 Created on 2017/3/19
 
-@author: JavaCardOS
+@author: javacardos@gmail.com
+@organization: http://www.javacardos.com/
+@copyright: JavaCardOS Technologies. All rights reserved.
 '''
 
 class R502Interface(object):

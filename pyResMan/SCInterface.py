@@ -1,7 +1,9 @@
 '''
 Created on 2016-5-7
 
-@author: zhenkui
+@author: javacardos@gmail.com
+@organization: http://www.javacardos.com/
+@copyright: JavaCardOS Technologies. All rights reserved.
 '''
 
 class SCInterface(object):

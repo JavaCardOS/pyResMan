@@ -1,7 +1,9 @@
 '''
 Created on 2016-05-14
 
-@author: zhenkui
+@author: javacardos@gmail.com
+@organization: http://www.javacardos.com/
+@copyright: JavaCardOS Technologies. All rights reserved.
 '''
 
 from GPInterface import GPInterface
