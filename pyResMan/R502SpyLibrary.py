@@ -238,6 +238,10 @@ class R502SpyLibrary(object):
         ISO14443-3 command;
     '''
     def claREQA2(self, req_value):
+        '''
+        @brief: 
+        @return: True and response data / False and the error code.
+        '''
         cmd = '%s%s%s\x00\x00' %(chr(self.CLA_RF), chr(self.INS_RF_REQA), req_value)
         rsp = self.__scInterface.transmit(cmd)
         if rsp[-2 : ] == '\x90\x00':
@@ -245,6 +249,10 @@ class R502SpyLibrary(object):
         return False, rsp[0]
     
     def claWUPA2(self, req_value):
+        '''
+        @brief: 
+        @return: True and response data / False and the error code.
+        '''
         cmd = '%s%s%s\x00\x00' %(chr(self.CLA_RF), chr(self.INS_RF_WUPA), req_value)
         rsp = self.__scInterface.transmit(cmd)
         if rsp[-2 : ] == '\x90\x00':
@@ -252,6 +260,10 @@ class R502SpyLibrary(object):
         return False, rsp[0]
     
     def claAnticollision2(self, sel, nvb):
+        '''
+        @brief: 
+        @return: True and response data / False and the error code.
+        '''
         cmd = '%s%s%s%s\x00' %(chr(self.CLA_RF), chr(self.INS_RF_ANTI), sel, nvb)
         rsp = self.__scInterface.transmit(cmd)
         if rsp[-2 : ] == '\x90\x00':
@@ -259,6 +271,10 @@ class R502SpyLibrary(object):
         return False, rsp[0]
         
     def claSelect2(self, sel, nvb, uid):
+        '''
+        @brief: 
+        @return: True and response data / False and the error code.
+        '''
         cmd = '%s%s%s%s\x04%s' %(chr(self.CLA_RF), chr(self.INS_RF_SEL), sel, nvb, uid)
         rsp = self.__scInterface.transmit(cmd)
         if rsp[-2 : ] == '\x90\x00':
@@ -266,6 +282,10 @@ class R502SpyLibrary(object):
         return False, rsp[0]
 
     def claHLTA2(self):
+        '''
+        @brief: 
+        @return: True and response data / False and the error code.
+        '''
         cmd = '%s%s\x00\x00\x00' %(chr(self.CLA_RF), chr(self.INS_RF_HLTA))
         rsp = self.__scInterface.transmit(cmd)
         if rsp[-2 : ] == '\x90\x00':
@@ -276,9 +296,13 @@ class R502SpyLibrary(object):
         ### Methods version 2; ###
     '''
     def mifareAuthentication2(self, keyType, blockNumber, key, uid):
+        '''
+        @brief: 
+        @return: True and response data / False and the error code.
+        '''
         if keyType not in [0, 1]:
             raise Exception('Invalid key type.')
-        if len(key) != 4:
+        if len(key) != 6:
             raise Exception('Wrong key length.')
         if len(uid) != 4:
             raise Exception('Wrong uid length.')
@@ -290,6 +314,10 @@ class R502SpyLibrary(object):
         return False, rsp[0]
 
     def mifareBlockRead2(self, blockNumber):
+        '''
+        @brief: 
+        @return: True and response data / False and the error code.
+        '''
         cmd = '%s%s%s\x00\x10' %(chr(self.CLA_MIFARE), chr(R502SpyLibrary.INS_MIFARE_BLOCK_READ), chr(blockNumber))
         rsp = self.__scInterface.transmit(cmd)
         if rsp[-2 : ] == '\x90\x00':
@@ -297,6 +325,10 @@ class R502SpyLibrary(object):
         return False, rsp[0]
 
     def mifareBlockWrite2(self, blockNumber, value):
+        '''
+        @brief: 
+        @return: True and response data / False and the error code.
+        '''
         if len(value) != 0x10:
             raise Exception('Wrong value length.')
         
@@ -307,6 +339,10 @@ class R502SpyLibrary(object):
         return False, rsp[0]
 
     def mifareIncrement2(self, blockNumber, incValue):
+        '''
+        @brief: 
+        @return: True and response data / False and the error code.
+        '''
         cmd = '%s%s%s\x00\x04%s' %(chr(self.CLA_MIFARE), chr(R502SpyLibrary.INS_MIFARE_INCREMENT), chr(blockNumber), incValue)
         rsp = self.__scInterface.transmit(cmd)
         if rsp[-2 : ] == '\x90\x00':
@@ -314,6 +350,10 @@ class R502SpyLibrary(object):
         return False, rsp[0]
 
     def mifareDecrement2(self, blockNumber, decValue):
+        '''
+        @brief: 
+        @return: True and response data / False and the error code.
+        '''
         cmd = '%s%s%s\x00\x04%s' %(chr(self.CLA_MIFARE), chr(R502SpyLibrary.INS_MIFARE_DECREMENT), chr(blockNumber), decValue)
         rsp = self.__scInterface.transmit(cmd)
         if rsp[-2 : ] == '\x90\x00':
@@ -321,6 +361,10 @@ class R502SpyLibrary(object):
         return False, rsp[0]
     
     def mifareRestore2(self, blockNumber):
+        '''
+        @brief: 
+        @return: True and response data / False and the error code.
+        '''
         cmd = '%s%s%s\x00\x00' %(chr(self.CLA_MIFARE), chr(R502SpyLibrary.INS_MIFARE_RESTORE), chr(blockNumber))
         rsp = self.__scInterface.transmit(cmd)
         if rsp[-2 : ] == '\x90\x00':
@@ -328,6 +372,10 @@ class R502SpyLibrary(object):
         return False, rsp[0]
     
     def mifareTransfer2(self, blockNumber):
+        '''
+        @brief: 
+        @return: True and response data / False and the error code.
+        '''
         cmd = '%s%s%s\x00\x00' %(chr(self.CLA_MIFARE), chr(R502SpyLibrary.INS_MIFARE_TRANSFER), chr(blockNumber))
         rsp = self.__scInterface.transmit(cmd)
         if rsp[-2 : ] == '\x90\x00':
@@ -335,6 +383,10 @@ class R502SpyLibrary(object):
         return False, rsp[0]
     
     def mifareDumpCard(self):
+        '''
+        @brief: 
+        @return: True and response data / False and the error code.
+        '''
         cmd = '%s%s\x00\x00\x00' %(chr(self.CLA_MIFARE), chr(R502SpyLibrary.INS_MIFARE_DUMP))
         rsp = self.__scInterface.transmit(cmd)
         if rsp[-2 : ] == '\x90\x00':
@@ -342,6 +394,10 @@ class R502SpyLibrary(object):
         return False, rsp[0]
 
     def mifareCloneCard(self):
+        '''
+        @brief: 
+        @return: True and response data / False and the error code.
+        '''
         cmd = '%s%s\x00\x00\x00' %(chr(self.CLA_MIFARE), chr(R502SpyLibrary.INS_MIFARE_CLONE))
         rsp = self.__scInterface.transmit(cmd)
         if rsp[-2 : ] == '\x90\x00':

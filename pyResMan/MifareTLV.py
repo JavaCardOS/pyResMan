@@ -27,7 +27,7 @@ _TAG_ERROR = '\x80'
 
 class MifareCommandTLV(object):
     '''
-    Class to build mifare command tlv data;
+    @brief Class to build mifare command tlv data;
     '''
     def __init__(self, command_tag):
         self.__data = ''

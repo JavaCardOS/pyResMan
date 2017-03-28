@@ -62,7 +62,7 @@ class pyResManController(object):
         return self.__readername
     
     def connect(self, readername, protocol, mode):
-        """ Connect to the reader;"""
+        """ Connect to the reader. """
         self.__readername = readername
         self.__handler.handleLog('Connect to %s.' %(readername))
         self.__gpInterface.connect(str(readername), protocol)
@@ -578,9 +578,7 @@ class pyResManController(object):
         self.__scDebugger.rfManaul()
         self.__scDebugger.claWUPA2(chr(0x52))
         error, uid = self.__scDebugger.claAnticollision2(chr(0x93), chr(0x20))
-        print 'UID: ' + ''.join('%02X' %(ord(b)) for b in uid)
         error, data = self.__scDebugger.claSelect2(chr(0x93), chr(0x70), uid)
-        print 'SELECT respoonse: ' + ''.join('%02X' %(ord(b)) for b in data)
         return error, uid
 
     def __mifareSetup(self):
@@ -592,23 +590,23 @@ class pyResManController(object):
             self.__handler.handleException(Exception(data))
             return
         uid = data
-        print 'UID: ' + ''.join('%02X' %(ord(b)) for b in uid)
         error, data = self.__scDebugger.claSelect2(chr(0x93), chr(0x70), uid)
         if not error:
             self.__handler.handleException(Exception(data))
             return
-        print 'SELECT respoonse: ' + ''.join('%02X' %(ord(b)) for b in data)
         self.__scDebugger.claHLTA2()
         error = self.__libsc.M1_setup()
         if error != 0:
             self.__handler.handleException(Exception(DebuggerUtils.getErrorString(error)))
             return
+        return error, uid
         
     def __mifareDumpCard(self, key_a):
         # Read card data;
         result = True
         need_select = True
         for block_index in range(64):
+            self.__handler.handleLog('Read block data, block: %d.' %(block_index))
             if need_select:
                 # Select the card;
                 try:
@@ -617,6 +615,7 @@ class pyResManController(object):
                         self.__handler.handleException(Exception('Select card failed, %s' %(DebuggerUtils.getErrorString(error))))
                         return
                     else:
+                        self.__handler.handleLog('Card selected: %s' %(''.join('%02X' %(ord(b)) for b in uid)), wx.LOG_Info)
                         need_select = False
                 except Exception, e:
                     self.__handler.handleException(e)
@@ -637,7 +636,7 @@ class pyResManController(object):
                 result = False
                 need_select = True
         if result:
-            self.__handler.handleLog('Dump card data succeeded.')
+            self.__handler.handleLog('Dump card data succeeded.', wx.LOG_Info)
     
     def __mifareCloneCard(self, card_data, key_a):
         # Prepare;
@@ -665,7 +664,7 @@ class pyResManController(object):
     
     def __mifareUnblockCard(self):
         try:
-            self.__mifareOpenBackdoor()
+            self.__mifareSetup()
             error = self.__libsc.M1_write_block(0, '\x01\x02\x03\x04\x04\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00')
             if error != 0:
                 self.__handler.handleException(Exception(DebuggerUtils.getErrorString(error)))
@@ -687,8 +686,9 @@ class pyResManController(object):
             return
         
         uid = data
-        error = self.__mifareTryAuthentication(0, uid)
-        if error != 0x00:
+        self.__handler.handleLog('Card selected: %s' %(''.join('%02X' %(ord(b)) for b in uid)), wx.LOG_Info)
+        error = self.__scDebugger.mifareAuthentication2(0, 0, '\xFF\xFF\xFF\xFF\xFF\xFF', uid)
+        if not error:
             self.__handler.handleException(Exception('Authenticate failed, %s' %(DebuggerUtils.getErrorString(error))))
             return
         
@@ -700,7 +700,7 @@ class pyResManController(object):
         
         # Write data to block 0;
         try:
-            self.__mifareOpenBackdoor()
+            self.__mifareSetup()
         except Exception, e:
             self.__handler.handleException(e)
             return
@@ -713,7 +713,7 @@ class pyResManController(object):
         if error != 0:
             self.__handler.handleException(Exception(DebuggerUtils.getErrorString(error)))
         else:
-            self.__handler.handleLog('Mifare card unblocked.', wx.LOG_Info)
+            self.__handler.handleLog('Mifare card UID changed, from: %s, to: %s.' %(''.join('%02X' %(ord(b)) for b in uid), ''.join('%02X' %(ord(b)) for b in new_uid)), wx.LOG_Info)
         
     def mifareDumpCard(self, key_a):
         self.__mifareCommandThread = threading.Thread(target=self.__mifareDumpCard, args=(key_a, ));

@@ -32,5 +32,5 @@ exe = EXE(pyz,
           name='pyResMan',
           debug=False,
           strip=None,
-          upx=True,
+          upx=False,
           console=True , version='version.txt')
