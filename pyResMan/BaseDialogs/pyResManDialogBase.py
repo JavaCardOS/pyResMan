@@ -720,7 +720,7 @@ class pyResManDialogBase ( wx.Dialog ):
         
         bSizer401.AddSpacer( ( 0, 0), 1, wx.EXPAND, 5 )
         
-        self.m_staticText101 = wx.StaticText( self._panelAbout, wx.ID_ANY, u"PyResMan v3.1", wx.DefaultPosition, wx.DefaultSize, wx.ALIGN_CENTRE )
+        self.m_staticText101 = wx.StaticText( self._panelAbout, wx.ID_ANY, u"PyResMan v4.0", wx.DefaultPosition, wx.DefaultSize, wx.ALIGN_CENTRE )
         self.m_staticText101.Wrap( -1 )
         bSizer401.Add( self.m_staticText101, 0, wx.ALL|wx.EXPAND|wx.ALIGN_CENTER_VERTICAL, 5 )
         
