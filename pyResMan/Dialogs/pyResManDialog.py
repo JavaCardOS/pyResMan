@@ -1,10 +1,10 @@
-# -*- coding:utf8 -*-
+# -*- coding:utf-8 -*-
 
 '''
 Created on 2015-10-27
 
 @author: javacardos@gmail.com
-@organization: http://www.javacardos.com/
+@organization: https://www.javacardos.com/
 @copyright: JavaCardOS Technologies. All rights reserved.
 '''
 

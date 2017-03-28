@@ -1,11 +1,12 @@
-# -*- coding: utf-8 -*- 
+# -*- coding: utf-8 -*-
 
-###########################################################################
-## Python code generated with wxFormBuilder (version Jun 17 2015)
-## http://www.wxformbuilder.org/
-##
-## PLEASE DO "NOT" EDIT THIS FILE!
-###########################################################################
+'''
+Modified on 2017-03-28
+
+@author: javacardos@gmail.com
+@organization: https://www.javacardos.com/
+@copyright: JavaCardOS Technologies. All rights reserved.
+'''
 
 from pyResMan.BaseDialogs.pyResManCommandDialogBase_RBlock import CommandDialogBase_RBlock
 from pyResMan.Util import IDOK, IDCANCEL

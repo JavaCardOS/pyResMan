@@ -4,7 +4,7 @@
 Created on 2015-10-30
 
 @author: javacardos@gmail.com
-@organization: http://www.javacardos.com/
+@organization: https://www.javacardos.com/
 @copyright: JavaCardOS Technologies. All rights reserved.
 '''
 

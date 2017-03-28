@@ -11,7 +11,7 @@ addlibpath = 'GpPcscConnectionPlugin.dll'
 if sys.platform.startswith('linux'):
     addlibpath = "/usr/lib/libgppcscconnectionplugin.so.1"
 
-a = Analysis(['pyResMan/__main__.py'],
+a = Analysis(['pyResMan/Main.py'],
              pathex=[basepath],
              binaries=[(addlibpath, '.')],
              datas=None,

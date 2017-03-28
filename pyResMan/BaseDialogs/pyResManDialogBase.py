@@ -427,6 +427,8 @@ class pyResManDialogBase ( wx.Dialog ):
         _gpPageSizer.Fit( self._panelGP )
         self._notebookPages.AddPage( self._panelGP, u"GlobalPlatform", False )
         self._panelScript = wx.Panel( self._notebookPages, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
+        self._panelScript.SetFont( wx.Font( wx.NORMAL_FONT.GetPointSize(), 70, 90, 90, False, wx.EmptyString ) )
+        
         bSizer44 = wx.BoxSizer( wx.VERTICAL )
         
         bSizer45 = wx.BoxSizer( wx.HORIZONTAL )
@@ -460,8 +462,10 @@ class pyResManDialogBase ( wx.Dialog ):
         self._panelScript.SetSizer( bSizer44 )
         self._panelScript.Layout()
         bSizer44.Fit( self._panelScript )
-        self._notebookPages.AddPage( self._panelScript, u"Script", False )
+        self._notebookPages.AddPage( self._panelScript, u"Script", True )
         self._panelSCDebugger = wx.Panel( self._notebookPages, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
+        self._panelSCDebugger.SetFont( wx.Font( wx.NORMAL_FONT.GetPointSize(), 70, 90, 90, False, wx.EmptyString ) )
+        
         bSizer411 = wx.BoxSizer( wx.VERTICAL )
         
         self.m_panel13 = wx.Panel( self._panelSCDebugger, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
@@ -589,10 +593,10 @@ class pyResManDialogBase ( wx.Dialog ):
         
         self.m_staticText92 = wx.StaticText( self._panelMifare, wx.ID_ANY, u"This function is only available for the online store product: ", wx.DefaultPosition, wx.DefaultSize, wx.ALIGN_RIGHT )
         self.m_staticText92.Wrap( -1 )
-        bSizer161.Add( self.m_staticText92, 0, wx.ALL, 5 )
+        bSizer161.Add( self.m_staticText92, 0, wx.ALIGN_CENTER_VERTICAL|wx.TOP|wx.RIGHT|wx.LEFT, 5 )
         
         self.m_hyperlink4 = wx.HyperlinkCtrl( self._panelMifare, wx.ID_ANY, u"Mifare Clone 1K", u"https://javacardos.com/store/mifare-clone-1k.php", wx.DefaultPosition, wx.DefaultSize, wx.HL_ALIGN_LEFT|wx.HL_DEFAULT_STYLE )
-        bSizer161.Add( self.m_hyperlink4, 0, wx.ALL, 5 )
+        bSizer161.Add( self.m_hyperlink4, 0, wx.TOP|wx.RIGHT|wx.LEFT, 5 )
         
         
         bSizer155.Add( bSizer161, 1, wx.ALIGN_CENTER, 5 )
@@ -697,7 +701,7 @@ class pyResManDialogBase ( wx.Dialog ):
         self._panelMifare.SetSizer( bSizer155 )
         self._panelMifare.Layout()
         bSizer155.Fit( self._panelMifare )
-        self._notebookPages.AddPage( self._panelMifare, u"Mifare", True )
+        self._notebookPages.AddPage( self._panelMifare, u"Mifare", False )
         self._panelAbout = wx.Panel( self._notebookPages, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
         bSizer331 = wx.BoxSizer( wx.HORIZONTAL )
         
@@ -729,7 +733,7 @@ class pyResManDialogBase ( wx.Dialog ):
         
         bSizer39.AddSpacer( ( 0, 0), 1, wx.EXPAND, 5 )
         
-        self.m_hyperlink1 = wx.HyperlinkCtrl( self._panelAbout, wx.ID_ANY, u"JavaCardOS Technologies. All rights reserved.", u"http://www.javacardos.com/?s=pyresman", wx.DefaultPosition, wx.DefaultSize, wx.HL_ALIGN_CENTRE|wx.HL_DEFAULT_STYLE )
+        self.m_hyperlink1 = wx.HyperlinkCtrl( self._panelAbout, wx.ID_ANY, u"JavaCardOS Technologies. All rights reserved.", u"https://www.javacardos.com/?s=pyresman", wx.DefaultPosition, wx.DefaultSize, wx.HL_ALIGN_CENTRE|wx.HL_DEFAULT_STYLE )
         bSizer39.Add( self.m_hyperlink1, 0, wx.ALL|wx.EXPAND|wx.ALIGN_CENTER_VERTICAL, 5 )
         
         
@@ -743,7 +747,7 @@ class pyResManDialogBase ( wx.Dialog ):
         
         bSizer381.AddSpacer( ( 0, 0), 1, wx.EXPAND, 5 )
         
-        self.m_hyperlink2 = wx.HyperlinkCtrl( self._panelAbout, wx.ID_ANY, u"Website: http://www.javacardos.com/", u"http://www.javacardos.com/?s=pyresman", wx.DefaultPosition, wx.DefaultSize, wx.HL_ALIGN_CENTRE|wx.HL_DEFAULT_STYLE )
+        self.m_hyperlink2 = wx.HyperlinkCtrl( self._panelAbout, wx.ID_ANY, u"Website: https://www.javacardos.com/", u"https://www.javacardos.com/?s=pyresman", wx.DefaultPosition, wx.DefaultSize, wx.HL_ALIGN_CENTRE|wx.HL_DEFAULT_STYLE )
         bSizer381.Add( self.m_hyperlink2, 0, wx.ALL|wx.EXPAND|wx.ALIGN_CENTER_VERTICAL, 5 )
         
         
@@ -757,7 +761,7 @@ class pyResManDialogBase ( wx.Dialog ):
         
         bSizer371.AddSpacer( ( 0, 0), 1, wx.EXPAND, 5 )
         
-        self.m_hyperlink3 = wx.HyperlinkCtrl( self._panelAbout, wx.ID_ANY, u"Discussion: http://www.javacardos.com/javacardforum/", u"http://www.javacardos.com/javacardforum//?s=pyresman", wx.DefaultPosition, wx.DefaultSize, wx.HL_ALIGN_CENTRE|wx.HL_DEFAULT_STYLE )
+        self.m_hyperlink3 = wx.HyperlinkCtrl( self._panelAbout, wx.ID_ANY, u"Discussion: https://www.javacardos.com/javacardforum/", u"https://www.javacardos.com/javacardforum//?s=pyresman", wx.DefaultPosition, wx.DefaultSize, wx.HL_ALIGN_CENTRE|wx.HL_DEFAULT_STYLE )
         bSizer371.Add( self.m_hyperlink3, 0, wx.ALL|wx.EXPAND|wx.ALIGN_CENTER_VERTICAL, 5 )
         
         
@@ -788,6 +792,8 @@ class pyResManDialogBase ( wx.Dialog ):
         self.m_panel14.Layout()
         bSizer47.Fit( self.m_panel14 )
         self.m_panel15 = wx.Panel( self.m_splitter2, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
+        self.m_panel15.SetFont( wx.Font( wx.NORMAL_FONT.GetPointSize(), 70, 90, 90, False, wx.EmptyString ) )
+        
         bSizer49 = wx.BoxSizer( wx.VERTICAL )
         
         self._textctrlLog = wx.TextCtrl( self.m_panel15, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, wx.TE_MULTILINE|wx.TE_READONLY|wx.TE_RICH2 )

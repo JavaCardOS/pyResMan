@@ -2,7 +2,7 @@
 Created on 2017/3/15
 
 @author: javacardos@gmail.com
-@organization: http://www.javacardos.com/
+@organization: https://www.javacardos.com/
 @copyright: JavaCardOS Technologies. All rights reserved.
 '''
 

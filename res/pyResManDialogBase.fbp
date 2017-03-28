@@ -2024,7 +2024,7 @@
                                                     <object class="notebookpage" expanded="0">
                                                         <property name="bitmap"></property>
                                                         <property name="label">GlobalPlatform</property>
-                                                        <property name="select">0</property>
+                                                        <property name="select">1</property>
                                                         <object class="wxPanel" expanded="0">
                                                             <property name="BottomDockable">1</property>
                                                             <property name="LeftDockable">1</property>
@@ -5719,7 +5719,7 @@
                                                             <property name="enabled">1</property>
                                                             <property name="fg"></property>
                                                             <property name="floatable">1</property>
-                                                            <property name="font"></property>
+                                                            <property name="font">,90,90,-1,70,0</property>
                                                             <property name="gripper">0</property>
                                                             <property name="hidden">0</property>
                                                             <property name="id">wxID_ANY</property>
@@ -6448,7 +6448,7 @@
                                                             <property name="enabled">1</property>
                                                             <property name="fg"></property>
                                                             <property name="floatable">1</property>
-                                                            <property name="font"></property>
+                                                            <property name="font">,90,90,-1,70,0</property>
                                                             <property name="gripper">0</property>
                                                             <property name="hidden">0</property>
                                                             <property name="id">wxID_ANY</property>
@@ -8057,7 +8057,7 @@
                                                     <object class="notebookpage" expanded="1">
                                                         <property name="bitmap"></property>
                                                         <property name="label">Mifare</property>
-                                                        <property name="select">1</property>
+                                                        <property name="select">0</property>
                                                         <object class="wxPanel" expanded="1">
                                                             <property name="BottomDockable">1</property>
                                                             <property name="LeftDockable">1</property>
@@ -8148,7 +8148,7 @@
                                                                         <property name="permission">none</property>
                                                                         <object class="sizeritem" expanded="1">
                                                                             <property name="border">5</property>
-                                                                            <property name="flag">wxALL</property>
+                                                                            <property name="flag">wxALIGN_CENTER_VERTICAL|wxTOP|wxRIGHT|wxLEFT</property>
                                                                             <property name="proportion">0</property>
                                                                             <object class="wxStaticText" expanded="1">
                                                                                 <property name="BottomDockable">1</property>
@@ -8231,7 +8231,7 @@
                                                                         </object>
                                                                         <object class="sizeritem" expanded="1">
                                                                             <property name="border">5</property>
-                                                                            <property name="flag">wxALL</property>
+                                                                            <property name="flag">wxTOP|wxRIGHT|wxLEFT</property>
                                                                             <property name="proportion">0</property>
                                                                             <object class="wxHyperlinkCtrl" expanded="1">
                                                                                 <property name="BottomDockable">1</property>
@@ -10097,7 +10097,7 @@
                                                                                         <property name="subclass"></property>
                                                                                         <property name="toolbar_pane">0</property>
                                                                                         <property name="tooltip"></property>
-                                                                                        <property name="url">http://www.javacardos.com/?s=pyresman</property>
+                                                                                        <property name="url">https://www.javacardos.com/?s=pyresman</property>
                                                                                         <property name="visited_color"></property>
                                                                                         <property name="window_extra_style"></property>
                                                                                         <property name="window_name"></property>
@@ -10192,7 +10192,7 @@
                                                                                         <property name="hidden">0</property>
                                                                                         <property name="hover_color"></property>
                                                                                         <property name="id">wxID_ANY</property>
-                                                                                        <property name="label">Website: http://www.javacardos.com/</property>
+                                                                                        <property name="label">Website: https://www.javacardos.com/</property>
                                                                                         <property name="max_size"></property>
                                                                                         <property name="maximize_button">0</property>
                                                                                         <property name="maximum_size"></property>
@@ -10215,7 +10215,7 @@
                                                                                         <property name="subclass"></property>
                                                                                         <property name="toolbar_pane">0</property>
                                                                                         <property name="tooltip"></property>
-                                                                                        <property name="url">http://www.javacardos.com/?s=pyresman</property>
+                                                                                        <property name="url">https://www.javacardos.com/?s=pyresman</property>
                                                                                         <property name="visited_color"></property>
                                                                                         <property name="window_extra_style"></property>
                                                                                         <property name="window_name"></property>
@@ -10310,7 +10310,7 @@
                                                                                         <property name="hidden">0</property>
                                                                                         <property name="hover_color"></property>
                                                                                         <property name="id">wxID_ANY</property>
-                                                                                        <property name="label">Discussion: http://www.javacardos.com/javacardforum/</property>
+                                                                                        <property name="label">Discussion: https://www.javacardos.com/javacardforum/</property>
                                                                                         <property name="max_size"></property>
                                                                                         <property name="maximize_button">0</property>
                                                                                         <property name="maximum_size"></property>
@@ -10333,7 +10333,7 @@
                                                                                         <property name="subclass"></property>
                                                                                         <property name="toolbar_pane">0</property>
                                                                                         <property name="tooltip"></property>
-                                                                                        <property name="url">http://www.javacardos.com/javacardforum//?s=pyresman</property>
+                                                                                        <property name="url">https://www.javacardos.com/javacardforum//?s=pyresman</property>
                                                                                         <property name="visited_color"></property>
                                                                                         <property name="window_extra_style"></property>
                                                                                         <property name="window_name"></property>
