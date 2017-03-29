@@ -1,19 +1,11 @@
 # -*- mode: python -*-
 
-import os
-import sys
-
 block_cipher = None
 
-basepath = os.path.abspath(os.path.curdir)
 
-addlibpath = 'GpPcscConnectionPlugin.dll'
-if sys.platform.startswith('linux'):
-    addlibpath = "/usr/lib/libgppcscconnectionplugin.so.1"
-
-a = Analysis(['pyResMan/Main.py'],
-             pathex=[basepath],
-             binaries=[(addlibpath, '.')],
+a = Analysis(['pyResMan\\Main.py'],
+             pathex=['E:\\opensource\\pyResMan'],
+             binaries=None,
              datas=None,
              hiddenimports=[],
              hookspath=None,
@@ -32,5 +24,5 @@ exe = EXE(pyz,
           name='pyResMan',
           debug=False,
           strip=None,
-          upx=False,
-          console=True , version='version.txt')
+          upx=True,
+          console=True )
