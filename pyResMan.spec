@@ -1,9 +1,13 @@
 # -*- mode: python -*-
+import sys
 
 block_cipher = None
 
-
-a = Analysis(['pyResMan\\Main.py'],
+entry = ['pyResMan\\Main.py']
+if sys.platform != 'win32':
+    entry = ['pyResMan/Main.py']
+    
+a = Analysis(entry,
              pathex=['E:\\opensource\\pyResMan'],
              binaries=None,
              datas=None,
