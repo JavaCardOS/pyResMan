@@ -391,8 +391,10 @@ class pyResManController(object):
         self.__loadDebuggerScriptThread.start()
     
     def __saveDebuggerScript(self, scriptPathName, commandsInfo):
+        self.__handler.handleLog('Save debugger script ...', wx.LOG_Info)
         scriptFile = DebuggerScriptFile(scriptPathName)
         scriptFile.save(commandsInfo)
+        self.__handler.handleLog('Debugger script is saved to file: %s.' %(scriptPathName), wx.LOG_Info)
 
     def saveDebuggerScript(self, scriptPathName, commandsInfo):
         self.__saveDebuggerScriptThread = threading.Thread(target=self.__saveDebuggerScript, args=(scriptPathName, commandsInfo), name="Save debugger script thread")
