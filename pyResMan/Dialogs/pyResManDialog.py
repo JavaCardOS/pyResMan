@@ -1414,8 +1414,8 @@ class pyResManDialog (pyResManDialogBase):
         self._Log('Card data has been loaded from file: %s.' % (file_path_name), wx.LOG_Info)
         return
     
-    def _buttonUnblockCardOnButtonClick(self, event):
-        self.__controller.mifareUnblockCard()
+    def _buttonFixBrickedUIDOnButtonClick(self, event):
+        self.__controller.mifareFixBrickedUID()
     
     def _buttonChangeUIDOnButtonClick(self, event):
         uid = self._textctrlUID.GetValue()

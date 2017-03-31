@@ -136,7 +136,7 @@ class pyResManDialogBase ( wx.Dialog ):
         self._panelApdu.SetSizer( _apduPageSizer )
         self._panelApdu.Layout()
         _apduPageSizer.Fit( self._panelApdu )
-        self._notebookPages.AddPage( self._panelApdu, u"Basic APDU", True )
+        self._notebookPages.AddPage( self._panelApdu, u"Basic APDU", False )
         self._panelGP = wx.Panel( self._notebookPages, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
         _gpPageSizer = wx.BoxSizer( wx.VERTICAL )
         
@@ -591,7 +591,7 @@ class pyResManDialogBase ( wx.Dialog ):
         
         bSizer161.Add( self.m_staticText92, 0, wx.ALIGN_CENTER_VERTICAL|wx.TOP|wx.RIGHT|wx.LEFT, 5 )
         
-        self.m_hyperlink4 = wx.HyperlinkCtrl( self._panelMifare, wx.ID_ANY, u"Mifare Clone 1K", u"https://javacardos.com/store/mifare-clone-1k.php", wx.DefaultPosition, wx.DefaultSize, wx.HL_ALIGN_LEFT )
+        self.m_hyperlink4 = wx.HyperlinkCtrl( self._panelMifare, wx.ID_ANY, u"Mifare Clone 1K", u"https://javacardos.com/store/mifare-clone-1k.php", wx.DefaultPosition, wx.DefaultSize, wx.HL_ALIGN_LEFT|wx.HL_DEFAULT_STYLE )
         bSizer161.Add( self.m_hyperlink4, 0, wx.TOP|wx.RIGHT|wx.LEFT, 5 )
         
         
@@ -678,8 +678,8 @@ class pyResManDialogBase ( wx.Dialog ):
         self._buttonChangeUID = wx.Button( self._panelMifare, wx.ID_ANY, u"Change UID", wx.DefaultPosition, wx.DefaultSize, 0 )
         bSizer158.Add( self._buttonChangeUID, 0, wx.ALL|wx.EXPAND, 5 )
         
-        self._buttonUnblockCard = wx.Button( self._panelMifare, wx.ID_ANY, u"UnblockCard", wx.DefaultPosition, wx.DefaultSize, 0 )
-        bSizer158.Add( self._buttonUnblockCard, 0, wx.ALL|wx.EXPAND, 5 )
+        self._buttonFixBrickedUID = wx.Button( self._panelMifare, wx.ID_ANY, u"Fix bricked UID", wx.DefaultPosition, wx.DefaultSize, 0 )
+        bSizer158.Add( self._buttonFixBrickedUID, 0, wx.ALL|wx.EXPAND, 5 )
         
         self.m_staticline21 = wx.StaticLine( self._panelMifare, wx.ID_ANY, wx.DefaultPosition, wx.Size( -1,-1 ), wx.LI_VERTICAL )
         bSizer158.Add( self.m_staticline21, 0, wx.EXPAND |wx.ALL, 5 )
@@ -697,7 +697,7 @@ class pyResManDialogBase ( wx.Dialog ):
         self._panelMifare.SetSizer( bSizer155 )
         self._panelMifare.Layout()
         bSizer155.Fit( self._panelMifare )
-        self._notebookPages.AddPage( self._panelMifare, u"Mifare", False )
+        self._notebookPages.AddPage( self._panelMifare, u"Mifare", True )
         self._panelAbout = wx.Panel( self._notebookPages, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
         bSizer331 = wx.BoxSizer( wx.HORIZONTAL )
         
@@ -900,7 +900,7 @@ class pyResManDialogBase ( wx.Dialog ):
         self._buttonDumpCard.Bind( wx.EVT_BUTTON, self._buttonDumpCardOnButtonClick )
         self._buttonCloneCard.Bind( wx.EVT_BUTTON, self._buttonCloneCardOnButtonClick )
         self._buttonChangeUID.Bind( wx.EVT_BUTTON, self._buttonChangeUIDOnButtonClick )
-        self._buttonUnblockCard.Bind( wx.EVT_BUTTON, self._buttonUnblockCardOnButtonClick )
+        self._buttonFixBrickedUID.Bind( wx.EVT_BUTTON, self._buttonFixBrickedUIDOnButtonClick )
         self._buttonClearCardData.Bind( wx.EVT_BUTTON, self._buttonClearCardDataOnButtonClick )
         self._buttonClearLog.Bind( wx.EVT_BUTTON, self._buttonClearLogOnButtonClick )
     
@@ -1077,7 +1077,7 @@ class pyResManDialogBase ( wx.Dialog ):
     def _buttonChangeUIDOnButtonClick( self, event ):
         event.Skip()
     
-    def _buttonUnblockCardOnButtonClick( self, event ):
+    def _buttonFixBrickedUIDOnButtonClick( self, event ):
         event.Skip()
     
     def _buttonClearCardDataOnButtonClick( self, event ):

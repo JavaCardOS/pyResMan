@@ -664,14 +664,14 @@ class pyResManController(object):
             f.write(data)
             self.__handler.handleLog('Mifare card data saved.', wx.LOG_Info)
     
-    def __mifareUnblockCard(self):
+    def __mifareFixBrickedUID(self):
         try:
             self.__mifareSetup()
             error = self.__libsc.M1_write_block(0, '\x01\x02\x03\x04\x04\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00')
             if error != 0:
                 self.__handler.handleException(Exception(DebuggerUtils.getErrorString(error)))
             else:
-                self.__handler.handleLog('Mifare card unblocked.', wx.LOG_Info)
+                self.__handler.handleLog('Mifare card bricked UID is fixed.', wx.LOG_Info)
         except Exception, e:
             self.__handler.handleException(e)
             return
@@ -733,8 +733,8 @@ class pyResManController(object):
         self.__mifareCommandThread = threading.Thread(target=self.__mifareReadSaveData, args = (card_data, file_path_name, ));
         self.__mifareCommandThread.start()
     
-    def mifareUnblockCard(self):
-        self.__mifareCommandThread = threading.Thread(target=self.__mifareUnblockCard);
+    def mifareFixBrickedUID(self):
+        self.__mifareCommandThread = threading.Thread(target=self.__mifareFixBrickedUID);
         self.__mifareCommandThread.start()
     
     def mifareChangeUID(self, uid):
