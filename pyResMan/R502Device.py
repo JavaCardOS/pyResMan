@@ -5,8 +5,9 @@ Created on 2017/3/19
 @organization: https://www.javacardos.com/
 @copyright: JavaCardOS Technologies. All rights reserved.
 '''
+from desfire.device import Device
 
-class R502Interface(object):
+class R502Device(Device):
     '''
     Interface for device R502 to send TLV comamnd and recv TLV response.
     '''
@@ -24,3 +25,7 @@ class R502Interface(object):
         low_response = self._low_interface.transmit(low_command)
         # Get APDU response;
         return low_response[0 : -2]
+
+    def transceive(self, cmd_bytes):
+        resp = self._low_interface.transmit(''.join('%s' %(chr(b)) for b in cmd_bytes))
+        return [ord(c) for c in resp]

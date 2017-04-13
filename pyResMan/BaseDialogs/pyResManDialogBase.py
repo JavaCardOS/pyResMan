@@ -697,7 +697,97 @@ class pyResManDialogBase ( wx.Dialog ):
         self._panelMifare.SetSizer( bSizer155 )
         self._panelMifare.Layout()
         bSizer155.Fit( self._panelMifare )
-        self._notebookPages.AddPage( self._panelMifare, u"Mifare", True )
+        self._notebookPages.AddPage( self._panelMifare, u"Mifare", False )
+        self._panelDESFire = wx.Panel( self._notebookPages, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
+        bSizer1611 = wx.BoxSizer( wx.HORIZONTAL )
+        
+        bSizer162 = wx.BoxSizer( wx.VERTICAL )
+        
+        self._buttonAuthenticate = wx.Button( self._panelDESFire, wx.ID_ANY, u"Authenticate", wx.DefaultPosition, wx.DefaultSize, 0 )
+        bSizer162.Add( self._buttonAuthenticate, 0, wx.ALL|wx.EXPAND|wx.ALIGN_CENTER_HORIZONTAL, 5 )
+        
+        self.m_staticline7 = wx.StaticLine( self._panelDESFire, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.LI_HORIZONTAL )
+        bSizer162.Add( self.m_staticline7, 0, wx.EXPAND |wx.ALL, 5 )
+        
+        self._buttonGetVersion = wx.Button( self._panelDESFire, wx.ID_ANY, u"Get Version", wx.DefaultPosition, wx.DefaultSize, 0 )
+        bSizer162.Add( self._buttonGetVersion, 0, wx.ALL|wx.ALIGN_CENTER_HORIZONTAL, 5 )
+        
+        self._buttonFormatPICC = wx.Button( self._panelDESFire, wx.ID_ANY, u"Format PICC", wx.DefaultPosition, wx.DefaultSize, 0 )
+        bSizer162.Add( self._buttonFormatPICC, 0, wx.ALL|wx.ALIGN_CENTER_HORIZONTAL, 5 )
+        
+        
+        bSizer1611.Add( bSizer162, 0, wx.EXPAND, 5 )
+        
+        bSizer163 = wx.BoxSizer( wx.HORIZONTAL )
+        
+        self._listctrlDESFireApplications = wx.ListCtrl( self._panelDESFire, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.LC_REPORT|wx.LC_SINGLE_SEL )
+        bSizer163.Add( self._listctrlDESFireApplications, 1, wx.ALL|wx.EXPAND, 5 )
+        
+        bSizer165 = wx.BoxSizer( wx.VERTICAL )
+        
+        self._buttonGetApplicationIDs = wx.Button( self._panelDESFire, wx.ID_ANY, u"Get Application IDs", wx.DefaultPosition, wx.DefaultSize, 0 )
+        bSizer165.Add( self._buttonGetApplicationIDs, 0, wx.ALL|wx.ALIGN_CENTER_HORIZONTAL|wx.EXPAND, 5 )
+        
+        self._buttonSelectApplication = wx.Button( self._panelDESFire, wx.ID_ANY, u"Select Application", wx.DefaultPosition, wx.DefaultSize, 0 )
+        bSizer165.Add( self._buttonSelectApplication, 0, wx.ALL|wx.ALIGN_CENTER_HORIZONTAL|wx.EXPAND, 5 )
+        
+        self._buttonCreateApplication = wx.Button( self._panelDESFire, wx.ID_ANY, u"Create Application ...", wx.DefaultPosition, wx.DefaultSize, 0 )
+        bSizer165.Add( self._buttonCreateApplication, 0, wx.ALL|wx.ALIGN_CENTER_HORIZONTAL|wx.EXPAND, 5 )
+        
+        self._buttonDeleteApplication = wx.Button( self._panelDESFire, wx.ID_ANY, u"Delete Application", wx.DefaultPosition, wx.DefaultSize, 0 )
+        bSizer165.Add( self._buttonDeleteApplication, 0, wx.ALL|wx.ALIGN_CENTER_HORIZONTAL|wx.EXPAND, 5 )
+        
+        
+        bSizer163.Add( bSizer165, 0, wx.EXPAND, 5 )
+        
+        
+        bSizer1611.Add( bSizer163, 1, wx.EXPAND, 5 )
+        
+        bSizer164 = wx.BoxSizer( wx.HORIZONTAL )
+        
+        self._listctrlDESFireFiles = wx.ListCtrl( self._panelDESFire, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.LC_REPORT|wx.LC_SINGLE_SEL )
+        bSizer164.Add( self._listctrlDESFireFiles, 1, wx.ALL|wx.EXPAND, 5 )
+        
+        bSizer169 = wx.BoxSizer( wx.VERTICAL )
+        
+        self._buttonGetFileIDs = wx.Button( self._panelDESFire, wx.ID_ANY, u"Get File IDs", wx.DefaultPosition, wx.DefaultSize, 0 )
+        bSizer169.Add( self._buttonGetFileIDs, 0, wx.ALL|wx.EXPAND|wx.ALIGN_CENTER_HORIZONTAL, 5 )
+        
+        self.m_button81 = wx.Button( self._panelDESFire, wx.ID_ANY, u"Get File Settings", wx.DefaultPosition, wx.DefaultSize, 0 )
+        bSizer169.Add( self.m_button81, 0, wx.ALL|wx.EXPAND|wx.ALIGN_CENTER_HORIZONTAL, 5 )
+        
+        self.m_button82 = wx.Button( self._panelDESFire, wx.ID_ANY, u"Change File Settings ...", wx.DefaultPosition, wx.DefaultSize, 0 )
+        bSizer169.Add( self.m_button82, 0, wx.ALL|wx.EXPAND|wx.ALIGN_CENTER_HORIZONTAL, 5 )
+        
+        self._buttonCreateStdDataFile = wx.Button( self._panelDESFire, wx.ID_ANY, u"Create Std Data File ...", wx.DefaultPosition, wx.DefaultSize, 0 )
+        bSizer169.Add( self._buttonCreateStdDataFile, 0, wx.ALL|wx.EXPAND|wx.ALIGN_CENTER_HORIZONTAL, 5 )
+        
+        self._buttonCreateBackupDataFile = wx.Button( self._panelDESFire, wx.ID_ANY, u"Create Backup Data File ...", wx.DefaultPosition, wx.DefaultSize, 0 )
+        bSizer169.Add( self._buttonCreateBackupDataFile, 0, wx.ALL|wx.EXPAND|wx.ALIGN_CENTER_HORIZONTAL, 5 )
+        
+        self._buttonCreateValueFile = wx.Button( self._panelDESFire, wx.ID_ANY, u"Create Value File ...", wx.DefaultPosition, wx.DefaultSize, 0 )
+        bSizer169.Add( self._buttonCreateValueFile, 0, wx.ALL|wx.EXPAND|wx.ALIGN_CENTER_HORIZONTAL, 5 )
+        
+        self._buttonCreateLinearRecordFile = wx.Button( self._panelDESFire, wx.ID_ANY, u"Create Linear Record File ...", wx.DefaultPosition, wx.DefaultSize, 0 )
+        bSizer169.Add( self._buttonCreateLinearRecordFile, 0, wx.ALL|wx.EXPAND|wx.ALIGN_CENTER_HORIZONTAL, 5 )
+        
+        self._buttonCreateCyclicRecordFile = wx.Button( self._panelDESFire, wx.ID_ANY, u"Create Cyclic Record File ...", wx.DefaultPosition, wx.DefaultSize, 0 )
+        bSizer169.Add( self._buttonCreateCyclicRecordFile, 0, wx.ALL|wx.EXPAND|wx.ALIGN_CENTER_HORIZONTAL, 5 )
+        
+        self.m_button88 = wx.Button( self._panelDESFire, wx.ID_ANY, u"Delete File", wx.DefaultPosition, wx.DefaultSize, 0 )
+        bSizer169.Add( self.m_button88, 0, wx.ALL|wx.EXPAND|wx.ALIGN_CENTER_HORIZONTAL, 5 )
+        
+        
+        bSizer164.Add( bSizer169, 0, wx.EXPAND, 5 )
+        
+        
+        bSizer1611.Add( bSizer164, 1, wx.EXPAND, 5 )
+        
+        
+        self._panelDESFire.SetSizer( bSizer1611 )
+        self._panelDESFire.Layout()
+        bSizer1611.Fit( self._panelDESFire )
+        self._notebookPages.AddPage( self._panelDESFire, u"DESFire", True )
         self._panelAbout = wx.Panel( self._notebookPages, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
         bSizer331 = wx.BoxSizer( wx.HORIZONTAL )
         
@@ -902,6 +992,19 @@ class pyResManDialogBase ( wx.Dialog ):
         self._buttonChangeUID.Bind( wx.EVT_BUTTON, self._buttonChangeUIDOnButtonClick )
         self._buttonFixBrickedUID.Bind( wx.EVT_BUTTON, self._buttonFixBrickedUIDOnButtonClick )
         self._buttonClearCardData.Bind( wx.EVT_BUTTON, self._buttonClearCardDataOnButtonClick )
+        self._buttonAuthenticate.Bind( wx.EVT_BUTTON, self._buttonAuthenticateOnButtonClick )
+        self._buttonGetVersion.Bind( wx.EVT_BUTTON, self._buttonGetVersionOnButtonClick )
+        self._buttonFormatPICC.Bind( wx.EVT_BUTTON, self._buttonFormatPICCOnButtonClick )
+        self._buttonGetApplicationIDs.Bind( wx.EVT_BUTTON, self._buttonGetApplicationIDsOnButtonClick )
+        self._buttonSelectApplication.Bind( wx.EVT_BUTTON, self._buttonSelectApplicationOnButtonClick )
+        self._buttonCreateApplication.Bind( wx.EVT_BUTTON, self._buttonCreateApplicationOnButtonClick )
+        self._buttonDeleteApplication.Bind( wx.EVT_BUTTON, self._buttonDeleteApplicationOnButtonClick )
+        self._buttonGetFileIDs.Bind( wx.EVT_BUTTON, self._buttonGetFileIDsOnButtonClick )
+        self._buttonCreateStdDataFile.Bind( wx.EVT_BUTTON, self._buttonCreateStdDataFileOnButtonClick )
+        self._buttonCreateBackupDataFile.Bind( wx.EVT_BUTTON, self._buttonCreateBackupDataFileOnButtonClick )
+        self._buttonCreateValueFile.Bind( wx.EVT_BUTTON, self._buttonCreateValueFileOnButtonClick )
+        self._buttonCreateLinearRecordFile.Bind( wx.EVT_BUTTON, self._buttonCreateLinearRecordFileOnButtonClick )
+        self._buttonCreateCyclicRecordFile.Bind( wx.EVT_BUTTON, self._buttonCreateCyclicRecordFileOnButtonClick )
         self._buttonClearLog.Bind( wx.EVT_BUTTON, self._buttonClearLogOnButtonClick )
     
     def __del__( self ):
@@ -1081,6 +1184,45 @@ class pyResManDialogBase ( wx.Dialog ):
         event.Skip()
     
     def _buttonClearCardDataOnButtonClick( self, event ):
+        event.Skip()
+    
+    def _buttonAuthenticateOnButtonClick( self, event ):
+        event.Skip()
+    
+    def _buttonGetVersionOnButtonClick( self, event ):
+        event.Skip()
+    
+    def _buttonFormatPICCOnButtonClick( self, event ):
+        event.Skip()
+    
+    def _buttonGetApplicationIDsOnButtonClick( self, event ):
+        event.Skip()
+    
+    def _buttonSelectApplicationOnButtonClick( self, event ):
+        event.Skip()
+    
+    def _buttonCreateApplicationOnButtonClick( self, event ):
+        event.Skip()
+    
+    def _buttonDeleteApplicationOnButtonClick( self, event ):
+        event.Skip()
+    
+    def _buttonGetFileIDsOnButtonClick( self, event ):
+        event.Skip()
+    
+    def _buttonCreateStdDataFileOnButtonClick( self, event ):
+        event.Skip()
+    
+    def _buttonCreateBackupDataFileOnButtonClick( self, event ):
+        event.Skip()
+    
+    def _buttonCreateValueFileOnButtonClick( self, event ):
+        event.Skip()
+    
+    def _buttonCreateLinearRecordFileOnButtonClick( self, event ):
+        event.Skip()
+    
+    def _buttonCreateCyclicRecordFileOnButtonClick( self, event ):
         event.Skip()
     
     def _buttonClearLogOnButtonClick( self, event ):

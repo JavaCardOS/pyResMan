@@ -18,9 +18,10 @@ import os
 from GPInterface import GPInterface
 from R502SpyLibrary import R502SpyLibrary
 from DebuggerScriptFile import DebuggerScriptFile
-from pyResMan.R502Interface import R502Interface
+from pyResMan.R502Device import R502Device
 from pyResMan.pyLibSC import LibSC
 from pyResMan import DebuggerUtils
+from pyResMan import DESFireEx
 
 class APDUItem(object):
     """Class for APDU item data;"""
@@ -49,8 +50,10 @@ class pyResManController(object):
         self.__runScriptThread = None
         self.__gpInterface = GPInterface()
         self.__scDebugger = R502SpyLibrary(self.__gpInterface)
-        self.__r502_interface = R502Interface(self.__gpInterface)
-        self.__libsc = LibSC(self.__r502_interface)
+        self.__r502_device = R502Device(self.__gpInterface)
+        self.__libsc = LibSC(self.__r502_device)
+        self.__desfire = DESFireEx.DESFireEx(self.__r502_device)
+        
         gp.enableTraceMode(1)
         
         self.__debuggerVariables = {}
@@ -66,7 +69,8 @@ class pyResManController(object):
         self.__readername = readername
         self.__handler.handleLog('Connect to %s.' %(readername))
         self.__gpInterface.connect(str(readername), protocol)
-        self.__scDebugger.init()
+        if self.__readername.find('R502 SPY') != -1:
+            self.__scDebugger.init()
 
     def handleCardEvent(self, eventType, args):
         readername = args[0]
@@ -90,6 +94,9 @@ class pyResManController(object):
         self.__reader.monitorCard(self.__readername)
 
     def disconnect(self):
+        if self.__readername.find('R502 SPY') != -1:
+            self.__scDebugger.rfAuto()
+            self.__scDebugger.rfOn()
         self.__gpInterface.disconnect()
         try:
             self.__reader.removeCardMonitorHandler(self)
@@ -716,30 +723,128 @@ class pyResManController(object):
             self.__handler.handleException(Exception(DebuggerUtils.getErrorString(error)))
         else:
             self.__handler.handleLog('Mifare card UID changed, from: %s, to: %s.' %(''.join('%02X' %(ord(b)) for b in uid), ''.join('%02X' %(ord(b)) for b in new_uid)), wx.LOG_Info)
+    
+    def __desfireSendCommand(self, cmd):
+        error, resp  = self.__libsc.DESFire_send_command(cmd)
+        if error != 0:
+            self.__handler.handleLog(DebuggerUtils.getErrorString(error), wx.LOG_Error)
+        else:
+            self.__handler.handleLog(''.join('%02X' %(ord(c)) for c in resp))
         
     def mifareDumpCard(self, key_a):
-        self.__mifareCommandThread = threading.Thread(target=self.__mifareDumpCard, args=(key_a, ));
+        self.__mifareCommandThread = threading.Thread(target=self.__mifareDumpCard, args=(key_a, ))
         self.__mifareCommandThread.start()
     
     def mifareCloneCard(self, card_data, key_a):
-        self.__mifareCommandThread = threading.Thread(target=self.__mifareCloneCard, args=(card_data, key_a, ));
+        self.__mifareCommandThread = threading.Thread(target=self.__mifareCloneCard, args=(card_data, key_a, ))
         self.__mifareCommandThread.start()
     
     def mifareReadCardData(self):
-        self.__mifareCommandThread = threading.Thread(target=self.__mifareReadCardData);
+        self.__mifareCommandThread = threading.Thread(target=self.__mifareReadCardData)
         self.__mifareCommandThread.start()
     
     def mifareSaveData(self, card_data, file_path_name):
-        self.__mifareCommandThread = threading.Thread(target=self.__mifareReadSaveData, args = (card_data, file_path_name, ));
+        self.__mifareCommandThread = threading.Thread(target=self.__mifareReadSaveData, args = (card_data, file_path_name, ))
         self.__mifareCommandThread.start()
     
     def mifareFixBrickedUID(self):
-        self.__mifareCommandThread = threading.Thread(target=self.__mifareFixBrickedUID);
+        self.__mifareCommandThread = threading.Thread(target=self.__mifareFixBrickedUID)
         self.__mifareCommandThread.start()
     
     def mifareChangeUID(self, uid):
-        self.__mifareCommandThread = threading.Thread(target=self.__mifareChangeUID, args=(uid, ));
+        self.__mifareCommandThread = threading.Thread(target=self.__mifareChangeUID, args=(uid, ))
         self.__mifareCommandThread.start()
+    
+    def __desfireAuthenticate(self):
+        try:
+            self.__desfire.authenticate(0)
+            self.__handler.handleLog('DESFire authenticated.', wx.LOG_Info)
+        except Exception, e:
+            self.__handler.handleLog(str(e), wx.LOG_Error)
+    
+    def desfireAuthenticate(self):
+        self.__desfireCommandThread = threading.Thread(target=self.__desfireAuthenticate)
+        self.__desfireCommandThread.start()
+
+    def __desfireGetVersion(self):
+        version_info = self.__desfire.get_version()
+        self.__handler.handleDESFireResponse(DESFireEx.GET_VERSION, version_info)
+    
+    def desfireGetVersion(self):
+        self.__desfireCommandThread = threading.Thread(target=self.__desfireGetVersion)
+        self.__desfireCommandThread.start()
+
+    def __desfireFormatPICC(self):
+        try:
+            self.__desfire.format()
+            self.__handler.handleLog('DESFire format PICC succeeded.', wx.LOG_Info)
+        except Exception, e:
+            self.__handler.handleLog('DESFire format PICC, exception: %s' %(e), wx.LOG_Error)
+        
+    def desfireFormatPICC(self):
+        self.__desfireCommandThread = threading.Thread(target=self.__desfireFormatPICC)
+        self.__desfireCommandThread.start()
+    
+    def __desfireGetApplicationIDs(self):
+        try:
+            app_ids = self.__desfire.get_applications()
+            self.__handler.handleDESFireResponse(DESFireEx.GET_APPLICATION_IDS, app_ids)
+            self.__handler.handleLog('DESFire get application ids succeeded.', wx.LOG_Info)
+        except Exception, e:
+            self.__handler.handleLog('DESFire get application ids, exception: %s' %(e), wx.LOG_Error)
+
+    def desfireGetApplicationIDs(self):
+        self.__desfireCommandThread = threading.Thread(target=self.__desfireGetApplicationIDs)
+        self.__desfireCommandThread.start()
+    
+    def __desfireDeleteApplication(self, app_id):
+        try:
+            self.__desfire.delete_application(app_id)
+            self.__handler.handleLog('DESFire delete application succeeded.', wx.LOG_Info)
+        except Exception, e:
+            self.__handler.handleLog('DESFire delete application, exception: %s' %(e), wx.LOG_Error)
+        # Refresh application list;
+        self.__desfireGetApplicationIDs()
+
+    def desfireDeleteApplication(self, app_id):
+        self.__desfireCommandThread = threading.Thread(target=self.__desfireDeleteApplication, args=(app_id, ))
+        self.__desfireCommandThread.start()
+    
+    def __desfireSelectApplication(self, app_id):
+        try:
+            self.__desfire.select_application(app_id)
+            self.__handler.handleLog('DESFire select application: %06X selected.' %(app_id), wx.LOG_Info)
+        except Exception, e:
+            self.__handler.handleLog('DESFire select application, exception: %s' %(e), wx.LOG_Error)
+
+    def desfireSelectApplication(self, app_id):
+        self.__desfireCommandThread = threading.Thread(target=self.__desfireSelectApplication, args=(app_id, ))
+        self.__desfireCommandThread.start()
+    
+    def __desfireCreateApplication(self, aid, key_settings, num_of_keys):
+        try:
+            self.__desfire.create_application(aid, key_settings, num_of_keys)
+            self.__handler.handleLog('DESFire create application succeeded.', wx.LOG_Info)
+        except Exception, e:
+            self.__handler.handleLog('DESFire create application, exception: %s' %(e), wx.LOG_Error)
+        # Refresh application list;
+        self.__desfireGetApplicationIDs()
+
+    def desfireCreateApplication(self, aid, key_settings, num_of_keys):
+        self.__desfireCommandThread = threading.Thread(target=self.__desfireCreateApplication, args=(aid, key_settings, num_of_keys))
+        self.__desfireCommandThread.start()
+    
+    def __desfireGetFileIDs(self):
+        try:
+            file_ids = self.__desfire.get_file_ids()
+            self.__handler.handleDESFireResponse(DESFireEx.GET_FILE_IDS, file_ids)
+            self.__handler.handleLog('DESFire get file ids succeeded.', wx.LOG_Info)
+        except Exception, e:
+            self.__handler.handleLog('DESFire get file ids, exception: %s' %(e), wx.LOG_Error)
+
+    def desfireGetFileIDs(self):
+        self.__desfireCommandThread = threading.Thread(target=self.__desfireGetFileIDs)
+        self.__desfireCommandThread.start()
 
 class pyResManControllerEventHandler(object):
     '''
@@ -813,4 +918,8 @@ class pyResManControllerEventHandler(object):
         pass
 
     def handleMifareResponse(self, action_type, result, data):
-            pass
+        pass
+    
+    def handleDESFireResponse(self, command_type, response):
+        pass
+    

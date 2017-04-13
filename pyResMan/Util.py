@@ -67,12 +67,12 @@ class Util(object):
         return vs
     
     @staticmethod
-    def vl2s(vl, pad):
+    def vl2s(vl, pad=''):
         """Convert value list to string; ({0x00, 0xA4, 0x04, 0x00, 0x00} => "00A4040000")"""
         return pad.join("%02X" %(v) for v in vl)
 
     @staticmethod
-    def vs2s(vs, pad):
+    def vs2s(vs, pad=''):
         """Convert value list to string; ('\x00\xA4\x04\x00\x00' => "00A4040000")"""
         return pad.join("%02X" %(ord(v)) for v in vs)
 

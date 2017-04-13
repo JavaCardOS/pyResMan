@@ -7,7 +7,7 @@ Created on 2017/3/19
 '''
 
 from pyResMan.MifareTLV import MifareCommandTLV, MifareResponseTLV,\
-    COMMAND_TAG_DECREMENT
+    COMMAND_TAG_DECREMENT, COMMAND_TAG_DESFIRE_COMMAND
 from pyResMan.MifareTLV import COMMAND_TAG_AUTHENTICATION, COMMAND_TAG_READ_BLOCK, COMMAND_TAG_WRITE_BLOCK, COMMAND_TAG_INCREMENT\
                                , COMMAND_TAG_DECREMENT, COMMAND_TAG_RESTORE, COMMAND_TAG_TRANSFER, COMMAND_TAG_SETUP
 
@@ -145,3 +145,11 @@ class LibSC(object):
         response_tlv = MifareResponseTLV(response)
         return response_tlv.get_error()
     
+    def DESFire_send_command(self, cmd):
+        command_tlv = MifareCommandTLV(COMMAND_TAG_DESFIRE_COMMAND)
+        command_tlv.set_command(cmd)
+        command = command_tlv.serialize()
+        response = self.__interface.transmit_sc_command(command)
+        response_tlv = MifareResponseTLV(response)
+        return response_tlv.get_error(), response_tlv.get_desfire_data()
+        

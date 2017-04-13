@@ -13,7 +13,7 @@ from pyResMan.pyResManReader import pyResManReader
 from smartcard.Exceptions import NoCardException
 from pyResMan.pyResManController import pyResManController, APDUItem
 import os
-from pyResMan.Util import Util
+from pyResMan.Util import Util, HexValidator, IDCANCEL
 from datetime import datetime
 from pyResMan.Dialogs.pyResManInstallDialog import pyResManInstallDialog
 from pyResMan.BaseDialogs.pyResManDialogBase import pyResManDialogBase
@@ -41,6 +41,13 @@ from pyResMan.Dialogs.pyResManCommandDialog_MifareTransfer import CommandDialog_
 from pyResMan.Dialogs.pyResManCommandDialog_MifareRestore import CommandDialog_MifareRestore
 from pyResMan import DebuggerUtils
 from pyResMan.DebuggerUtils import getErrorString
+import pyResMan.DESFireEx as DESFireEx
+from wx._controls import LIST_STATE_SELECTED
+from pyResMan.Dialogs.pyResManDialog_DESFireCreateApplication import DESFireDialog_CreateApplication
+from Dialog import Dialog
+from pyResMan.Dialogs.pyResManDialog_DESFireCreateFile import DESFireDialog_CreateFile
+from pyResMan.DESFireEx import CREATE_STDDATAFILE, CREATE_BACKUPDATAFILE,\
+    CREATE_VALUE_FILE, CREATE_LINEAR_RECORD_FILE, CREATE_CYCLIC_RECORD_FILE
 
 COMMAND_LIST_COL_INDEX = 0
 COMMAND_LIST_COL_COMMAND_NAME = 1
@@ -162,10 +169,16 @@ class pyResManDialog (pyResManDialogBase):
         
         # Init Mifare page;
         self.ClearMifareCardData()
+        self._textctrlKeyA.SetValidator(HexValidator())
+        self._textctrlUID.SetValidator(HexValidator())
+        
+        # Init DESFire page;
+        self._listctrlDESFireApplications.InsertColumn(0, 'ID')
+        self._listctrlDESFireFiles.InsertColumn(0, 'ID')
     
     def ClearMifareCardData(self):
-        colCount = self._gridCardData.GetNumberCols();
-        rowCount = self._gridCardData.GetNumberRows();
+        colCount = self._gridCardData.GetNumberCols()
+        rowCount = self._gridCardData.GetNumberRows()
         for rowIndex in range(rowCount):
             self._gridCardData.SetRowLabelValue(rowIndex, '%d' % (rowIndex))
             for colIndex in range(colCount):
@@ -1472,3 +1485,116 @@ class pyResManDialog (pyResManDialogBase):
     def m_splitter2OnIdle( self, event ):
 #         self.m_splitter2.SetSashPosition( 0 )
         self.m_splitter2.Unbind( wx.EVT_IDLE )
+
+    def _buttonAuthenticateOnButtonClick(self, event):
+        self.__controller.desfireAuthenticate()
+    
+    def _buttonGetVersionOnButtonClick(self, event):
+        self.__controller.desfireGetVersion()
+    
+    def __outputDESFireVersion(self, version_data):
+        hard_info = version_data['hard_info']
+        soft_info = version_data['soft_info']
+        uid = version_data['uid']
+        self._Log('UID: %s' %(uid), wx.LOG_Message)
+        self._Log('Hardware info:', wx.LOG_Message)
+        self._Log('    Vendor: %s' %(hard_info['vendor']), wx.LOG_Message)
+        self._Log('    Type: %d.%d' %(hard_info['type'], hard_info['subtype']), wx.LOG_Message)
+        self._Log('    Version number: %d.%d' %(hard_info['major_version'], hard_info['minor_version']), wx.LOG_Message)
+        self._Log('    Storage size: %dk' %(hard_info['storage_size']), wx.LOG_Message)
+        self._Log('    Protocol type: %s' %(hard_info['protocol_type']), wx.LOG_Message)
+        self._Log('Software info:', wx.LOG_Message)
+        self._Log('    Vendor: %s' %(soft_info['vendor']), wx.LOG_Message)
+        self._Log('    Type: %d.%d' %(soft_info['type'], soft_info['subtype']), wx.LOG_Message)
+        self._Log('    Version number: %d.%d' %(soft_info['major_version'], soft_info['minor_version']), wx.LOG_Message)
+        self._Log('    Storage size: %dk' %(soft_info['storage_size']), wx.LOG_Message)
+        self._Log('    Protocol type: %s' %(soft_info['protocol_type']), wx.LOG_Message)
+    
+    def __outputDESFireApplications(self, app_ids):
+        self._Log('DESFire got %d applications.' %(len(app_ids)), wx.LOG_Info)
+        self._listctrlDESFireApplications.DeleteAllItems()
+        for app_id in app_ids:
+            self._listctrlDESFireApplications.InsertStringItem(self._listctrlDESFireApplications.GetItemCount(), '%06X' %(app_id))
+        
+    def handleDESFireResponse(self, command_type, response):
+        if command_type == DESFireEx.GET_VERSION:
+            self.__outputDESFireVersion(response)
+        elif command_type == DESFireEx.GET_APPLICATION_IDS:
+            self.__outputDESFireApplications(response)
+        elif command_type == DESFireEx.GET_FILE_IDS:
+            self.__outputDESFireFileIDs(response)
+        else:
+            pass
+    
+    def _buttonFormatPICCOnButtonClick(self, event):
+        self.__controller.desfireFormatPICC()
+    
+    def _buttonGetApplicationIDsOnButtonClick(self, event):
+        self.__controller.desfireGetApplicationIDs()
+    
+    def __listctrlDESFireApplications_GetSelected(self):
+        app_id = None
+        for i in range(self._listctrlDESFireApplications.GetItemCount()):
+            if self._listctrlDESFireApplications.GetItemState(i, LIST_STATE_SELECTED) != 0:
+                app_id = self._listctrlDESFireApplications.GetItemText(i)
+                break
+        return app_id
+    
+    def _buttonDeleteApplicationOnButtonClick(self, event):
+        app_id = self.__listctrlDESFireApplications_GetSelected()
+        if app_id == None:
+            self._Log('DESFire delete application: No application selected.', wx.LOG_Warning)
+            return
+        self.__controller.desfireDeleteApplication(int(app_id, 0x10))
+    
+    def _buttonSelectApplicationOnButtonClick(self, event):
+        app_id = self.__listctrlDESFireApplications_GetSelected()
+        if app_id == None:
+            self._Log('DESFire select application: No application selected.', wx.LOG_Warning)
+            return
+        self.__controller.desfireSelectApplication(int(app_id, 0x10))
+    
+    def _buttonCreateApplicationOnButtonClick(self, event):
+        dialog_create_application = DESFireDialog_CreateApplication(self)
+        if IDCANCEL == dialog_create_application.ShowModal():
+            return
+        
+        aid = dialog_create_application.getAID()
+        key_settings = dialog_create_application.getKeySett()
+        num_of_keys = dialog_create_application.getNumOfKeys()
+        self.__controller.desfireCreateApplication(aid, key_settings, num_of_keys)
+    
+    def _buttonGetFileIDsOnButtonClick(self, event):
+        self.__controller.desfireGetFileIDs()
+    
+    def __outputDESFireFileIDs(self, file_ids):
+        self._Log('DESFire got %d files.' %(len(file_ids)), wx.LOG_Info)
+        self._listctrlDESFireFiles.DeleteAllItems()
+        for file_id in file_ids:
+            self._listctrlDESFireFiles.InsertStringItem(self._listctrlDESFireFiles.GetItemCount(), '%0xX' %(file_id))
+    
+    def _buttonCreateStdDataFileOnButtonClick(self, event):
+        dialog_create_file = DESFireDialog_CreateFile(self, CREATE_STDDATAFILE)
+        if IDCANCEL == dialog_create_file.ShowModal():
+            return
+    
+    def _buttonCreateBackupDataFileOnButtonClick(self, event):
+        dialog_create_file = DESFireDialog_CreateFile(self, CREATE_BACKUPDATAFILE)
+        if IDCANCEL == dialog_create_file.ShowModal():
+            return
+    
+    def _buttonCreateValueFileOnButtonClick(self, event):
+        dialog_create_file = DESFireDialog_CreateFile(self, CREATE_VALUE_FILE)
+        if IDCANCEL == dialog_create_file.ShowModal():
+            return
+    
+    def _buttonCreateLinearRecordFileOnButtonClick(self, event):
+        dialog_create_file = DESFireDialog_CreateFile(self, CREATE_LINEAR_RECORD_FILE)
+        if IDCANCEL == dialog_create_file.ShowModal():
+            return
+    
+    def _buttonCreateCyclicRecordFileOnButtonClick(self, event):
+        dialog_create_file = DESFireDialog_CreateFile(self, CREATE_CYCLIC_RECORD_FILE)
+        if IDCANCEL == dialog_create_file.ShowModal():
+            return
+    
