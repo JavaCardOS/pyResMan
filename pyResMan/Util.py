@@ -152,6 +152,11 @@ class Util(object):
                 ishexstr = False
                 break
         return ishexstr
+    
+    @staticmethod
+    def bytes3_to_byte_array(value):
+        return [(value & 0xff), (value >> 8) & 0xff, (value >> 16) & 0xff ]
+
 
 
 import wx

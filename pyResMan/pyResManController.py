@@ -845,7 +845,68 @@ class pyResManController(object):
     def desfireGetFileIDs(self):
         self.__desfireCommandThread = threading.Thread(target=self.__desfireGetFileIDs)
         self.__desfireCommandThread.start()
+    
+    def __desfireCreateStdDataFile(self, file_no, com_set, access_rights, file_size):
+        try:
+            self.__desfire.create_std_data_file(file_no, com_set, access_rights, file_size)
+            self.__handler.handleLog('DESFire create std data file succeeded.', wx.LOG_Info)
+            self.__desfireGetFileIDs()
+        except Exception, e:
+            self.__handler.handleLog('DESFire create std data file, exception: %s' %(e), wx.LOG_Error)
+        
+    def desfireCreateStdDataFile(self, file_no, com_set, access_rights, file_size):
+        self.__desfireCommandThread = threading.Thread(target=self.__desfireCreateStdDataFile, args=(file_no, com_set, access_rights, file_size))
+        self.__desfireCommandThread.start()
+    
+    def __desfireCreateBackupDataFile(self, file_no, com_set, access_rights, file_size):
+        try:
+            self.__desfire.create_backup_data_file(file_no, com_set, access_rights, file_size)
+            self.__handler.handleLog('DESFire create backup data file succeeded.', wx.LOG_Info)
+            self.__desfireGetFileIDs()
+        except Exception, e:
+            self.__handler.handleLog('DESFire create backup data file, exception: %s' %(e), wx.LOG_Error)
+    
+    def desfireCreateBackupDataFile(self, file_no, com_set, access_rights, file_size):
+        self.__desfireCommandThread = threading.Thread(target=self.__desfireCreateBackupDataFile, args=(file_no, com_set, access_rights, file_size))
+        self.__desfireCommandThread.start()
+    
+    def __desfireCreateValueFile(self, file_no, com_set, access_rights, lower_limit, upper_limit, value, limit_debit_enabled):
+        try:
+            self.__desfire.create_value_file(file_no, com_set, access_rights, lower_limit, upper_limit, value, limit_debit_enabled)
+            self.__handler.handleLog('DESFire create value file succeeded.', wx.LOG_Info)
+            self.__desfireGetFileIDs()
+        except Exception, e:
+            self.__handler.handleLog('DESFire create value file, exception: %s' %(e), wx.LOG_Error)
+    
+    def desfireCreateValueFile(self, file_no, com_set, access_rights, lower_limit, upper_limit, value, limit_debit_enabled):
+        self.__desfireCommandThread = threading.Thread(target=self.__desfireCreateValueFile, args=(file_no, com_set, access_rights, lower_limit, upper_limit, value, limit_debit_enabled))
+        self.__desfireCommandThread.start()
 
+    def __desfireCreateLinearRecordFile(self, file_no, com_set, access_rights, record_size, max_num_of_records):
+        try:
+            self.__desfire.create_linear_record_file(file_no, com_set, access_rights, record_size, max_num_of_records)
+            self.__handler.handleLog('DESFire create linear record file succeeded.', wx.LOG_Info)
+            self.__desfireGetFileIDs()
+        except Exception, e:
+            self.__handler.handleLog('DESFire create linear record file, exception: %s' %(e), wx.LOG_Error)
+    
+    def desfireCreateLinearRecordFile(self, file_no, com_set, access_rights, record_size, max_num_of_records):
+        self.__desfireCommandThread = threading.Thread(target=self.__desfireCreateLinearRecordFile, args=(file_no, com_set, access_rights, record_size, max_num_of_records))
+        self.__desfireCommandThread.start()
+    
+    def __desfireCreateCyclicRecordFile(self, file_no, com_set, access_rights, record_size, max_num_of_records):
+        try:
+            self.__desfire.create_cyclic_record_file(file_no, com_set, access_rights, record_size, max_num_of_records)
+            self.__handler.handleLog('DESFire create cyclic record file succeeded.', wx.LOG_Info)
+            self.__desfireGetFileIDs()
+        except Exception, e:
+            self.__handler.handleLog('DESFire create cyclic record file, exception: %s' %(e), wx.LOG_Error)
+    
+    def desfireCreateCyclicRecordFile(self, file_no, com_set, access_rights, record_size, max_num_of_records):
+        self.__desfireCommandThread = threading.Thread(target=self.__desfireCreateCyclicRecordFile, args=(file_no, com_set, access_rights, record_size, max_num_of_records))
+        self.__desfireCommandThread.start()
+    
+    
 class pyResManControllerEventHandler(object):
     '''
     Methods to handle controller's event; The viewer (pyRsaMan) implements these methods as usual;

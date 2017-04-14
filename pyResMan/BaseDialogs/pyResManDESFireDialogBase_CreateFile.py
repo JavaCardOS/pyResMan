@@ -29,7 +29,7 @@ class DESFireDialogBase_CreateFile ( wx.Dialog ):
         self._statictextFileNo.Wrap( -1 )
         bSizer183.Add( self._statictextFileNo, 1, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
         
-        self._textctrlFileNo = wx.TextCtrl( self, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
+        self._textctrlFileNo = wx.TextCtrl( self, wx.ID_ANY, u"00", wx.DefaultPosition, wx.DefaultSize, 0 )
         self._textctrlFileNo.SetMaxLength( 2 ) 
         bSizer183.Add( self._textctrlFileNo, 1, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
         
@@ -42,7 +42,7 @@ class DESFireDialogBase_CreateFile ( wx.Dialog ):
         self._statictextComSet.Wrap( -1 )
         bSizer185.Add( self._statictextComSet, 1, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
         
-        self._textctrlComSet = wx.TextCtrl( self, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
+        self._textctrlComSet = wx.TextCtrl( self, wx.ID_ANY, u"00", wx.DefaultPosition, wx.DefaultSize, 0 )
         self._textctrlComSet.SetMaxLength( 2 ) 
         bSizer185.Add( self._textctrlComSet, 1, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
         
@@ -55,7 +55,7 @@ class DESFireDialogBase_CreateFile ( wx.Dialog ):
         self._statictextAccessRights.Wrap( -1 )
         bSizer186.Add( self._statictextAccessRights, 1, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
         
-        self._textctrlAccessRights = wx.TextCtrl( self, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
+        self._textctrlAccessRights = wx.TextCtrl( self, wx.ID_ANY, u"EEEE", wx.DefaultPosition, wx.DefaultSize, 0 )
         self._textctrlAccessRights.SetMaxLength( 4 ) 
         bSizer186.Add( self._textctrlAccessRights, 1, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
         
@@ -68,7 +68,7 @@ class DESFireDialogBase_CreateFile ( wx.Dialog ):
         self._statictextFileSize.Wrap( -1 )
         bSizer187.Add( self._statictextFileSize, 1, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
         
-        self._textctrlFileSize = wx.TextCtrl( self, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
+        self._textctrlFileSize = wx.TextCtrl( self, wx.ID_ANY, u"000001", wx.DefaultPosition, wx.DefaultSize, 0 )
         self._textctrlFileSize.SetMaxLength( 6 ) 
         bSizer187.Add( self._textctrlFileSize, 1, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
         
@@ -81,7 +81,7 @@ class DESFireDialogBase_CreateFile ( wx.Dialog ):
         self._statictextLowerLimit.Wrap( -1 )
         bSizer188.Add( self._statictextLowerLimit, 1, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
         
-        self._textctrlLowerLimit = wx.TextCtrl( self, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
+        self._textctrlLowerLimit = wx.TextCtrl( self, wx.ID_ANY, u"00000000", wx.DefaultPosition, wx.DefaultSize, 0 )
         self._textctrlLowerLimit.SetMaxLength( 8 ) 
         bSizer188.Add( self._textctrlLowerLimit, 1, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
         
@@ -94,7 +94,7 @@ class DESFireDialogBase_CreateFile ( wx.Dialog ):
         self._statictextUpperLimit.Wrap( -1 )
         bSizer189.Add( self._statictextUpperLimit, 1, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
         
-        self._textctrlUpperLimit = wx.TextCtrl( self, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
+        self._textctrlUpperLimit = wx.TextCtrl( self, wx.ID_ANY, u"FFFFFFFF", wx.DefaultPosition, wx.DefaultSize, 0 )
         self._textctrlUpperLimit.SetMaxLength( 8 ) 
         bSizer189.Add( self._textctrlUpperLimit, 1, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
         
@@ -107,7 +107,7 @@ class DESFireDialogBase_CreateFile ( wx.Dialog ):
         self._statictextValue.Wrap( -1 )
         bSizer190.Add( self._statictextValue, 1, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
         
-        self._textctrlValue = wx.TextCtrl( self, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
+        self._textctrlValue = wx.TextCtrl( self, wx.ID_ANY, u"11111111", wx.DefaultPosition, wx.DefaultSize, 0 )
         self._textctrlValue.SetMaxLength( 8 ) 
         bSizer190.Add( self._textctrlValue, 1, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
         
@@ -117,6 +117,7 @@ class DESFireDialogBase_CreateFile ( wx.Dialog ):
         bSizer193 = wx.BoxSizer( wx.HORIZONTAL )
         
         self._checkboxLimitedCreditEnabled = wx.CheckBox( self, wx.ID_ANY, u"Limited Credit Enabled", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self._checkboxLimitedCreditEnabled.SetValue(True) 
         bSizer193.Add( self._checkboxLimitedCreditEnabled, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
         
         
@@ -128,7 +129,7 @@ class DESFireDialogBase_CreateFile ( wx.Dialog ):
         self._statictextRecordSize.Wrap( -1 )
         bSizer191.Add( self._statictextRecordSize, 1, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
         
-        self._textctrlRecordSize = wx.TextCtrl( self, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
+        self._textctrlRecordSize = wx.TextCtrl( self, wx.ID_ANY, u"000010", wx.DefaultPosition, wx.DefaultSize, 0 )
         self._textctrlRecordSize.SetMaxLength( 6 ) 
         bSizer191.Add( self._textctrlRecordSize, 1, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
         
@@ -141,7 +142,7 @@ class DESFireDialogBase_CreateFile ( wx.Dialog ):
         self._statictextMaxNumOfRecords.Wrap( -1 )
         bSizer192.Add( self._statictextMaxNumOfRecords, 1, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
         
-        self._textctrlMaxNumOfRecords = wx.TextCtrl( self, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
+        self._textctrlMaxNumOfRecords = wx.TextCtrl( self, wx.ID_ANY, u"000020", wx.DefaultPosition, wx.DefaultSize, 0 )
         self._textctrlMaxNumOfRecords.SetMaxLength( 6 ) 
         bSizer192.Add( self._textctrlMaxNumOfRecords, 1, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
         

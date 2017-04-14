@@ -48,6 +48,7 @@ from Dialog import Dialog
 from pyResMan.Dialogs.pyResManDialog_DESFireCreateFile import DESFireDialog_CreateFile
 from pyResMan.DESFireEx import CREATE_STDDATAFILE, CREATE_BACKUPDATAFILE,\
     CREATE_VALUE_FILE, CREATE_LINEAR_RECORD_FILE, CREATE_CYCLIC_RECORD_FILE
+from nt import access
 
 COMMAND_LIST_COL_INDEX = 0
 COMMAND_LIST_COL_COMMAND_NAME = 1
@@ -1571,30 +1572,64 @@ class pyResManDialog (pyResManDialogBase):
         self._Log('DESFire got %d files.' %(len(file_ids)), wx.LOG_Info)
         self._listctrlDESFireFiles.DeleteAllItems()
         for file_id in file_ids:
-            self._listctrlDESFireFiles.InsertStringItem(self._listctrlDESFireFiles.GetItemCount(), '%0xX' %(file_id))
+            self._listctrlDESFireFiles.InsertStringItem(self._listctrlDESFireFiles.GetItemCount(), '%02X' %(file_id))
     
     def _buttonCreateStdDataFileOnButtonClick(self, event):
         dialog_create_file = DESFireDialog_CreateFile(self, CREATE_STDDATAFILE)
         if IDCANCEL == dialog_create_file.ShowModal():
             return
+        
+        file_no = dialog_create_file.getFileNo()
+        com_set = dialog_create_file.getComSet()
+        access_rights = dialog_create_file.getAccessRights()
+        file_size = dialog_create_file.getFileSize()
+        self.__controller.desfireCreateStdDataFile(file_no, com_set, access_rights, file_size)
     
     def _buttonCreateBackupDataFileOnButtonClick(self, event):
         dialog_create_file = DESFireDialog_CreateFile(self, CREATE_BACKUPDATAFILE)
         if IDCANCEL == dialog_create_file.ShowModal():
             return
+        
+        file_no = dialog_create_file.getFileNo()
+        com_set = dialog_create_file.getComSet()
+        access_rights = dialog_create_file.getAccessRights()
+        file_size = dialog_create_file.getFileSize()
+        self.__controller.desfireCreateBackupDataFile(file_no, com_set, access_rights, file_size)
     
     def _buttonCreateValueFileOnButtonClick(self, event):
         dialog_create_file = DESFireDialog_CreateFile(self, CREATE_VALUE_FILE)
         if IDCANCEL == dialog_create_file.ShowModal():
             return
+
+        file_no = dialog_create_file.getFileNo()
+        com_set = dialog_create_file.getComSet()
+        access_rights = dialog_create_file.getAccessRights()
+        lower_limit = dialog_create_file.getLowerLimit()
+        upper_limit = dialog_create_file.getUpperLimit()
+        value = dialog_create_file.getValue()
+        limit_debit_enabled = 0x01 if dialog_create_file.isLimitDebitEnabled() else 0x00
+        self.__controller.desfireCreateValueFile(file_no, com_set, access_rights, lower_limit, upper_limit, value, limit_debit_enabled)
     
     def _buttonCreateLinearRecordFileOnButtonClick(self, event):
         dialog_create_file = DESFireDialog_CreateFile(self, CREATE_LINEAR_RECORD_FILE)
         if IDCANCEL == dialog_create_file.ShowModal():
             return
+
+        file_no = dialog_create_file.getFileNo()
+        com_set = dialog_create_file.getComSet()
+        access_rights = dialog_create_file.getAccessRights()
+        record_size = dialog_create_file.getRecordSize()
+        max_num_of_records = dialog_create_file.getMaxNumOfRecords()
+        self.__controller.desfireCreateLinearRecordFile(file_no, com_set, access_rights, record_size, max_num_of_records)
     
     def _buttonCreateCyclicRecordFileOnButtonClick(self, event):
         dialog_create_file = DESFireDialog_CreateFile(self, CREATE_CYCLIC_RECORD_FILE)
         if IDCANCEL == dialog_create_file.ShowModal():
             return
     
+        file_no = dialog_create_file.getFileNo()
+        com_set = dialog_create_file.getComSet()
+        access_rights = dialog_create_file.getAccessRights()
+        record_size = dialog_create_file.getRecordSize()
+        max_num_of_records = dialog_create_file.getMaxNumOfRecords()
+        self.__controller.desfireCreateCyclicRecordFile(file_no, com_set, access_rights, record_size, max_num_of_records)

@@ -720,7 +720,10 @@ class pyResManDialogBase ( wx.Dialog ):
         
         bSizer163 = wx.BoxSizer( wx.HORIZONTAL )
         
-        self._listctrlDESFireApplications = wx.ListCtrl( self._panelDESFire, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.LC_REPORT|wx.LC_SINGLE_SEL )
+        self._listctrlDESFireApplications = wx.ListCtrl( self._panelDESFire, wx.ID_ANY, wx.DefaultPosition, wx.Size( 75,-1 ), wx.LC_REPORT|wx.LC_SINGLE_SEL )
+        self._listctrlDESFireApplications.SetMinSize( wx.Size( 75,-1 ) )
+        self._listctrlDESFireApplications.SetMaxSize( wx.Size( 75,-1 ) )
+        
         bSizer163.Add( self._listctrlDESFireApplications, 1, wx.ALL|wx.EXPAND, 5 )
         
         bSizer165 = wx.BoxSizer( wx.VERTICAL )
@@ -741,11 +744,14 @@ class pyResManDialogBase ( wx.Dialog ):
         bSizer163.Add( bSizer165, 0, wx.EXPAND, 5 )
         
         
-        bSizer1611.Add( bSizer163, 1, wx.EXPAND, 5 )
+        bSizer1611.Add( bSizer163, 0, wx.EXPAND, 5 )
         
         bSizer164 = wx.BoxSizer( wx.HORIZONTAL )
         
-        self._listctrlDESFireFiles = wx.ListCtrl( self._panelDESFire, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.LC_REPORT|wx.LC_SINGLE_SEL )
+        self._listctrlDESFireFiles = wx.ListCtrl( self._panelDESFire, wx.ID_ANY, wx.DefaultPosition, wx.Size( 30,-1 ), wx.LC_REPORT|wx.LC_SINGLE_SEL )
+        self._listctrlDESFireFiles.SetMinSize( wx.Size( 30,-1 ) )
+        self._listctrlDESFireFiles.SetMaxSize( wx.Size( 30,-1 ) )
+        
         bSizer164.Add( self._listctrlDESFireFiles, 1, wx.ALL|wx.EXPAND, 5 )
         
         bSizer169 = wx.BoxSizer( wx.VERTICAL )
@@ -781,7 +787,7 @@ class pyResManDialogBase ( wx.Dialog ):
         bSizer164.Add( bSizer169, 0, wx.EXPAND, 5 )
         
         
-        bSizer1611.Add( bSizer164, 1, wx.EXPAND, 5 )
+        bSizer1611.Add( bSizer164, 0, wx.EXPAND, 5 )
         
         
         self._panelDESFire.SetSizer( bSizer1611 )

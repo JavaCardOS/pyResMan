@@ -4,7 +4,9 @@ Created on 2017/4/12
 @author: zhenkui
 '''
 
-from desfire.protocol import DESFire
+from desfire.protocol import DESFire, FILE_COMMUNICATION
+from desfire.util import dword_to_byte_array
+from pyResMan.Util import Util
 
 AUTHENTICATE                = 0x0A
 AUTHENTICATE_ISO            = 0x1A
@@ -109,3 +111,49 @@ class DESFireEx(DESFire):
         # CREATE_APPLICATION((byte) 0xCA),
         apdu_command = self.wrap_command(0xCA, parameters)
         self.communicate(apdu_command, "Creating application {:06X}".format(app_id))
+
+    def create_std_data_file(self, file_no, com_set, access_rights, file_size):
+        parameters = [file_no]
+
+        assert com_set in FILE_COMMUNICATION
+        parameters += [ com_set ]
+        parameters += [ access_rights & 0xff, access_rights >> 8 ]
+        parameters += Util.bytes3_to_byte_array(file_size)
+
+        apdu_command = self.wrap_command(CREATE_STDDATAFILE, parameters)
+        self.communicate(apdu_command, "Creating std data file {:02X}".format(file_no))
+
+    def create_backup_data_file(self, file_no, com_set, access_rights, file_size):
+        parameters = [file_no]
+
+        assert com_set in FILE_COMMUNICATION
+        parameters += [ com_set ]
+        parameters += [ access_rights & 0xff, access_rights >> 8 ]
+        parameters += Util.bytes3_to_byte_array(file_size)
+
+        apdu_command = self.wrap_command(CREATE_BACKUPDATAFILE, parameters)
+        self.communicate(apdu_command, "Creating backup data file {:02X}".format(file_no))
+
+    def create_linear_record_file(self, file_no, com_set, access_rights, record_size, max_num_of_records):
+        parameters = [file_no]
+
+        assert com_set in FILE_COMMUNICATION
+        parameters += [ com_set ]
+        parameters += [ access_rights & 0xff, access_rights >> 8 ]
+        parameters += Util.bytes3_to_byte_array(record_size)
+        parameters += Util.bytes3_to_byte_array(max_num_of_records)
+
+        apdu_command = self.wrap_command(CREATE_LINEAR_RECORD_FILE, parameters)
+        self.communicate(apdu_command, "Creating linear record file {:02X}".format(file_no))
+
+    def create_cyclic_record_file(self, file_no, com_set, access_rights, record_size, max_num_of_records):
+        parameters = [file_no]
+
+        assert com_set in FILE_COMMUNICATION
+        parameters += [ com_set ]
+        parameters += [ access_rights & 0xff, access_rights >> 8 ]
+        parameters += Util.bytes3_to_byte_array(record_size)
+        parameters += Util.bytes3_to_byte_array(max_num_of_records)
+
+        apdu_command = self.wrap_command(CREATE_CYCLIC_RECORD_FILE, parameters)
+        self.communicate(apdu_command, "Creating cyclic record file {:02X}".format(file_no))
