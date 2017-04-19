@@ -47,7 +47,8 @@ from pyResMan.Dialogs.pyResManDialog_DESFireCreateApplication import DESFireDial
 from Dialog import Dialog
 from pyResMan.Dialogs.pyResManDialog_DESFireCreateFile import DESFireDialog_CreateFile
 from pyResMan.DESFireEx import CREATE_STDDATAFILE, CREATE_BACKUPDATAFILE,\
-    CREATE_VALUE_FILE, CREATE_LINEAR_RECORD_FILE, CREATE_CYCLIC_RECORD_FILE
+    CREATE_VALUE_FILE, CREATE_LINEAR_RECORD_FILE, CREATE_CYCLIC_RECORD_FILE,\
+    GET_KEY_SETTINGS
 from nt import access
 
 COMMAND_LIST_COL_INDEX = 0
@@ -1488,7 +1489,8 @@ class pyResManDialog (pyResManDialogBase):
         self.m_splitter2.Unbind( wx.EVT_IDLE )
 
     def _buttonAuthenticateOnButtonClick(self, event):
-        self.__controller.desfireAuthenticate()
+        key = self._textctrlDESFireKey.GetValue()
+        self.__controller.desfireAuthenticate(Util.s2vl(key))
     
     def _buttonGetVersionOnButtonClick(self, event):
         self.__controller.desfireGetVersion()
@@ -1516,6 +1518,46 @@ class pyResManDialog (pyResManDialogBase):
         self._listctrlDESFireApplications.DeleteAllItems()
         for app_id in app_ids:
             self._listctrlDESFireApplications.InsertStringItem(self._listctrlDESFireApplications.GetItemCount(), '%06X' %(app_id))
+    
+    def __outputDESFireFileSettings(self, file_settings):
+        file_no = file_settings.get('file_no', 0)
+        file_type = file_settings.get('type', '')
+        file_type_str = file_settings.get('type_str', '')
+        com_set = file_settings.get('com_set', '')
+        access_rights = file_settings.get('access_rights', '')
+
+        self._Log('File no: %06X' %(file_no))
+        self._Log('    type: %s' %(file_type_str))
+        self._Log('    com. set.: %s' %(com_set))
+        self._Log('    access rights: %02X%02X' %(access_rights[0], access_rights[1]))
+        
+        if (file_type == 0x00) or (file_type == 0x01):
+            file_size = file_settings.get('file_size', 0)
+            self._Log('    file_size: %06X' %(file_size))
+        elif (file_type == 0x02):
+            lower_limit = file_settings.get('lower_limit', 0)
+            upper_limit = file_settings.get('upper_limit', 0)
+            value = file_settings.get('value', 0)
+            limited_credit_enabled = file_settings.get('limited_credit_enabled', 0)
+            self._Log('    lower_limit: %08X' %(lower_limit))
+            self._Log('    upper_limit: %08X' %(upper_limit))
+            self._Log('    value: %08X' %(value))
+            if limited_credit_enabled:
+                self._Log('    limited credit enabled')
+        elif (file_type == 0x03) or (file_type == 0x04):
+            record_size = file_settings.get('record_size', 0)
+            max_num_of_records = file_settings.get('max_num_of_records', 0)
+            current_num_of_records = file_settings.get('current_num_of_records', 0)
+            self._Log('    record_size: %06X' %(record_size))
+            self._Log('    max. num of records: %06X' %(max_num_of_records))
+            self._Log('    current num of records: %06X' %(current_num_of_records))
+        else:
+            pass
+    
+    def __outputDESFireKeySettings(self, data):
+        key_settings, max_num_of_keys = data
+        self._Log('Key settings: %02X' %(key_settings), wx.LOG_Message)
+        self._Log('Max num of keys: %02X' %(max_num_of_keys), wx.LOG_Message)
         
     def handleDESFireResponse(self, command_type, response):
         if command_type == DESFireEx.GET_VERSION:
@@ -1524,6 +1566,10 @@ class pyResManDialog (pyResManDialogBase):
             self.__outputDESFireApplications(response)
         elif command_type == DESFireEx.GET_FILE_IDS:
             self.__outputDESFireFileIDs(response)
+        elif command_type == DESFireEx.GET_FILE_SETTINGS:
+            self.__outputDESFireFileSettings(response)
+        elif command_type == GET_KEY_SETTINGS:
+            self.__outputDESFireKeySettings(response)
         else:
             pass
     
@@ -1540,6 +1586,14 @@ class pyResManDialog (pyResManDialogBase):
                 app_id = self._listctrlDESFireApplications.GetItemText(i)
                 break
         return app_id
+    
+    def __listctrlDESFireFiles_GetSelected(self):
+        file_id = None
+        for i in range(self._listctrlDESFireFiles.GetItemCount()):
+            if self._listctrlDESFireFiles.GetItemState(i, LIST_STATE_SELECTED) != 0:
+                file_id = self._listctrlDESFireFiles.GetItemText(i)
+                break
+        return file_id
     
     def _buttonDeleteApplicationOnButtonClick(self, event):
         app_id = self.__listctrlDESFireApplications_GetSelected()
@@ -1633,3 +1687,30 @@ class pyResManDialog (pyResManDialogBase):
         record_size = dialog_create_file.getRecordSize()
         max_num_of_records = dialog_create_file.getMaxNumOfRecords()
         self.__controller.desfireCreateCyclicRecordFile(file_no, com_set, access_rights, record_size, max_num_of_records)
+
+    def _buttonGetFileSettingsOnButtonClick(self, event):
+        file_no = self.__listctrlDESFireFiles_GetSelected()
+        if file_no == None:
+            self._Log('Get file settings: no file selected.', wx.LOG_Warning)
+            return
+        self.__controller.desfireGetFileSettings(int(file_no, 0x10))
+    
+    def _buttonChangeFileSettingsOnButtonClick(self, event):
+        pass
+    
+    def _buttonDeleteFileOnButtonClick(self, event):
+        file_id = self.__listctrlDESFireFiles_GetSelected()
+        if file_id == None:
+            self._Log('DESFire delete file: No file selected.', wx.LOG_Warning)
+            return
+        
+        self.__controller.desfireDeleteFile(file_id)
+    
+    def _buttonChangeKeyOnButtonClick(self, event):
+        key = self._textctrlDESFireKey.GetValue()
+        new_key = self._textctrlDESFireNewKey.GetValue()
+        self.__controller.desfireChangeKey(Util.s2vl(key), Util.s2vl(new_key))
+    
+    def _buttonGetKeySettingsOnButtonClick(self, event):
+        self.__controller.desfireGetKeySettings()
+    

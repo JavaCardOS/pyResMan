@@ -4,9 +4,10 @@ Created on 2017/4/12
 @author: zhenkui
 '''
 
-from desfire.protocol import DESFire, FILE_COMMUNICATION
-from desfire.util import dword_to_byte_array
+from desfire.protocol import DESFire, FILE_COMMUNICATION, FILE_TYPES
+from desfire.util import dword_to_byte_array, byte_array_to_human_readable_hex
 from pyResMan.Util import Util
+import pyDes
 
 AUTHENTICATE                = 0x0A
 AUTHENTICATE_ISO            = 0x1A
@@ -48,17 +49,80 @@ COMMIT_TRANSACTION          = 0xC7
 ABORT_TRANSACTION           = 0xA7
 CONTINUE                    = 0xAF
 
+import sys
+if sys.version_info[0] < 3:
+    def bytes(l):
+        return ''.join(chr(b) for b in l)
+
 
 class DESFireEx(DESFire):
     '''
     Extended DESFire class.
     '''
 
-#     def __init__(self, device):
-#         '''
-#         Constructor
-#         '''
-#         super(self, device)
+    def __init__(self, device):
+        '''
+        Constructor
+        '''
+        DESFire.__init__(self, device)
+
+        self.session_cipher = None
+        self.key_id = 0
+
+    def authenticate(self, key_id, private_key=[0x00] * 16):
+        apdu_command = self.wrap_command(0x0a, [key_id])
+        resp = self.communicate(apdu_command, "Authenticating key {:02X}".format(key_id), allow_continue_fallthrough=True)
+
+        # We get 8 bytes challenge
+        random_b_encrypted = list(resp)
+        assert len(random_b_encrypted) == 8
+
+        initial_value = b"\00" * 8
+        
+        k = pyDes.triple_des(bytes(private_key), pyDes.CBC, initial_value, pad=None, padmode=pyDes.PAD_NORMAL)
+
+        decrypted_b = [ord(b) for b in (k.decrypt(bytes(random_b_encrypted)))]
+
+        # shift randB one byte left and get randB'
+        shifted_b = decrypted_b[1:8] + [decrypted_b[0]]
+
+        # Generate random_a
+        # NOT A REAL RANDOM NUMBER AND NOT IV XORRED
+#         random_a = [0x00] * 8
+        random_a = [0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88]
+
+        decrypted_a = [ord(b) for b in k.decrypt(bytes(random_a))]
+
+        xorred = []
+
+        for i in range(0, 8):
+            xorred.append(decrypted_a[i] ^ shifted_b[i])
+
+        decrypted_xorred = [ord(b) for b in k.decrypt(bytes(xorred))]
+
+        final_bytes = decrypted_a + decrypted_xorred
+        assert len(final_bytes) == 16
+
+        apdu_command = self.wrap_command(0xaf, final_bytes)
+        resp = self.communicate(apdu_command, "Authenticating continues with key {:02X}".format(key_id))
+        assert len(resp) == 8
+
+        decrypted_check_a1 = [ord(b) for b in k.decrypt(bytes(resp))]
+        check_a1 = [random_a[-1]] + random_a[0 : len(random_a) - 1]
+        assert (decrypted_check_a1 != check_a1)
+
+        self.logger.info("Received session key %s", byte_array_to_human_readable_hex(resp))
+
+        if random_a == decrypted_b:
+            self.session_key = random_a[0 : 4] + decrypted_b[0 : 4] + random_a[0 : 4] + decrypted_b[0 : 4]
+        else:
+            self.session_key = random_a[0 : 4] + decrypted_b[0 : 4] + random_a[4 : 8] + decrypted_b[4 : 8]
+
+        initial_value = b"\00" * 8
+        self.session_cipher = pyDes.triple_des(bytes(self.session_key), pyDes.CBC, initial_value, pad=None, padmode=pyDes.PAD_NORMAL)
+        self.key_id = key_id
+        
+        return resp
     
     def parse_version(self, version_data):
         version_info = {}
@@ -157,3 +221,71 @@ class DESFireEx(DESFire):
 
         apdu_command = self.wrap_command(CREATE_CYCLIC_RECORD_FILE, parameters)
         self.communicate(apdu_command, "Creating cyclic record file {:02X}".format(file_no))
+
+    def get_file_settings(self, file_id):
+
+        apdu_command = self.wrap_command(GET_FILE_SETTINGS, [file_id])
+        resp = self.communicate(apdu_command, "Reading file settings {:02X}".format(file_id))
+
+        file_type = resp[0]
+
+        file_settings = {
+            "type": file_type,
+            "type_str": FILE_TYPES[file_type],
+            "com_set": FILE_COMMUNICATION[resp[1]],
+            "access_rights": resp[2:4],
+        }
+
+        if (file_type == 0x00) or (file_type == 0x01):
+            # Data file
+            file_settings.update({
+                "file_size": Util.byte_array3_to_dword(resp[4:7]),
+            })
+        elif (file_type == 0x02):
+            # Value file
+            file_settings.update({
+                "lower_limit": Util.byte_array4_to_dword(resp[4:8]),
+                "upper_limit": Util.byte_array4_to_dword(resp[8:12]),
+                "value": Util.byte_array4_to_dword(resp[12:16]),
+                "limited_credit_enabled": True if (resp[16] != 0) else False
+            })
+        elif (file_type == 0x03) or (file_type == 0x04):
+            # Linear record file
+            file_settings.update({
+                # Length of ONE records
+                "record_size": Util.byte_array3_to_dword(resp[4:7]),
+                "max_num_of_records": Util.byte_array3_to_dword(resp[7:10]),
+                "current_num_of_records": Util.byte_array3_to_dword(resp[10:13]),
+            })
+        else:
+            pass
+
+        return file_settings
+
+    def change_key(self, cur_key_id, key_id, key, new_key):
+        if len(key) != 16:
+            raise Exception('Invalid key length.')
+        if len(new_key) != 16:
+            raise Exception('Invalid key length.')
+
+        data = []
+        if self.key_id != key_id:
+            xored_key = []
+            for i in range(len(new_key)):
+                xored_key.append(key[i] ^ new_key[i])
+            crc1 = Util.calculate_crc(xored_key, len(xored_key), 0x6363)
+            crc2 = Util.calculate_crc(new_key, len(new_key), 0x6363)
+            data = xored_key + [(crc1 & 0xFF), (crc1 >> 8) & 0xFF] + [(crc2 & 0xFF), (crc2 >> 8) & 0xFF] + [0x00, 0x00, 0x00, 0x00]
+        else:
+            crc = Util.calculate_crc(new_key, len(new_key), 0x6363)
+            data = new_key + [((crc >> 8) & 0xFF), (crc & 0xFF)] + [0x00] * 6
+        decrypted_data = self.session_cipher.decrypt(bytes(data))
+        decrypted_data = [ord(b) for b in decrypted_data]
+
+        apdu_command = self.wrap_command(CHANGE_KEY, [key_id] + decrypted_data)
+        self.communicate(apdu_command, "Change key")
+
+    def get_key_settings(self):
+        apdu_command = self.wrap_command(GET_KEY_SETTINGS)
+        resp = self.communicate(apdu_command, "Get key settings")
+        return resp

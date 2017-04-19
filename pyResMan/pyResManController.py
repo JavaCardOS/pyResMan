@@ -22,6 +22,7 @@ from pyResMan.R502Device import R502Device
 from pyResMan.pyLibSC import LibSC
 from pyResMan import DebuggerUtils
 from pyResMan import DESFireEx
+from pyResMan.DESFireEx import GET_FILE_SETTINGS, GET_KEY_SETTINGS
 
 class APDUItem(object):
     """Class for APDU item data;"""
@@ -755,15 +756,15 @@ class pyResManController(object):
         self.__mifareCommandThread = threading.Thread(target=self.__mifareChangeUID, args=(uid, ))
         self.__mifareCommandThread.start()
     
-    def __desfireAuthenticate(self):
+    def __desfireAuthenticate(self, key):
         try:
-            self.__desfire.authenticate(0)
+            self.__desfire.authenticate(0, key)
             self.__handler.handleLog('DESFire authenticated.', wx.LOG_Info)
         except Exception, e:
             self.__handler.handleLog(str(e), wx.LOG_Error)
     
-    def desfireAuthenticate(self):
-        self.__desfireCommandThread = threading.Thread(target=self.__desfireAuthenticate)
+    def desfireAuthenticate(self, key):
+        self.__desfireCommandThread = threading.Thread(target=self.__desfireAuthenticate, args=(key, ))
         self.__desfireCommandThread.start()
 
     def __desfireGetVersion(self):
@@ -906,6 +907,53 @@ class pyResManController(object):
         self.__desfireCommandThread = threading.Thread(target=self.__desfireCreateCyclicRecordFile, args=(file_no, com_set, access_rights, record_size, max_num_of_records))
         self.__desfireCommandThread.start()
     
+    def __desfireDeleteFile(self, file_no):
+        try:
+            self.__desfire.delete_file(file_no)
+            self.__handler.handleLog('DESFire delete file succeeded.', wx.LOG_Info)
+            self.__desfireGetFileIDs()
+        except Exception, e:
+            self.__handler.handleLog('DESFire delete file, exception: %s' %(e), wx.LOG_Error)
+    
+    def desfireDeleteFile(self, file_no):
+        self.__desfireCommandThread = threading.Thread(target=self.__desfireCreateCyclicRecordFile, args=(file_no, ))
+        self.__desfireCommandThread.start()
+    
+    def __desfireGetFileSettings(self, file_no):
+        try:
+            file_settings = self.__desfire.get_file_settings(file_no)
+            file_settings.update({ 'file_no': file_no })
+            self.__handler.handleDESFireResponse(GET_FILE_SETTINGS, file_settings)
+            self.__handler.handleLog('DESFire get file settings succeeded.', wx.LOG_Info)
+        except Exception, e:
+            self.__handler.handleLog('DESFire get file settings, exception: %s' %(e), wx.LOG_Error)
+    
+    def desfireGetFileSettings(self, file_no):
+        self.__desfireCommandThread = threading.Thread(target=self.__desfireGetFileSettings, args=(file_no, ))
+        self.__desfireCommandThread.start()
+
+    def __desfireChangeKey(self, key, new_key):
+        try:
+            self.__desfire.change_key(0, 0, key, new_key)
+            self.__handler.handleLog('DESFire change key succeeded.', wx.LOG_Info)
+        except Exception, e:
+            self.__handler.handleLog('DESFire change key, exception: %s' %(e), wx.LOG_Error)
+        
+    def desfireChangeKey(self, key, new_key):
+        self.__desfireCommandThread = threading.Thread(target=self.__desfireChangeKey, args=(key, new_key, ))
+        self.__desfireCommandThread.start()
+
+    def __desfireGetKeySettings(self):
+        try:
+            key_settings, max_num_of_keys = self.__desfire.get_key_settings()
+            self.__handler.handleDESFireResponse(GET_KEY_SETTINGS, (key_settings, max_num_of_keys))
+            self.__handler.handleLog('DESFire change key succeeded.', wx.LOG_Info)
+        except Exception, e:
+            self.__handler.handleLog('DESFire change key, exception: %s' %(e), wx.LOG_Error)
+        
+    def desfireGetKeySettings(self):
+        self.__desfireCommandThread = threading.Thread(target=self.__desfireGetKeySettings)
+        self.__desfireCommandThread.start()
     
 class pyResManControllerEventHandler(object):
     '''
