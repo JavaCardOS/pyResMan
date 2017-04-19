@@ -22,7 +22,7 @@ from pyResMan.R502Device import R502Device
 from pyResMan.pyLibSC import LibSC
 from pyResMan import DebuggerUtils
 from pyResMan import DESFireEx
-from pyResMan.DESFireEx import GET_FILE_SETTINGS, GET_KEY_SETTINGS
+from pyResMan.DESFireEx import GET_FILE_SETTINGS, GET_KEY_SETTINGS, GET_VALUE
 
 class APDUItem(object):
     """Class for APDU item data;"""
@@ -953,6 +953,51 @@ class pyResManController(object):
         
     def desfireGetKeySettings(self):
         self.__desfireCommandThread = threading.Thread(target=self.__desfireGetKeySettings)
+        self.__desfireCommandThread.start()
+    
+    def __desfireGetValue(self, file_id):
+        try:
+            value = self.__desfire.get_value(file_id)
+            self.__handler.handleDESFireResponse(GET_VALUE, (file_id, value))
+            self.__handler.handleLog('DESFire get value succeeded.', wx.LOG_Info)
+        except Exception, e:
+            self.__handler.handleLog('DESFire get value, exception: %s' %(e), wx.LOG_Error)
+    
+    def desfireGetValue(self, file_id):
+        self.__desfireCommandThread = threading.Thread(target=self.__desfireGetValue, args=(file_id))
+        self.__desfireCommandThread.start()
+        
+    def __desfireClearRecordFile(self, file_id):
+        try:
+            self.__desfire.clear_record_file(file_id)
+            self.__handler.handleLog('DESFire clear record file succeeded.', wx.LOG_Info)
+        except Exception, e:
+            self.__handler.handleLog('DESFire clear record file, exception: %s' %(e), wx.LOG_Error)
+    
+    def desfireClearRecordFile(self, file_id):
+        self.__desfireCommandThread = threading.Thread(target=self.__desfireClearRecordFile, args=(file_id))
+        self.__desfireCommandThread.start()
+        
+    def __desfireCommitTransaction(self):
+        try:
+            self.__desfire.commit_transaction()
+            self.__handler.handleLog('DESFire commit transaction succeeded.', wx.LOG_Info)
+        except Exception, e:
+            self.__handler.handleLog('DESFire commit transaction, exception: %s' %(e), wx.LOG_Error)
+    
+    def desfireCommitTransaction(self):
+        self.__desfireCommandThread = threading.Thread(target=self.__desfireCommitTransaction)
+        self.__desfireCommandThread.start()
+    
+    def __desfireAbortTransaction(self):
+        try:
+            self.__desfire.abort_transaction()
+            self.__handler.handleLog('DESFire abort transaction succeeded.', wx.LOG_Info)
+        except Exception, e:
+            self.__handler.handleLog('DESFire abort transaction, exception: %s' %(e), wx.LOG_Error)
+    
+    def desfireAbortTransaction(self):
+        self.__desfireCommandThread = threading.Thread(target=self.__desfireAbortTransaction)
         self.__desfireCommandThread.start()
     
 class pyResManControllerEventHandler(object):

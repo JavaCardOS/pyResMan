@@ -289,3 +289,14 @@ class DESFireEx(DESFire):
         apdu_command = self.wrap_command(GET_KEY_SETTINGS)
         resp = self.communicate(apdu_command, "Get key settings")
         return resp
+
+    def clear_record_file(self, file_id):
+        apdu_command = self.wrap_command(CLEAR_RECORD_FILE, [file_id])
+        self.communicate(apdu_command, "Clear record file")
+    
+    def commit_transaction(self):
+        self.commit()
+
+    def abort_transaction(self):
+        apdu_command = self.wrap_command(ABORT_TRANSACTION)
+        self.communicate(apdu_command, "Abort file changes")

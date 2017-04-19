@@ -931,6 +931,44 @@ class pyResManDialogBase ( wx.Dialog ):
         
         bSizer164.Add( bSizer169, 0, wx.EXPAND, 5 )
         
+        bSizer192 = wx.BoxSizer( wx.VERTICAL )
+        
+        self._buttonDESFireReadData = wx.Button( self._panelDESFire, wx.ID_ANY, u"Read Data", wx.DefaultPosition, wx.DefaultSize, 0 )
+        bSizer192.Add( self._buttonDESFireReadData, 0, wx.ALL|wx.EXPAND, 5 )
+        
+        self._buttonDESFireWriteData = wx.Button( self._panelDESFire, wx.ID_ANY, u"Write Data", wx.DefaultPosition, wx.DefaultSize, 0 )
+        bSizer192.Add( self._buttonDESFireWriteData, 0, wx.ALL|wx.EXPAND, 5 )
+        
+        self._buttonDESFireGetValue = wx.Button( self._panelDESFire, wx.ID_ANY, u"Get Value", wx.DefaultPosition, wx.DefaultSize, 0 )
+        bSizer192.Add( self._buttonDESFireGetValue, 0, wx.ALL|wx.EXPAND, 5 )
+        
+        self._buttonDESFireCredit = wx.Button( self._panelDESFire, wx.ID_ANY, u"Credit", wx.DefaultPosition, wx.DefaultSize, 0 )
+        bSizer192.Add( self._buttonDESFireCredit, 0, wx.ALL|wx.EXPAND, 5 )
+        
+        self._buttonDESFireDebit = wx.Button( self._panelDESFire, wx.ID_ANY, u"Debit", wx.DefaultPosition, wx.DefaultSize, 0 )
+        bSizer192.Add( self._buttonDESFireDebit, 0, wx.ALL|wx.EXPAND, 5 )
+        
+        self._buttonDESFireLimitedCredit = wx.Button( self._panelDESFire, wx.ID_ANY, u"Limited Credit", wx.DefaultPosition, wx.DefaultSize, 0 )
+        bSizer192.Add( self._buttonDESFireLimitedCredit, 0, wx.ALL|wx.EXPAND, 5 )
+        
+        self._buttonDESFireWriteRecord = wx.Button( self._panelDESFire, wx.ID_ANY, u"Write Record", wx.DefaultPosition, wx.DefaultSize, 0 )
+        bSizer192.Add( self._buttonDESFireWriteRecord, 0, wx.ALL|wx.EXPAND, 5 )
+        
+        self._buttonDESFireReadRecords = wx.Button( self._panelDESFire, wx.ID_ANY, u"Read Records", wx.DefaultPosition, wx.DefaultSize, 0 )
+        bSizer192.Add( self._buttonDESFireReadRecords, 0, wx.ALL|wx.EXPAND, 5 )
+        
+        self._buttonDESFireClearRecordFile = wx.Button( self._panelDESFire, wx.ID_ANY, u"Clear Record File", wx.DefaultPosition, wx.DefaultSize, 0 )
+        bSizer192.Add( self._buttonDESFireClearRecordFile, 0, wx.ALL|wx.EXPAND, 5 )
+        
+        self._buttonDESFireCommitTransaction = wx.Button( self._panelDESFire, wx.ID_ANY, u"Commit Transaction", wx.DefaultPosition, wx.DefaultSize, 0 )
+        bSizer192.Add( self._buttonDESFireCommitTransaction, 0, wx.ALL|wx.EXPAND, 5 )
+        
+        self._buttonDESFireAbortTransaction = wx.Button( self._panelDESFire, wx.ID_ANY, u"Abort Transaction", wx.DefaultPosition, wx.DefaultSize, 0 )
+        bSizer192.Add( self._buttonDESFireAbortTransaction, 0, wx.ALL|wx.EXPAND, 5 )
+        
+        
+        bSizer164.Add( bSizer192, 1, wx.EXPAND|wx.ALIGN_CENTER_VERTICAL, 5 )
+        
         
         bSizer1611.Add( bSizer164, 0, wx.EXPAND, 5 )
         
@@ -1153,6 +1191,7 @@ class pyResManDialogBase ( wx.Dialog ):
         self._buttonSelectApplication.Bind( wx.EVT_BUTTON, self._buttonSelectApplicationOnButtonClick )
         self._buttonCreateApplication.Bind( wx.EVT_BUTTON, self._buttonCreateApplicationOnButtonClick )
         self._buttonDeleteApplication.Bind( wx.EVT_BUTTON, self._buttonDeleteApplicationOnButtonClick )
+        self._listctrlDESFireFiles.Bind( wx.EVT_LIST_ITEM_SELECTED, self._listctrlDESFireFilesOnListItemSelected )
         self._buttonGetFileIDs.Bind( wx.EVT_BUTTON, self._buttonGetFileIDsOnButtonClick )
         self._buttonGetFileSettings.Bind( wx.EVT_BUTTON, self._buttonGetFileSettingsOnButtonClick )
         self._buttonChangeFileSettings.Bind( wx.EVT_BUTTON, self._buttonChangeFileSettingsOnButtonClick )
@@ -1162,6 +1201,17 @@ class pyResManDialogBase ( wx.Dialog ):
         self._buttonCreateLinearRecordFile.Bind( wx.EVT_BUTTON, self._buttonCreateLinearRecordFileOnButtonClick )
         self._buttonCreateCyclicRecordFile.Bind( wx.EVT_BUTTON, self._buttonCreateCyclicRecordFileOnButtonClick )
         self._buttonDeleteFile.Bind( wx.EVT_BUTTON, self._buttonDeleteFileOnButtonClick )
+        self._buttonDESFireReadData.Bind( wx.EVT_BUTTON, self._buttonDESFireReadDataOnButtonClick )
+        self._buttonDESFireWriteData.Bind( wx.EVT_BUTTON, self._buttonDESFireWriteDataOnButtonClick )
+        self._buttonDESFireGetValue.Bind( wx.EVT_BUTTON, self._buttonDESFireGetValueOnButtonClick )
+        self._buttonDESFireCredit.Bind( wx.EVT_BUTTON, self._buttonDESFireCreditOnButtonClick )
+        self._buttonDESFireDebit.Bind( wx.EVT_BUTTON, self._buttonDESFireDebitOnButtonClick )
+        self._buttonDESFireLimitedCredit.Bind( wx.EVT_BUTTON, self._buttonDESFireLimitedCreditOnButtonClick )
+        self._buttonDESFireWriteRecord.Bind( wx.EVT_BUTTON, self._buttonDESFireWriteRecordOnButtonClick )
+        self._buttonDESFireReadRecords.Bind( wx.EVT_BUTTON, self._buttonDESFireReadRecordsOnButtonClick )
+        self._buttonDESFireClearRecordFile.Bind( wx.EVT_BUTTON, self._buttonDESFireClearRecordFileOnButtonClick )
+        self._buttonDESFireCommitTransaction.Bind( wx.EVT_BUTTON, self._buttonDESFireCommitTransactionOnButtonClick )
+        self._buttonDESFireAbortTransaction.Bind( wx.EVT_BUTTON, self._buttonDESFireAbortTransactionOnButtonClick )
         self._buttonClearLog.Bind( wx.EVT_BUTTON, self._buttonClearLogOnButtonClick )
     
     def __del__( self ):
@@ -1373,6 +1423,9 @@ class pyResManDialogBase ( wx.Dialog ):
     def _buttonDeleteApplicationOnButtonClick( self, event ):
         event.Skip()
     
+    def _listctrlDESFireFilesOnListItemSelected( self, event ):
+        event.Skip()
+    
     def _buttonGetFileIDsOnButtonClick( self, event ):
         event.Skip()
     
@@ -1398,6 +1451,39 @@ class pyResManDialogBase ( wx.Dialog ):
         event.Skip()
     
     def _buttonDeleteFileOnButtonClick( self, event ):
+        event.Skip()
+    
+    def _buttonDESFireReadDataOnButtonClick( self, event ):
+        event.Skip()
+    
+    def _buttonDESFireWriteDataOnButtonClick( self, event ):
+        event.Skip()
+    
+    def _buttonDESFireGetValueOnButtonClick( self, event ):
+        event.Skip()
+    
+    def _buttonDESFireCreditOnButtonClick( self, event ):
+        event.Skip()
+    
+    def _buttonDESFireDebitOnButtonClick( self, event ):
+        event.Skip()
+    
+    def _buttonDESFireLimitedCreditOnButtonClick( self, event ):
+        event.Skip()
+    
+    def _buttonDESFireWriteRecordOnButtonClick( self, event ):
+        event.Skip()
+    
+    def _buttonDESFireReadRecordsOnButtonClick( self, event ):
+        event.Skip()
+    
+    def _buttonDESFireClearRecordFileOnButtonClick( self, event ):
+        event.Skip()
+    
+    def _buttonDESFireCommitTransactionOnButtonClick( self, event ):
+        event.Skip()
+    
+    def _buttonDESFireAbortTransactionOnButtonClick( self, event ):
         event.Skip()
     
     def _buttonClearLogOnButtonClick( self, event ):

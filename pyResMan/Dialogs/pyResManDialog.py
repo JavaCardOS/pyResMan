@@ -48,8 +48,9 @@ from Dialog import Dialog
 from pyResMan.Dialogs.pyResManDialog_DESFireCreateFile import DESFireDialog_CreateFile
 from pyResMan.DESFireEx import CREATE_STDDATAFILE, CREATE_BACKUPDATAFILE,\
     CREATE_VALUE_FILE, CREATE_LINEAR_RECORD_FILE, CREATE_CYCLIC_RECORD_FILE,\
-    GET_KEY_SETTINGS
-from nt import access
+    GET_KEY_SETTINGS, GET_VALUE, READ_DATA, WRITE_RECORD, LIMITED_CREDIT, DEBIT,\
+    WRITE_DATA, CREDIT, READ_RECORDS
+from pyResMan.Dialogs.pyResManDialog_DESFireFileOperation import DESFireDialog_FileOperation
 
 COMMAND_LIST_COL_INDEX = 0
 COMMAND_LIST_COL_COMMAND_NAME = 1
@@ -177,6 +178,8 @@ class pyResManDialog (pyResManDialogBase):
         # Init DESFire page;
         self._listctrlDESFireApplications.InsertColumn(0, 'ID')
         self._listctrlDESFireFiles.InsertColumn(0, 'ID')
+
+        self.__desfireDisableAllFileButtons()
     
     def ClearMifareCardData(self):
         colCount = self._gridCardData.GetNumberCols()
@@ -1519,6 +1522,19 @@ class pyResManDialog (pyResManDialogBase):
         for app_id in app_ids:
             self._listctrlDESFireApplications.InsertStringItem(self._listctrlDESFireApplications.GetItemCount(), '%06X' %(app_id))
     
+    def __desfireDisableAllFileButtons(self):
+        self._buttonDESFireReadData.Disable()
+        self._buttonDESFireWriteData.Disable()
+        self._buttonDESFireGetValue.Disable()
+        self._buttonDESFireCredit.Disable()
+        self._buttonDESFireDebit.Disable()
+        self._buttonDESFireLimitedCredit.Disable()
+        self._buttonDESFireWriteRecord.Disable()
+        self._buttonDESFireReadRecords.Disable()
+        self._buttonDESFireClearRecordFile.Disable()
+        self._buttonDESFireCommitTransaction.Disable()
+        self._buttonDESFireAbortTransaction.Disable()
+
     def __outputDESFireFileSettings(self, file_settings):
         file_no = file_settings.get('file_no', 0)
         file_type = file_settings.get('type', '')
@@ -1553,6 +1569,25 @@ class pyResManDialog (pyResManDialogBase):
             self._Log('    current num of records: %06X' %(current_num_of_records))
         else:
             pass
+        
+        self.__desfireDisableAllFileButtons()
+        if (file_type == 0x00) or (file_type == 0x01):
+            self._buttonDESFireReadData.Enable()
+            self._buttonDESFireWriteData.Enable()
+        elif (file_type == 0x02):
+            self._buttonDESFireGetValue.Enable()
+            self._buttonDESFireCredit.Enable()
+            self._buttonDESFireDebit.Enable()
+            self._buttonDESFireLimitedCredit.Enable()
+        elif (file_type == 0x03) or (file_type == 0x04):
+            self._buttonDESFireWriteRecord.Enable()
+            self._buttonDESFireReadRecords.Enable()
+            self._buttonDESFireClearRecordFile.Enable()
+        else:
+            pass
+        if file_type != 0x00:
+            self._buttonDESFireCommitTransaction.Enable()
+            self._buttonDESFireAbortTransaction.Enable()
     
     def __outputDESFireKeySettings(self, data):
         key_settings, max_num_of_keys = data
@@ -1570,6 +1605,9 @@ class pyResManDialog (pyResManDialogBase):
             self.__outputDESFireFileSettings(response)
         elif command_type == GET_KEY_SETTINGS:
             self.__outputDESFireKeySettings(response)
+        elif command_type == GET_VALUE:
+            file_id, value = response
+            self._Log('Value of file %06X is %08X (%d)' %(file_id, value, value))
         else:
             pass
     
@@ -1714,3 +1752,64 @@ class pyResManDialog (pyResManDialogBase):
     def _buttonGetKeySettingsOnButtonClick(self, event):
         self.__controller.desfireGetKeySettings()
     
+    def _listctrlDESFireFilesOnListItemSelected(self, event):
+        file_id = self.__listctrlDESFireFiles_GetSelected()
+        if file_id == None:
+            self._Log('Get file settings: no file selected.', wx.LOG_Warning)
+            return
+        self.__controller.desfireGetFileSettings(int(file_id, 0x10))
+        
+    def _buttonDESFireGetValueOnButtonClick(self, event):
+        file_id = self.__listctrlDESFireFiles_GetSelected()
+        if file_id == None:
+            self._Log('Get file settings: no file selected.', wx.LOG_Warning)
+            return
+        self.__controller.desfireGetValue(int(file_id, 0x10))
+    
+    def _buttonDESFireClearRecordFileOnButtonClick(self, event):
+        file_id = self.__listctrlDESFireFiles_GetSelected()
+        if file_id == None:
+            self._Log('Get file settings: no file selected.', wx.LOG_Warning)
+            return
+        self.__controller.desfireClearRecordFile(int(file_id, 0x10))
+
+    def _buttonDESFireCommitTransactionOnButtonClick(self, event):
+        self.__controller.desfireCommitTransaction()
+    
+    def _buttonDESFireAbortTransactionOnButtonClick(self, event):
+        self.__controller.desfireAbortTransaction()
+    
+    def _buttonDESFireReadDataOnButtonClick(self, event):
+        dlg = DESFireDialog_FileOperation(self, READ_DATA)
+        if IDCANCEL == dlg.ShowModal():
+            return
+    
+    def _buttonDESFireWriteDataOnButtonClick(self, event):
+        dlg = DESFireDialog_FileOperation(self, WRITE_DATA)
+        if IDCANCEL == dlg.ShowModal():
+            return
+    
+    def _buttonDESFireCreditOnButtonClick(self, event):
+        dlg = DESFireDialog_FileOperation(self, CREDIT)
+        if IDCANCEL == dlg.ShowModal():
+            return
+        
+    def _buttonDESFireDebitOnButtonClick(self, event):
+        dlg = DESFireDialog_FileOperation(self, DEBIT)
+        if IDCANCEL == dlg.ShowModal():
+            return
+    
+    def _buttonDESFireLimitedCreditOnButtonClick(self, event):
+        dlg = DESFireDialog_FileOperation(self, LIMITED_CREDIT)
+        if IDCANCEL == dlg.ShowModal():
+            return
+    
+    def _buttonDESFireWriteRecordOnButtonClick(self, event):
+        dlg = DESFireDialog_FileOperation(self, WRITE_RECORD)
+        if IDCANCEL == dlg.ShowModal():
+            return
+
+    def _buttonDESFireReadRecordsOnButtonClick(self, event):
+        dlg = DESFireDialog_FileOperation(self, READ_RECORDS)
+        if IDCANCEL == dlg.ShowModal():
+            return

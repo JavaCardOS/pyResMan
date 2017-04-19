@@ -67,6 +67,21 @@ class DESFireDialog_CreateFile ( DESFireDialogBase_CreateFile ):
             self._statictextMaxNumOfRecords.Show()
         else:
             pass
+
+        title = 'DESFire Create File'
+        if file_type == CREATE_STDDATAFILE:
+            title = 'DESFire Create Std Data File'
+        elif file_type == CREATE_BACKUPDATAFILE:
+            title = 'DESFire Create Backup Data File'
+        elif file_type == CREATE_VALUE_FILE:
+            title = 'DESFire Create Value File'
+        elif file_type == CREATE_LINEAR_RECORD_FILE:
+            title = 'DESFire Create Linear Record File'
+        elif file_type == CREATE_CYCLIC_RECORD_FILE:
+            title = 'DESFire Create Cyclic Record File'
+        else:
+            pass
+        self.SetTitle(title)
         
         self.DoLayoutAdaptation()
     
