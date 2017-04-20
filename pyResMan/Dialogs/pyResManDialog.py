@@ -1607,7 +1607,11 @@ class pyResManDialog (pyResManDialogBase):
             self.__outputDESFireKeySettings(response)
         elif command_type == GET_VALUE:
             file_id, value = response
-            self._Log('Value of file %06X is %08X (%d)' %(file_id, value, value))
+            self._Log('Value of file %02X is %08X (%d)' %(file_id, value, value))
+        elif command_type == READ_DATA:
+            self._Log('File data: ' + ''.join('%02X' %(b) for b in response))
+        elif command_type == READ_RECORDS:
+            self._Log('Record file data: ' + ''.join('%02X' %(b) for b in response))
         else:
             pass
     
@@ -1780,36 +1784,96 @@ class pyResManDialog (pyResManDialogBase):
         self.__controller.desfireAbortTransaction()
     
     def _buttonDESFireReadDataOnButtonClick(self, event):
-        dlg = DESFireDialog_FileOperation(self, READ_DATA)
-        if IDCANCEL == dlg.ShowModal():
+        file_id = self.__listctrlDESFireFiles_GetSelected()
+        if file_id == None:
+            self._Log('Get file settings: no file selected.', wx.LOG_Warning)
             return
-    
-    def _buttonDESFireWriteDataOnButtonClick(self, event):
-        dlg = DESFireDialog_FileOperation(self, WRITE_DATA)
-        if IDCANCEL == dlg.ShowModal():
-            return
-    
-    def _buttonDESFireCreditOnButtonClick(self, event):
-        dlg = DESFireDialog_FileOperation(self, CREDIT)
+        dlg = DESFireDialog_FileOperation(self, READ_DATA, int(file_id, 0x10))
         if IDCANCEL == dlg.ShowModal():
             return
         
-    def _buttonDESFireDebitOnButtonClick(self, event):
-        dlg = DESFireDialog_FileOperation(self, DEBIT)
+        file_id = dlg.getFileNo()
+        offset = dlg.getOffset()
+        length = dlg.getLength()
+        self.__controller.desfireReadData(file_id, offset, length)
+    
+    def _buttonDESFireWriteDataOnButtonClick(self, event):
+        file_id = self.__listctrlDESFireFiles_GetSelected()
+        if file_id == None:
+            self._Log('Get file settings: no file selected.', wx.LOG_Warning)
+            return
+        dlg = DESFireDialog_FileOperation(self, WRITE_DATA, int(file_id, 0x10))
         if IDCANCEL == dlg.ShowModal():
             return
+        
+        file_id = dlg.getFileNo()
+        offset = dlg.getOffset()
+        data = dlg.getData()
+        self.__controller.desfireWriteData(file_id, offset, len(data), data)
     
-    def _buttonDESFireLimitedCreditOnButtonClick(self, event):
-        dlg = DESFireDialog_FileOperation(self, LIMITED_CREDIT)
-        if IDCANCEL == dlg.ShowModal():
+    def _buttonDESFireCreditOnButtonClick(self, event):
+        file_id = self.__listctrlDESFireFiles_GetSelected()
+        if file_id == None:
+            self._Log('Get file settings: no file selected.', wx.LOG_Warning)
             return
-    
-    def _buttonDESFireWriteRecordOnButtonClick(self, event):
-        dlg = DESFireDialog_FileOperation(self, WRITE_RECORD)
+        dlg = DESFireDialog_FileOperation(self, CREDIT, int(file_id, 0x10))
         if IDCANCEL == dlg.ShowModal():
             return
 
-    def _buttonDESFireReadRecordsOnButtonClick(self, event):
-        dlg = DESFireDialog_FileOperation(self, READ_RECORDS)
+        file_id = dlg.getFileNo()
+        value = dlg.getValue()
+        self.__controller.desfireCredit(file_id, value)
+        
+    def _buttonDESFireDebitOnButtonClick(self, event):
+        file_id = self.__listctrlDESFireFiles_GetSelected()
+        if file_id == None:
+            self._Log('Get file settings: no file selected.', wx.LOG_Warning)
+            return
+        dlg = DESFireDialog_FileOperation(self, DEBIT, int(file_id, 0x10))
         if IDCANCEL == dlg.ShowModal():
             return
+
+        file_id = dlg.getFileNo()
+        value = dlg.getValue()
+        self.__controller.desfireDebit(file_id, value)
+    
+    def _buttonDESFireLimitedCreditOnButtonClick(self, event):
+        file_id = self.__listctrlDESFireFiles_GetSelected()
+        if file_id == None:
+            self._Log('Get file settings: no file selected.', wx.LOG_Warning)
+            return
+        dlg = DESFireDialog_FileOperation(self, LIMITED_CREDIT, int(file_id, 0x10))
+        if IDCANCEL == dlg.ShowModal():
+            return
+
+        file_id = dlg.getFileNo()
+        value = dlg.getValue()
+        self.__controller.desfireLimitedCredit(file_id, value)
+    
+    def _buttonDESFireWriteRecordOnButtonClick(self, event):
+        file_id = self.__listctrlDESFireFiles_GetSelected()
+        if file_id == None:
+            self._Log('Get file settings: no file selected.', wx.LOG_Warning)
+            return
+        dlg = DESFireDialog_FileOperation(self, WRITE_RECORD, int(file_id, 0x10))
+        if IDCANCEL == dlg.ShowModal():
+            return
+        
+        file_id = dlg.getFileNo()
+        offset = dlg.getOffset()
+        data = dlg.getData()
+        self.__controller.desfireWriteRecord(file_id, offset, len(data), data)
+
+    def _buttonDESFireReadRecordsOnButtonClick(self, event):
+        file_id = self.__listctrlDESFireFiles_GetSelected()
+        if file_id == None:
+            self._Log('Get file settings: no file selected.', wx.LOG_Warning)
+            return
+        dlg = DESFireDialog_FileOperation(self, READ_RECORDS, int(file_id, 0x10))
+        if IDCANCEL == dlg.ShowModal():
+            return
+
+        file_id = dlg.getFileNo()
+        offset = dlg.getOffset()
+        length = dlg.getLength()
+        self.__controller.desfireReadRecords(file_id, offset, length)

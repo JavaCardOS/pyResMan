@@ -13,7 +13,7 @@ class DESFireDialog_FileOperation(DESFireDialogBase_FileOperation):
     '''
 
 
-    def __init__(self, parent, command_type):
+    def __init__(self, parent, command_type, file_id):
         '''
         Constructor
         '''
@@ -31,11 +31,9 @@ class DESFireDialog_FileOperation(DESFireDialogBase_FileOperation):
         elif command_type == WRITE_DATA:
             self._statictextFileNo.Show()
             self._statictextOffset.Show()
-            self._statictextLength.Show()
             self._statictextData.Show()
             self._textctrlFileNo.Show()
             self._textctrlOffset.Show()
-            self._textctrlLength.Show()
             self._textctrlData.Show()
         elif command_type == CREDIT:
             self._statictextFileNo.Show()
@@ -55,11 +53,9 @@ class DESFireDialog_FileOperation(DESFireDialogBase_FileOperation):
         elif command_type == WRITE_RECORD:
             self._statictextFileNo.Show()
             self._statictextOffset.Show()
-            self._statictextLength.Show()
             self._statictextData.Show()
             self._textctrlFileNo.Show()
             self._textctrlOffset.Show()
-            self._textctrlLength.Show()
             self._textctrlData.Show()
         elif command_type == READ_RECORDS:
             self._statictextFileNo.Show()
@@ -70,6 +66,8 @@ class DESFireDialog_FileOperation(DESFireDialogBase_FileOperation):
             self._textctrlLength.Show()
         else:
             pass
+        
+        self._textctrlFileNo.SetValue('%02X' %(file_id))
         
         self.DoLayoutAdaptation()
         

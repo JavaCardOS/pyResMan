@@ -22,7 +22,8 @@ from pyResMan.R502Device import R502Device
 from pyResMan.pyLibSC import LibSC
 from pyResMan import DebuggerUtils
 from pyResMan import DESFireEx
-from pyResMan.DESFireEx import GET_FILE_SETTINGS, GET_KEY_SETTINGS, GET_VALUE
+from pyResMan.DESFireEx import GET_FILE_SETTINGS, GET_KEY_SETTINGS, GET_VALUE,\
+    READ_DATA, READ_RECORDS
 
 class APDUItem(object):
     """Class for APDU item data;"""
@@ -964,7 +965,7 @@ class pyResManController(object):
             self.__handler.handleLog('DESFire get value, exception: %s' %(e), wx.LOG_Error)
     
     def desfireGetValue(self, file_id):
-        self.__desfireCommandThread = threading.Thread(target=self.__desfireGetValue, args=(file_id))
+        self.__desfireCommandThread = threading.Thread(target=self.__desfireGetValue, args=(file_id, ))
         self.__desfireCommandThread.start()
         
     def __desfireClearRecordFile(self, file_id):
@@ -975,7 +976,7 @@ class pyResManController(object):
             self.__handler.handleLog('DESFire clear record file, exception: %s' %(e), wx.LOG_Error)
     
     def desfireClearRecordFile(self, file_id):
-        self.__desfireCommandThread = threading.Thread(target=self.__desfireClearRecordFile, args=(file_id))
+        self.__desfireCommandThread = threading.Thread(target=self.__desfireClearRecordFile, args=(file_id, ))
         self.__desfireCommandThread.start()
         
     def __desfireCommitTransaction(self):
@@ -998,6 +999,85 @@ class pyResManController(object):
     
     def desfireAbortTransaction(self):
         self.__desfireCommandThread = threading.Thread(target=self.__desfireAbortTransaction)
+        self.__desfireCommandThread.start()
+
+    def __desfireReadData(self, file_id, offset, length):
+        try:
+            data = self.__desfire.read_data(file_id, offset, length)
+            self.__handler.handleDESFireResponse(READ_DATA, data)
+            self.__handler.handleLog('DESFire read data succeeded.', wx.LOG_Info)
+        except Exception, e:
+            self.__handler.handleLog('DESFire read data, exception: %s' %(e), wx.LOG_Error)
+    
+    def desfireReadData(self, file_id, offset, length):
+        self.__desfireCommandThread = threading.Thread(target=self.__desfireReadData, args=(file_id, offset, length))
+        self.__desfireCommandThread.start()
+    
+    def __desfireWriteData(self, file_id, offset, length, data):
+        try:
+            self.__desfire.write_data(file_id, offset, length, data)
+            self.__handler.handleLog('DESFire write data succeeded.', wx.LOG_Info)
+        except Exception, e:
+            self.__handler.handleLog('DESFire write data, exception: %s' %(e), wx.LOG_Error)
+    
+    def desfireWriteData(self, file_id, offset, length, data):
+        self.__desfireCommandThread = threading.Thread(target=self.__desfireWriteData, args=(file_id, offset, length, data))
+        self.__desfireCommandThread.start()
+        
+    def __desfireCredit(self, file_id, value):
+        try:
+            self.__desfire.credit(file_id, value)
+            self.__handler.handleLog('DESFire credit succeeded.', wx.LOG_Info)
+        except Exception, e:
+            self.__handler.handleLog('DESFire credit, exception: %s' %(e), wx.LOG_Error)
+    
+    def desfireCredit(self, file_id, value):
+        self.__desfireCommandThread = threading.Thread(target=self.__desfireCredit, args=(file_id, value))
+        self.__desfireCommandThread.start()
+        
+    def __desfireDebit(self, file_id, value):
+        try:
+            self.__desfire.debit(file_id, value)
+            self.__handler.handleLog('DESFire debit succeeded.', wx.LOG_Info)
+        except Exception, e:
+            self.__handler.handleLog('DESFire debit, exception: %s' %(e), wx.LOG_Error)
+    
+    def desfireDebit(self, file_id, value):
+        self.__desfireCommandThread = threading.Thread(target=self.__desfireDebit, args=(file_id, value))
+        self.__desfireCommandThread.start()
+        
+    def __desfireLimitedCredit(self, file_id, value):
+        try:
+            self.__desfire.limited_credit(file_id, value)
+            self.__handler.handleLog('DESFire limited credit succeeded.', wx.LOG_Info)
+        except Exception, e:
+            self.__handler.handleLog('DESFire limited credit, exception: %s' %(e), wx.LOG_Error)
+    
+    def desfireLimitedCredit(self, file_id, value):
+        self.__desfireCommandThread = threading.Thread(target=self.__desfireLimitedCredit, args=(file_id, value))
+        self.__desfireCommandThread.start()
+    
+    def __desfireWriteRecord(self, file_id, offset, length, data):
+        try:
+            self.__desfire.write_record(file_id, offset, length, data)
+            self.__handler.handleLog('DESFire write record succeeded.', wx.LOG_Info)
+        except Exception, e:
+            self.__handler.handleLog('DESFire write record, exception: %s' %(e), wx.LOG_Error)
+    
+    def desfireWriteRecord(self, file_id, offset, length, data):
+        self.__desfireCommandThread = threading.Thread(target=self.__desfireWriteRecord, args=(file_id, offset, length, data))
+        self.__desfireCommandThread.start()
+        
+    def __desfireReadRecords(self, file_id, offset, length):
+        try:
+            data = self.__desfire.read_records(file_id, offset, length)
+            self.__handler.handleDESFireResponse(READ_RECORDS, data)
+            self.__handler.handleLog('DESFire read records succeeded.', wx.LOG_Info)
+        except Exception, e:
+            self.__handler.handleLog('DESFire read records, exception: %s' %(e), wx.LOG_Error)
+    
+    def desfireReadRecords(self, file_id, offset, length):
+        self.__desfireCommandThread = threading.Thread(target=self.__desfireReadRecords, args=(file_id, offset, length))
         self.__desfireCommandThread.start()
     
 class pyResManControllerEventHandler(object):

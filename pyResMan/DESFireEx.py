@@ -4,10 +4,12 @@ Created on 2017/4/12
 @author: zhenkui
 '''
 
-from desfire.protocol import DESFire, FILE_COMMUNICATION, FILE_TYPES
+from desfire.protocol import DESFire, FILE_COMMUNICATION, FILE_TYPES,\
+    DESFireCommunicationError
 from desfire.util import dword_to_byte_array, byte_array_to_human_readable_hex
 from pyResMan.Util import Util
 import pyDes
+import time
 
 AUTHENTICATE                = 0x0A
 AUTHENTICATE_ISO            = 0x1A
@@ -49,6 +51,31 @@ COMMIT_TRANSACTION          = 0xC7
 ABORT_TRANSACTION           = 0xA7
 CONTINUE                    = 0xAF
 
+ERRORS = {
+#       0x00: 'OPERATION_OK Successful operation'
+    0x0C: 'NO_CHANGES No changes done to backup files, CommitTransaction / AbortTransaction not necessary'
+    , 0x0E: 'OUT_OF_EEPROM_ERROR Insufficient NV-Memory to complete command'
+    , 0x1C: 'ILLEGAL_COMMAND_CODE Command code not supported'
+    , 0x1E: 'INTEGRITY_ERROR CRC or MAC does not match data Padding bytes not valid'
+    , 0x40: 'NO_SUCH_KEY Invalid key number specified'
+    , 0x7E: 'LENGTH_ERROR Length of command string invalid'
+    , 0x9D: 'PERMISSION_DENIED Current configuration / status does not allow the requested command'
+    , 0x9E: 'PARAMETER_ERROR Value of the parameter(s) invalid'
+    , 0xA0: 'APPLICATION_NOT_FOUND Requested AID not present on PICC'
+    , 0xA1: 'APPL_INTEGRITY_ERROR Unrecoverable error within application, application will be disabled'
+    , 0xAE: 'AUTHENTICATION_ERROR Current authentication status does not allow the requested command'
+#     , 0xAF: 'ADDITIONAL_FRAME Additional data frame is expected to be sent'
+    , 0xBE: 'BOUNDARY_ERROR Attempt to read/write data from/to beyond the file\'s/record\'s limits. Attempt to exceed the limits of a value file.'
+    , 0xC1: 'PICC_INTEGRITY_ERROR Unrecoverable error within PICC, PICC will be disabled'
+    , 0xCA: 'COMMAND_ABORTED Previous Command was not fully completed Not all Frames were requested or provided by the PCD'
+    , 0xCD: 'PICC_DISABLED_ERROR PICC was disabled by an unrecoverable error'
+    , 0xCE: 'COUNT_ERROR Number of Applications limited to 28, no additional CreateApplication possible'
+    , 0xDE: 'DUPLICATE_ERROR Creation of file/application failed because file/application with same number already exists'
+    , 0xEE: 'EEPROM_ERROR Could not complete NV-write operation due to loss of power, internal backup/rollback mechanism activated'
+    , 0xF0: 'FILE_NOT_FOUND Specified file number does not exist'
+    , 0xF1: 'FILE_INTEGRITY_ERROR Unrecoverable error within file, file will be disabled'
+}
+
 import sys
 if sys.version_info[0] < 3:
     def bytes(l):
@@ -68,6 +95,66 @@ class DESFireEx(DESFire):
 
         self.session_cipher = None
         self.key_id = 0
+    
+    def communicate(self, apdu_cmd, description, allow_continue_fallthrough=False):
+        """Communicate with a NFC tag.
+
+        Send in outgoing request and waith for a card reply.
+
+        TODO: Handle additional framing via 0xaf
+
+        :param apdu_cmd: Outgoing APDU command as array of bytes
+
+        :param description: Command description for logging purposes
+
+        :param allow_continue_fallthrough: If True 0xAF response (incoming more data, need mode data) is instantly returned to the called instead of trying to handle it internally
+
+        :raise: :py:class:`desfire.protocol.DESFireCommunicationError` on any error
+
+        :return: tuple(APDU response as list of bytes, bool if additional frames are inbound)
+        """
+
+        result = []
+        additional_framing_needed = True
+
+        # TODO: Clean this up so read/write implementations have similar mechanisms and all continue is handled internally
+        while additional_framing_needed:
+
+            apdu_cmd_hex = [hex(c) for c in apdu_cmd]
+            self.logger.debug("Running APDU command %s, sending: %s", description, apdu_cmd_hex)
+
+            resp = self.device.transceive(apdu_cmd)
+            self.logger.debug("Received APDU response: %s", byte_array_to_human_readable_hex(resp))
+
+            if resp[-2] != 0x91:
+                raise DESFireCommunicationError("Received invalid response for command: {}".format(description), resp[-2:])
+
+            # Possible status words: https://github.com/jekkos/android-hce-desfire/blob/master/hceappletdesfire/src/main/java/net/jpeelaer/hce/desfire/DesfireStatusWord.java
+            status = resp[-1]
+
+            # Check for known error interpretation
+            error_msg = ERRORS.get(status)
+            if error_msg:
+                raise DESFireCommunicationError(error_msg, status)
+
+            if status == 0xaf:
+                if allow_continue_fallthrough:
+                    additional_framing_needed = False
+                else:
+                    # Need to loop more cycles to fill in receive buffer
+                    additional_framing_needed = True
+                    apdu_cmd = self.wrap_command(0xaf)  # Continue
+            elif status != 0x00:
+                raise DESFireCommunicationError("Error {:02x} when communicating".format(status), status)
+            else:
+                additional_framing_needed = False
+
+            # This will un-memoryview this object as there seems to be some pyjnius
+            # bug getting this corrupted down along the line
+            unframed = list(resp[0:-2])
+            result += unframed
+
+        return result
 
     def authenticate(self, key_id, private_key=[0x00] * 16):
         apdu_command = self.wrap_command(0x0a, [key_id])
@@ -300,3 +387,98 @@ class DESFireEx(DESFire):
     def abort_transaction(self):
         apdu_command = self.wrap_command(ABORT_TRANSACTION)
         self.communicate(apdu_command, "Abort file changes")
+        
+    def read_data(self, file_id, offset, length):
+        offset_bytes = Util.bytes3_to_byte_array(offset)
+        length_bytes = Util.bytes3_to_byte_array(length)
+        parameters = [file_id] + offset_bytes + length_bytes
+
+        start_time = time.time()
+        apdu_command = self.wrap_command(0xbd, parameters)
+
+        data = self.communicate(apdu_command, "Reading data file {:02X}".format(file_id))
+
+        duration = time.time() - start_time
+        self.logger.debug("Finished reading %d bytes in %f seconds", len(data), duration)
+
+        return data
+    
+    def write_data(self, file_id, offset, length, data):
+        offset_bytes = Util.bytes3_to_byte_array(offset)
+        length_bytes = Util.bytes3_to_byte_array(length)
+        parameters = [file_id] + offset_bytes + length_bytes
+
+        data_pointer = 0
+        max_apdu_write_length = 47  # Actual max value found by experimenting
+        command = 0x3d  # WRITE DATA
+        cycles = 0
+        start_time = time.time()
+
+        self.logger.debug("Attempting to write %d bytes to a data file %02x", len(data), file_id)
+
+        while data_pointer < len(data):
+            chunk = data[data_pointer:data_pointer + max_apdu_write_length]
+            parameters = parameters + chunk
+            apdu_command = self.wrap_command(command, parameters)
+            self.communicate(apdu_command, "Writing line record file file {:02X}, current command {:02X} write pointer: {}".format(file_id, command, data_pointer), allow_continue_fallthrough=True)
+
+            data_pointer += max_apdu_write_length
+
+            # Use different parameters for the 2nd ... nth write cycle
+            command = 0xaf  # CONTINUE
+            max_apdu_write_length = 54
+            parameters = []
+            cycles += 1
+
+        duration = time.time() - start_time
+        self.logger.debug("Finished writing %d bytes in %d commands and %f seconds", len(data), cycles, duration)
+    
+    def credit(self, file_id, value):
+        self.credit_value(file_id, value)
+    
+    def debit(self, file_id, value):
+        self.debit_value(file_id, value)
+    
+    def limited_credit(self, file_id, value):
+        value_bytes = dword_to_byte_array(value)
+
+        apdu_command = self.wrap_command(LIMITED_CREDIT, [file_id] + value_bytes)
+        self.communicate(apdu_command, "Limited credit file {:02X} value {:08X}".format(file_id, value))
+    
+    def write_record(self, file_id, offset, length, data):
+        offset_bytes = Util.bytes3_to_byte_array(offset)
+        length_bytes = Util.bytes3_to_byte_array(length)
+        parameters = [file_id] + offset_bytes + length_bytes
+
+        data_pointer = 0
+        max_apdu_write_length = 47  # Actual max value found by experimenting
+        command = WRITE_RECORD  # WRITE DATA
+        cycles = 0
+        start_time = time.time()
+
+        self.logger.debug("Attempting to write %d bytes to a record file %02x", len(data), file_id)
+
+        while data_pointer < len(data):
+            chunk = data[data_pointer:data_pointer + max_apdu_write_length]
+            parameters = parameters + chunk
+            apdu_command = self.wrap_command(command, parameters)
+            self.communicate(apdu_command, "Writing line record file file {:02X}, current command {:02X} write pointer: {}".format(file_id, command, data_pointer), allow_continue_fallthrough=True)
+
+            data_pointer += max_apdu_write_length
+
+            # Use different parameters for the 2nd ... nth write cycle
+            command = 0xaf  # CONTINUE
+            max_apdu_write_length = 54
+            parameters = []
+            cycles += 1
+
+        duration = time.time() - start_time
+        self.logger.debug("Finished writing %d bytes in %d commands and %f seconds", len(data), cycles, duration)
+    
+    def read_records(self, file_id, offset, length):
+        offset_bytes = Util.bytes3_to_byte_array(offset)
+        length_bytes = Util.bytes3_to_byte_array(length)
+        parameters = [file_id] + offset_bytes + length_bytes
+        
+        apdu_command = self.wrap_command(READ_RECORDS, parameters)
+        return self.communicate(apdu_command, "Reading bytes from offset {} length {} in a line record file file {:02X}".format(offset, length, file_id))
