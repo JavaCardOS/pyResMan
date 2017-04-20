@@ -8,7 +8,7 @@ Created on 2015-10-27
 @copyright: JavaCardOS Technologies. All rights reserved.
 '''
 
-from wx import ListItem, TreeItemId, TreeItemData
+from wx import ListItem, TreeItemId, TreeItemData, MessageBox
 from pyResMan.pyResManReader import pyResManReader
 from smartcard.Exceptions import NoCardException
 from pyResMan.pyResManController import pyResManController, APDUItem
@@ -51,6 +51,7 @@ from pyResMan.DESFireEx import CREATE_STDDATAFILE, CREATE_BACKUPDATAFILE,\
     GET_KEY_SETTINGS, GET_VALUE, READ_DATA, WRITE_RECORD, LIMITED_CREDIT, DEBIT,\
     WRITE_DATA, CREDIT, READ_RECORDS
 from pyResMan.Dialogs.pyResManDialog_DESFireFileOperation import DESFireDialog_FileOperation
+from wx.lib import dialogs
 
 COMMAND_LIST_COL_INDEX = 0
 COMMAND_LIST_COL_COMMAND_NAME = 1
@@ -1749,9 +1750,10 @@ class pyResManDialog (pyResManDialogBase):
         self.__controller.desfireDeleteFile(file_id)
     
     def _buttonChangeKeyOnButtonClick(self, event):
-        key = self._textctrlDESFireKey.GetValue()
-        new_key = self._textctrlDESFireNewKey.GetValue()
-        self.__controller.desfireChangeKey(Util.s2vl(key), Util.s2vl(new_key))
+        dialogs.messageDialog(self, 'Not implemented yet.', 'DESFire change Key', wx.OK)
+#         key = self._textctrlDESFireKey.GetValue()
+#         new_key = self._textctrlDESFireNewKey.GetValue()
+#         self.__controller.desfireChangeKey(Util.s2vl(key), Util.s2vl(new_key))
     
     def _buttonGetKeySettingsOnButtonClick(self, event):
         self.__controller.desfireGetKeySettings()
