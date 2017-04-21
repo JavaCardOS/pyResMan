@@ -8,7 +8,7 @@ Created on 2015-10-27
 @copyright: JavaCardOS Technologies. All rights reserved.
 '''
 
-from wx import ListItem, TreeItemId, TreeItemData, MessageBox, NOT_FOUND
+from wx import ListItem, TreeItemId, TreeItemData, NOT_FOUND
 from pyResMan.pyResManReader import pyResManReader
 from smartcard.Exceptions import NoCardException
 from pyResMan.pyResManController import pyResManController, APDUItem
@@ -42,9 +42,7 @@ from pyResMan.Dialogs.pyResManCommandDialog_MifareRestore import CommandDialog_M
 from pyResMan import DebuggerUtils
 from pyResMan.DebuggerUtils import getErrorString
 import pyResMan.DESFireEx as DESFireEx
-from wx._controls import LIST_STATE_SELECTED
 from pyResMan.Dialogs.pyResManDialog_DESFireCreateApplication import DESFireDialog_CreateApplication
-from Dialog import Dialog
 from pyResMan.Dialogs.pyResManDialog_DESFireCreateFile import DESFireDialog_CreateFile
 from pyResMan.DESFireEx import CREATE_STDDATAFILE, CREATE_BACKUPDATAFILE,\
     CREATE_VALUE_FILE, CREATE_LINEAR_RECORD_FILE, CREATE_CYCLIC_RECORD_FILE,\

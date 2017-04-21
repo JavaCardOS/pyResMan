@@ -982,7 +982,7 @@
                                                     <object class="notebookpage" expanded="0">
                                                         <property name="bitmap"></property>
                                                         <property name="label">Basic APDU</property>
-                                                        <property name="select">0</property>
+                                                        <property name="select">1</property>
                                                         <object class="wxPanel" expanded="0">
                                                             <property name="BottomDockable">1</property>
                                                             <property name="LeftDockable">1</property>
@@ -9805,7 +9805,7 @@
                                                     <object class="notebookpage" expanded="0">
                                                         <property name="bitmap"></property>
                                                         <property name="label">DESFire</property>
-                                                        <property name="select">1</property>
+                                                        <property name="select">0</property>
                                                         <object class="wxPanel" expanded="0">
                                                             <property name="BottomDockable">1</property>
                                                             <property name="LeftDockable">1</property>
@@ -9947,10 +9947,10 @@
                                                                                                 <property name="label">Key</property>
                                                                                                 <property name="max_size"></property>
                                                                                                 <property name="maximize_button">0</property>
-                                                                                                <property name="maximum_size"></property>
+                                                                                                <property name="maximum_size">70,-1</property>
                                                                                                 <property name="min_size"></property>
                                                                                                 <property name="minimize_button">0</property>
-                                                                                                <property name="minimum_size"></property>
+                                                                                                <property name="minimum_size">70,-1</property>
                                                                                                 <property name="moveable">1</property>
                                                                                                 <property name="name">m_staticText107</property>
                                                                                                 <property name="pane_border">1</property>
@@ -9961,7 +9961,7 @@
                                                                                                 <property name="pos"></property>
                                                                                                 <property name="resize">Resizable</property>
                                                                                                 <property name="show">1</property>
-                                                                                                <property name="size">25,-1</property>
+                                                                                                <property name="size">70,-1</property>
                                                                                                 <property name="style">wxALIGN_CENTRE</property>
                                                                                                 <property name="subclass"></property>
                                                                                                 <property name="toolbar_pane">0</property>
@@ -11878,7 +11878,7 @@
                                                                                                         <property name="label">Applications</property>
                                                                                                         <property name="max_size"></property>
                                                                                                         <property name="maximize_button">0</property>
-                                                                                                        <property name="maximum_size"></property>
+                                                                                                        <property name="maximum_size">70,-1</property>
                                                                                                         <property name="min_size"></property>
                                                                                                         <property name="minimize_button">0</property>
                                                                                                         <property name="minimum_size">70,-1</property>
@@ -11892,7 +11892,7 @@
                                                                                                         <property name="pos"></property>
                                                                                                         <property name="resize">Resizable</property>
                                                                                                         <property name="show">1</property>
-                                                                                                        <property name="size"></property>
+                                                                                                        <property name="size">70,-1</property>
                                                                                                         <property name="style">wxALIGN_CENTRE</property>
                                                                                                         <property name="subclass"></property>
                                                                                                         <property name="toolbar_pane">0</property>
@@ -12737,7 +12737,7 @@
                                                                                                 <property name="label">Files</property>
                                                                                                 <property name="max_size"></property>
                                                                                                 <property name="maximize_button">0</property>
-                                                                                                <property name="maximum_size"></property>
+                                                                                                <property name="maximum_size">70,-1</property>
                                                                                                 <property name="min_size"></property>
                                                                                                 <property name="minimize_button">0</property>
                                                                                                 <property name="minimum_size">70,-1</property>
@@ -12751,7 +12751,7 @@
                                                                                                 <property name="pos"></property>
                                                                                                 <property name="resize">Resizable</property>
                                                                                                 <property name="show">1</property>
-                                                                                                <property name="size"></property>
+                                                                                                <property name="size">70,-1</property>
                                                                                                 <property name="style">wxALIGN_CENTRE</property>
                                                                                                 <property name="subclass"></property>
                                                                                                 <property name="toolbar_pane">0</property>
@@ -14923,7 +14923,7 @@
                                                                                         <property name="gripper">0</property>
                                                                                         <property name="hidden">0</property>
                                                                                         <property name="id">wxID_ANY</property>
-                                                                                        <property name="label">PyResMan v4.0</property>
+                                                                                        <property name="label">PyResMan v5.0</property>
                                                                                         <property name="max_size"></property>
                                                                                         <property name="maximize_button">0</property>
                                                                                         <property name="maximum_size"></property>
@@ -37512,7 +37512,7 @@
                 </object>
             </object>
         </object>
-        <object class="Dialog" expanded="1">
+        <object class="Dialog" expanded="0">
             <property name="aui_managed">0</property>
             <property name="aui_manager_style">wxAUI_MGR_DEFAULT</property>
             <property name="bg"></property>

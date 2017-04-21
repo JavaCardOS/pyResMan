@@ -7,7 +7,6 @@ Created on 2015-10-30
 @organization: https://www.javacardos.com/
 @copyright: JavaCardOS Technologies. All rights reserved.
 '''
-from django.conf.urls.static import static
 
 IDOK = 1
 IDCANCEL = 2

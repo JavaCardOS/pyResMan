@@ -136,7 +136,7 @@ class pyResManDialogBase ( wx.Dialog ):
         self._panelApdu.SetSizer( _apduPageSizer )
         self._panelApdu.Layout()
         _apduPageSizer.Fit( self._panelApdu )
-        self._notebookPages.AddPage( self._panelApdu, u"Basic APDU", False )
+        self._notebookPages.AddPage( self._panelApdu, u"Basic APDU", True )
         self._panelGP = wx.Panel( self._notebookPages, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
         _gpPageSizer = wx.BoxSizer( wx.VERTICAL )
         
@@ -707,8 +707,11 @@ class pyResManDialogBase ( wx.Dialog ):
         
         bSizer184 = wx.BoxSizer( wx.HORIZONTAL )
         
-        self.m_staticText107 = wx.StaticText( self._panelDESFire, wx.ID_ANY, u"Key", wx.DefaultPosition, wx.Size( 25,-1 ), wx.ALIGN_CENTRE )
+        self.m_staticText107 = wx.StaticText( self._panelDESFire, wx.ID_ANY, u"Key", wx.DefaultPosition, wx.Size( 70,-1 ), wx.ALIGN_CENTRE )
         self.m_staticText107.Wrap( -1 )
+        self.m_staticText107.SetMinSize( wx.Size( 70,-1 ) )
+        self.m_staticText107.SetMaxSize( wx.Size( 70,-1 ) )
+        
         bSizer184.Add( self.m_staticText107, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
         
         self._textctrlKeyNo = wx.TextCtrl( self._panelDESFire, wx.ID_ANY, u"00", wx.DefaultPosition, wx.Size( 25,-1 ), 0 )
@@ -868,9 +871,10 @@ class pyResManDialogBase ( wx.Dialog ):
         
         bSizer202 = wx.BoxSizer( wx.HORIZONTAL )
         
-        self.m_staticText117 = wx.StaticText( self._panelDESFire, wx.ID_ANY, u"Applications", wx.DefaultPosition, wx.DefaultSize, wx.ALIGN_CENTRE )
+        self.m_staticText117 = wx.StaticText( self._panelDESFire, wx.ID_ANY, u"Applications", wx.DefaultPosition, wx.Size( 70,-1 ), wx.ALIGN_CENTRE )
         self.m_staticText117.Wrap( -1 )
         self.m_staticText117.SetMinSize( wx.Size( 70,-1 ) )
+        self.m_staticText117.SetMaxSize( wx.Size( 70,-1 ) )
         
         bSizer202.Add( self.m_staticText117, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
         
@@ -929,9 +933,10 @@ class pyResManDialogBase ( wx.Dialog ):
         
         bSizer203.Add( self._listctrlDESFireFiles, 1, wx.ALL|wx.EXPAND, 5 )
         
-        self.m_staticText118 = wx.StaticText( self._panelDESFire, wx.ID_ANY, u"Files", wx.DefaultPosition, wx.DefaultSize, wx.ALIGN_CENTRE )
+        self.m_staticText118 = wx.StaticText( self._panelDESFire, wx.ID_ANY, u"Files", wx.DefaultPosition, wx.Size( 70,-1 ), wx.ALIGN_CENTRE )
         self.m_staticText118.Wrap( -1 )
         self.m_staticText118.SetMinSize( wx.Size( 70,-1 ) )
+        self.m_staticText118.SetMaxSize( wx.Size( 70,-1 ) )
         
         bSizer203.Add( self.m_staticText118, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
         
@@ -1065,7 +1070,7 @@ class pyResManDialogBase ( wx.Dialog ):
         self._panelDESFire.SetSizer( bSizer1611 )
         self._panelDESFire.Layout()
         bSizer1611.Fit( self._panelDESFire )
-        self._notebookPages.AddPage( self._panelDESFire, u"DESFire", True )
+        self._notebookPages.AddPage( self._panelDESFire, u"DESFire", False )
         self._panelAbout = wx.Panel( self._notebookPages, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
         bSizer331 = wx.BoxSizer( wx.HORIZONTAL )
         
@@ -1082,7 +1087,7 @@ class pyResManDialogBase ( wx.Dialog ):
         
         bSizer401.AddSpacer( ( 0, 0), 1, wx.EXPAND, 5 )
         
-        self.m_staticText101 = wx.StaticText( self._panelAbout, wx.ID_ANY, u"PyResMan v4.0", wx.DefaultPosition, wx.DefaultSize, wx.ALIGN_CENTRE )
+        self.m_staticText101 = wx.StaticText( self._panelAbout, wx.ID_ANY, u"PyResMan v5.0", wx.DefaultPosition, wx.DefaultSize, wx.ALIGN_CENTRE )
         self.m_staticText101.Wrap( -1 )
         bSizer401.Add( self.m_staticText101, 0, wx.ALL|wx.EXPAND|wx.ALIGN_CENTER_VERTICAL, 5 )
         
