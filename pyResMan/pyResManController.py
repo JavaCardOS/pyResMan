@@ -917,7 +917,7 @@ class pyResManController(object):
             self.__handler.handleLog('DESFire delete file, exception: %s' %(e), wx.LOG_Error)
     
     def desfireDeleteFile(self, file_no):
-        self.__desfireCommandThread = threading.Thread(target=self.__desfireCreateCyclicRecordFile, args=(file_no, ))
+        self.__desfireCommandThread = threading.Thread(target=self.__desfireDeleteFile, args=(file_no, ))
         self.__desfireCommandThread.start()
     
     def __desfireGetFileSettings(self, file_no):

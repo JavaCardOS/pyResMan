@@ -8,7 +8,7 @@ Created on 2015-10-27
 @copyright: JavaCardOS Technologies. All rights reserved.
 '''
 
-from wx import ListItem, TreeItemId, TreeItemData, MessageBox
+from wx import ListItem, TreeItemId, TreeItemData, MessageBox, NOT_FOUND
 from pyResMan.pyResManReader import pyResManReader
 from smartcard.Exceptions import NoCardException
 from pyResMan.pyResManController import pyResManController, APDUItem
@@ -1519,9 +1519,13 @@ class pyResManDialog (pyResManDialogBase):
     
     def __outputDESFireApplications(self, app_ids):
         self._Log('DESFire got %d applications.' %(len(app_ids)), wx.LOG_Info)
-        self._listctrlDESFireApplications.DeleteAllItems()
+        self._choiceDESFireApplications.Clear()
         for app_id in app_ids:
-            self._listctrlDESFireApplications.InsertStringItem(self._listctrlDESFireApplications.GetItemCount(), '%06X' %(app_id))
+            self._choiceDESFireApplications.Append('%06X' %(app_id))
+        
+        if len(app_ids) > 0:
+            self._choiceDESFireApplications.SetSelection(0)
+        
     
     def __desfireDisableAllFileButtons(self):
         self._buttonDESFireReadData.Disable()
@@ -1622,34 +1626,20 @@ class pyResManDialog (pyResManDialogBase):
     def _buttonGetApplicationIDsOnButtonClick(self, event):
         self.__controller.desfireGetApplicationIDs()
     
-    def __listctrlDESFireApplications_GetSelected(self):
-        app_id = None
-        for i in range(self._listctrlDESFireApplications.GetItemCount()):
-            if self._listctrlDESFireApplications.GetItemState(i, LIST_STATE_SELECTED) != 0:
-                app_id = self._listctrlDESFireApplications.GetItemText(i)
-                break
-        return app_id
-    
-    def __listctrlDESFireFiles_GetSelected(self):
-        file_id = None
-        for i in range(self._listctrlDESFireFiles.GetItemCount()):
-            if self._listctrlDESFireFiles.GetItemState(i, LIST_STATE_SELECTED) != 0:
-                file_id = self._listctrlDESFireFiles.GetItemText(i)
-                break
-        return file_id
-    
     def _buttonDeleteApplicationOnButtonClick(self, event):
-        app_id = self.__listctrlDESFireApplications_GetSelected()
-        if app_id == None:
-            self._Log('DESFire delete application: No application selected.', wx.LOG_Warning)
+        app_id_index = self._choiceDESFireApplications.GetSelection()
+        if app_id_index == NOT_FOUND:
+            self._Log('DESFire select application: No application selected.', wx.LOG_Warning)
             return
+        app_id = self._choiceDESFireApplications.GetString(app_id_index)
         self.__controller.desfireDeleteApplication(int(app_id, 0x10))
     
     def _buttonSelectApplicationOnButtonClick(self, event):
-        app_id = self.__listctrlDESFireApplications_GetSelected()
-        if app_id == None:
+        app_id_index = self._choiceDESFireApplications.GetSelection()
+        if app_id_index == NOT_FOUND:
             self._Log('DESFire select application: No application selected.', wx.LOG_Warning)
             return
+        app_id = self._choiceDESFireApplications.GetString(app_id_index)
         self.__controller.desfireSelectApplication(int(app_id, 0x10))
     
     def _buttonCreateApplicationOnButtonClick(self, event):
@@ -1667,9 +1657,13 @@ class pyResManDialog (pyResManDialogBase):
     
     def __outputDESFireFileIDs(self, file_ids):
         self._Log('DESFire got %d files.' %(len(file_ids)), wx.LOG_Info)
-        self._listctrlDESFireFiles.DeleteAllItems()
+        self._choiceDESFireFiles.Clear()
         for file_id in file_ids:
-            self._listctrlDESFireFiles.InsertStringItem(self._listctrlDESFireFiles.GetItemCount(), '%02X' %(file_id))
+            self._choiceDESFireFiles.Append('%02X' %(file_id))
+
+        if len(file_ids) > 0:
+            self._choiceDESFireFiles.SetSelection(0)
+            self.__controller.desfireGetFileSettings(file_ids[0])
     
     def _buttonCreateStdDataFileOnButtonClick(self, event):
         dialog_create_file = DESFireDialog_CreateFile(self, CREATE_STDDATAFILE)
@@ -1732,22 +1726,23 @@ class pyResManDialog (pyResManDialogBase):
         self.__controller.desfireCreateCyclicRecordFile(file_no, com_set, access_rights, record_size, max_num_of_records)
 
     def _buttonGetFileSettingsOnButtonClick(self, event):
-        file_no = self.__listctrlDESFireFiles_GetSelected()
-        if file_no == None:
+        file_id_index = self._choiceDESFireFiles.GetSelection()
+        if file_id_index == NOT_FOUND:
             self._Log('Get file settings: no file selected.', wx.LOG_Warning)
             return
-        self.__controller.desfireGetFileSettings(int(file_no, 0x10))
+        file_id = self._choiceDESFireFiles.GetString(file_id_index)
+        self.__controller.desfireGetFileSettings(int(file_id, 0x10))
     
     def _buttonChangeFileSettingsOnButtonClick(self, event):
         pass
     
     def _buttonDeleteFileOnButtonClick(self, event):
-        file_id = self.__listctrlDESFireFiles_GetSelected()
-        if file_id == None:
-            self._Log('DESFire delete file: No file selected.', wx.LOG_Warning)
+        file_id_index = self._choiceDESFireFiles.GetSelection()
+        if file_id_index == NOT_FOUND:
+            self._Log('Get file settings: no file selected.', wx.LOG_Warning)
             return
-        
-        self.__controller.desfireDeleteFile(file_id)
+        file_id = self._choiceDESFireFiles.GetString(file_id_index)
+        self.__controller.desfireDeleteFile(int(file_id, 0x10))
     
     def _buttonChangeKeyOnButtonClick(self, event):
         dialogs.messageDialog(self, 'Not implemented yet.', 'DESFire change Key', wx.OK)
@@ -1758,25 +1753,28 @@ class pyResManDialog (pyResManDialogBase):
     def _buttonGetKeySettingsOnButtonClick(self, event):
         self.__controller.desfireGetKeySettings()
     
-    def _listctrlDESFireFilesOnListItemSelected(self, event):
-        file_id = self.__listctrlDESFireFiles_GetSelected()
-        if file_id == None:
+    def _choiceDESFireFilesOnChoice(self, event):
+        file_id_index = self._choiceDESFireFiles.GetSelection()
+        if file_id_index == NOT_FOUND:
             self._Log('Get file settings: no file selected.', wx.LOG_Warning)
             return
+        file_id = self._choiceDESFireFiles.GetString(file_id_index)
         self.__controller.desfireGetFileSettings(int(file_id, 0x10))
         
     def _buttonDESFireGetValueOnButtonClick(self, event):
-        file_id = self.__listctrlDESFireFiles_GetSelected()
-        if file_id == None:
+        file_id_index = self._choiceDESFireFiles.GetSelection()
+        if file_id_index == NOT_FOUND:
             self._Log('Get file settings: no file selected.', wx.LOG_Warning)
             return
+        file_id = self._choiceDESFireFiles.GetString(file_id_index)
         self.__controller.desfireGetValue(int(file_id, 0x10))
     
     def _buttonDESFireClearRecordFileOnButtonClick(self, event):
-        file_id = self.__listctrlDESFireFiles_GetSelected()
-        if file_id == None:
+        file_id_index = self._choiceDESFireFiles.GetSelection()
+        if file_id_index == NOT_FOUND:
             self._Log('Get file settings: no file selected.', wx.LOG_Warning)
             return
+        file_id = self._choiceDESFireFiles.GetString(file_id_index)
         self.__controller.desfireClearRecordFile(int(file_id, 0x10))
 
     def _buttonDESFireCommitTransactionOnButtonClick(self, event):
@@ -1786,10 +1784,11 @@ class pyResManDialog (pyResManDialogBase):
         self.__controller.desfireAbortTransaction()
     
     def _buttonDESFireReadDataOnButtonClick(self, event):
-        file_id = self.__listctrlDESFireFiles_GetSelected()
-        if file_id == None:
+        file_id_index = self._choiceDESFireFiles.GetSelection()
+        if file_id_index == NOT_FOUND:
             self._Log('Get file settings: no file selected.', wx.LOG_Warning)
             return
+        file_id = self._choiceDESFireFiles.GetString(file_id_index)
         dlg = DESFireDialog_FileOperation(self, READ_DATA, int(file_id, 0x10))
         if IDCANCEL == dlg.ShowModal():
             return
@@ -1800,10 +1799,11 @@ class pyResManDialog (pyResManDialogBase):
         self.__controller.desfireReadData(file_id, offset, length)
     
     def _buttonDESFireWriteDataOnButtonClick(self, event):
-        file_id = self.__listctrlDESFireFiles_GetSelected()
-        if file_id == None:
+        file_id_index = self._choiceDESFireFiles.GetSelection()
+        if file_id_index == NOT_FOUND:
             self._Log('Get file settings: no file selected.', wx.LOG_Warning)
             return
+        file_id = self._choiceDESFireFiles.GetString(file_id_index)
         dlg = DESFireDialog_FileOperation(self, WRITE_DATA, int(file_id, 0x10))
         if IDCANCEL == dlg.ShowModal():
             return
@@ -1814,10 +1814,11 @@ class pyResManDialog (pyResManDialogBase):
         self.__controller.desfireWriteData(file_id, offset, len(data), data)
     
     def _buttonDESFireCreditOnButtonClick(self, event):
-        file_id = self.__listctrlDESFireFiles_GetSelected()
-        if file_id == None:
+        file_id_index = self._choiceDESFireFiles.GetSelection()
+        if file_id_index == NOT_FOUND:
             self._Log('Get file settings: no file selected.', wx.LOG_Warning)
             return
+        file_id = self._choiceDESFireFiles.GetString(file_id_index)
         dlg = DESFireDialog_FileOperation(self, CREDIT, int(file_id, 0x10))
         if IDCANCEL == dlg.ShowModal():
             return
@@ -1827,10 +1828,11 @@ class pyResManDialog (pyResManDialogBase):
         self.__controller.desfireCredit(file_id, value)
         
     def _buttonDESFireDebitOnButtonClick(self, event):
-        file_id = self.__listctrlDESFireFiles_GetSelected()
-        if file_id == None:
+        file_id_index = self._choiceDESFireFiles.GetSelection()
+        if file_id_index == NOT_FOUND:
             self._Log('Get file settings: no file selected.', wx.LOG_Warning)
             return
+        file_id = self._choiceDESFireFiles.GetString(file_id_index)
         dlg = DESFireDialog_FileOperation(self, DEBIT, int(file_id, 0x10))
         if IDCANCEL == dlg.ShowModal():
             return
@@ -1840,10 +1842,11 @@ class pyResManDialog (pyResManDialogBase):
         self.__controller.desfireDebit(file_id, value)
     
     def _buttonDESFireLimitedCreditOnButtonClick(self, event):
-        file_id = self.__listctrlDESFireFiles_GetSelected()
-        if file_id == None:
+        file_id_index = self._choiceDESFireFiles.GetSelection()
+        if file_id_index == NOT_FOUND:
             self._Log('Get file settings: no file selected.', wx.LOG_Warning)
             return
+        file_id = self._choiceDESFireFiles.GetString(file_id_index)
         dlg = DESFireDialog_FileOperation(self, LIMITED_CREDIT, int(file_id, 0x10))
         if IDCANCEL == dlg.ShowModal():
             return
@@ -1853,10 +1856,11 @@ class pyResManDialog (pyResManDialogBase):
         self.__controller.desfireLimitedCredit(file_id, value)
     
     def _buttonDESFireWriteRecordOnButtonClick(self, event):
-        file_id = self.__listctrlDESFireFiles_GetSelected()
-        if file_id == None:
+        file_id_index = self._choiceDESFireFiles.GetSelection()
+        if file_id_index == NOT_FOUND:
             self._Log('Get file settings: no file selected.', wx.LOG_Warning)
             return
+        file_id = self._choiceDESFireFiles.GetString(file_id_index)
         dlg = DESFireDialog_FileOperation(self, WRITE_RECORD, int(file_id, 0x10))
         if IDCANCEL == dlg.ShowModal():
             return
@@ -1867,10 +1871,11 @@ class pyResManDialog (pyResManDialogBase):
         self.__controller.desfireWriteRecord(file_id, offset, len(data), data)
 
     def _buttonDESFireReadRecordsOnButtonClick(self, event):
-        file_id = self.__listctrlDESFireFiles_GetSelected()
-        if file_id == None:
+        file_id_index = self._choiceDESFireFiles.GetSelection()
+        if file_id_index == NOT_FOUND:
             self._Log('Get file settings: no file selected.', wx.LOG_Warning)
             return
+        file_id = self._choiceDESFireFiles.GetString(file_id_index)
         dlg = DESFireDialog_FileOperation(self, READ_RECORDS, int(file_id, 0x10))
         if IDCANCEL == dlg.ShowModal():
             return
