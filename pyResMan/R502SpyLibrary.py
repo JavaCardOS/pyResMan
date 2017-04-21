@@ -65,7 +65,7 @@ class R502SpyLibrary(object):
     
     def init(self):
         self.rfOn()
-        self.rfOff()
+        self.rfManaul()
     
     def rfOn(self):
         cmd = '%s%s\x00\x00\x00' %(chr(self.CLA_RF), chr(self.INS_RF_ON))

@@ -67,12 +67,12 @@ class Util(object):
         return vs
     
     @staticmethod
-    def vl2s(vl, pad):
+    def vl2s(vl, pad=''):
         """Convert value list to string; ({0x00, 0xA4, 0x04, 0x00, 0x00} => "00A4040000")"""
         return pad.join("%02X" %(v) for v in vl)
 
     @staticmethod
-    def vs2s(vs, pad):
+    def vs2s(vs, pad=''):
         """Convert value list to string; ('\x00\xA4\x04\x00\x00' => "00A4040000")"""
         return pad.join("%02X" %(ord(v)) for v in vs)
 
@@ -152,6 +152,28 @@ class Util(object):
                 ishexstr = False
                 break
         return ishexstr
+    
+    @staticmethod
+    def bytes3_to_byte_array(value):
+        return [(value & 0xff), (value >> 8) & 0xff, (value >> 16) & 0xff ]
+
+    @staticmethod
+    def byte_array3_to_dword(byte_array):
+        return byte_array[0] | (byte_array[1] << 8) | (byte_array[2] << 16)
+
+    @staticmethod
+    def byte_array4_to_dword(byte_array):
+        return byte_array[0] | (byte_array[1] << 8) | (byte_array[2] << 16) | (byte_array[3] << 24)
+
+    @staticmethod
+    def calculate_crc(data, size, reg):
+        for octet in data[:size]:
+            for pos in range(8):
+                bit = (reg ^ ((octet >> pos) & 1)) & 1
+                reg = reg >> 1
+                if bit:
+                    reg = reg ^ 0x8408
+        return reg
 
 
 import wx

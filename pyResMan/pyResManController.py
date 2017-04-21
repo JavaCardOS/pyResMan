@@ -18,9 +18,12 @@ import os
 from GPInterface import GPInterface
 from R502SpyLibrary import R502SpyLibrary
 from DebuggerScriptFile import DebuggerScriptFile
-from pyResMan.R502Interface import R502Interface
+from pyResMan.R502Device import R502Device
 from pyResMan.pyLibSC import LibSC
 from pyResMan import DebuggerUtils
+from pyResMan import DESFireEx
+from pyResMan.DESFireEx import GET_FILE_SETTINGS, GET_KEY_SETTINGS, GET_VALUE,\
+    READ_DATA, READ_RECORDS
 
 class APDUItem(object):
     """Class for APDU item data;"""
@@ -49,8 +52,10 @@ class pyResManController(object):
         self.__runScriptThread = None
         self.__gpInterface = GPInterface()
         self.__scDebugger = R502SpyLibrary(self.__gpInterface)
-        self.__r502_interface = R502Interface(self.__gpInterface)
-        self.__libsc = LibSC(self.__r502_interface)
+        self.__r502_device = R502Device(self.__gpInterface)
+        self.__libsc = LibSC(self.__r502_device)
+        self.__desfire = DESFireEx.DESFireEx(self.__r502_device)
+        
         gp.enableTraceMode(1)
         
         self.__debuggerVariables = {}
@@ -66,7 +71,8 @@ class pyResManController(object):
         self.__readername = readername
         self.__handler.handleLog('Connect to %s.' %(readername))
         self.__gpInterface.connect(str(readername), protocol)
-        self.__scDebugger.init()
+        if self.__readername.find('R502 SPY') != -1:
+            self.__scDebugger.init()
 
     def handleCardEvent(self, eventType, args):
         readername = args[0]
@@ -90,6 +96,9 @@ class pyResManController(object):
         self.__reader.monitorCard(self.__readername)
 
     def disconnect(self):
+        if self.__readername.find('R502 SPY') != -1:
+            self.__scDebugger.rfAuto()
+            self.__scDebugger.rfOn()
         self.__gpInterface.disconnect()
         try:
             self.__reader.removeCardMonitorHandler(self)
@@ -391,8 +400,10 @@ class pyResManController(object):
         self.__loadDebuggerScriptThread.start()
     
     def __saveDebuggerScript(self, scriptPathName, commandsInfo):
+        self.__handler.handleLog('Save debugger script ...', wx.LOG_Info)
         scriptFile = DebuggerScriptFile(scriptPathName)
         scriptFile.save(commandsInfo)
+        self.__handler.handleLog('Debugger script is saved to file: %s.' %(scriptPathName), wx.LOG_Info)
 
     def saveDebuggerScript(self, scriptPathName, commandsInfo):
         self.__saveDebuggerScriptThread = threading.Thread(target=self.__saveDebuggerScript, args=(scriptPathName, commandsInfo), name="Save debugger script thread")
@@ -662,14 +673,14 @@ class pyResManController(object):
             f.write(data)
             self.__handler.handleLog('Mifare card data saved.', wx.LOG_Info)
     
-    def __mifareUnblockCard(self):
+    def __mifareFixBrickedUID(self):
         try:
             self.__mifareSetup()
             error = self.__libsc.M1_write_block(0, '\x01\x02\x03\x04\x04\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00')
             if error != 0:
                 self.__handler.handleException(Exception(DebuggerUtils.getErrorString(error)))
             else:
-                self.__handler.handleLog('Mifare card unblocked.', wx.LOG_Info)
+                self.__handler.handleLog('Mifare card bricked UID is fixed.', wx.LOG_Info)
         except Exception, e:
             self.__handler.handleException(e)
             return
@@ -714,31 +725,361 @@ class pyResManController(object):
             self.__handler.handleException(Exception(DebuggerUtils.getErrorString(error)))
         else:
             self.__handler.handleLog('Mifare card UID changed, from: %s, to: %s.' %(''.join('%02X' %(ord(b)) for b in uid), ''.join('%02X' %(ord(b)) for b in new_uid)), wx.LOG_Info)
+    
+    def __desfireSendCommand(self, cmd):
+        error, resp  = self.__libsc.DESFire_send_command(cmd)
+        if error != 0:
+            self.__handler.handleLog(DebuggerUtils.getErrorString(error), wx.LOG_Error)
+        else:
+            self.__handler.handleLog(''.join('%02X' %(ord(c)) for c in resp))
         
     def mifareDumpCard(self, key_a):
-        self.__mifareCommandThread = threading.Thread(target=self.__mifareDumpCard, args=(key_a, ));
+        self.__mifareCommandThread = threading.Thread(target=self.__mifareDumpCard, args=(key_a, ))
         self.__mifareCommandThread.start()
     
     def mifareCloneCard(self, card_data, key_a):
-        self.__mifareCommandThread = threading.Thread(target=self.__mifareCloneCard, args=(card_data, key_a, ));
+        self.__mifareCommandThread = threading.Thread(target=self.__mifareCloneCard, args=(card_data, key_a, ))
         self.__mifareCommandThread.start()
     
     def mifareReadCardData(self):
-        self.__mifareCommandThread = threading.Thread(target=self.__mifareReadCardData);
+        self.__mifareCommandThread = threading.Thread(target=self.__mifareReadCardData)
         self.__mifareCommandThread.start()
     
     def mifareSaveData(self, card_data, file_path_name):
-        self.__mifareCommandThread = threading.Thread(target=self.__mifareReadSaveData, args = (card_data, file_path_name, ));
+        self.__mifareCommandThread = threading.Thread(target=self.__mifareReadSaveData, args = (card_data, file_path_name, ))
         self.__mifareCommandThread.start()
     
-    def mifareUnblockCard(self):
-        self.__mifareCommandThread = threading.Thread(target=self.__mifareUnblockCard);
+    def mifareFixBrickedUID(self):
+        self.__mifareCommandThread = threading.Thread(target=self.__mifareFixBrickedUID)
         self.__mifareCommandThread.start()
     
     def mifareChangeUID(self, uid):
-        self.__mifareCommandThread = threading.Thread(target=self.__mifareChangeUID, args=(uid, ));
+        self.__mifareCommandThread = threading.Thread(target=self.__mifareChangeUID, args=(uid, ))
         self.__mifareCommandThread.start()
+    
+    def __desfireAuthenticate(self, key):
+        try:
+            self.__desfire.authenticate(0, key)
+            self.__handler.handleLog('DESFire authenticated.', wx.LOG_Info)
+        except Exception, e:
+            self.__handler.handleLog(str(e), wx.LOG_Error)
+    
+    def desfireAuthenticate(self, key):
+        self.__desfireCommandThread = threading.Thread(target=self.__desfireAuthenticate, args=(key, ))
+        self.__desfireCommandThread.start()
 
+    def __desfireGetVersion(self):
+        version_info = self.__desfire.get_version()
+        self.__handler.handleDESFireResponse(DESFireEx.GET_VERSION, version_info)
+    
+    def desfireGetVersion(self):
+        self.__desfireCommandThread = threading.Thread(target=self.__desfireGetVersion)
+        self.__desfireCommandThread.start()
+
+    def __desfireFormatPICC(self):
+        try:
+            self.__desfire.format()
+            self.__handler.handleLog('DESFire format PICC succeeded.', wx.LOG_Info)
+        except Exception, e:
+            self.__handler.handleLog('DESFire format PICC, exception: %s' %(e), wx.LOG_Error)
+        
+    def desfireFormatPICC(self):
+        self.__desfireCommandThread = threading.Thread(target=self.__desfireFormatPICC)
+        self.__desfireCommandThread.start()
+    
+    def __desfireGetApplicationIDs(self):
+        try:
+            app_ids = self.__desfire.get_applications()
+            self.__handler.handleDESFireResponse(DESFireEx.GET_APPLICATION_IDS, app_ids)
+            self.__handler.handleLog('DESFire get application ids succeeded.', wx.LOG_Info)
+        except Exception, e:
+            self.__handler.handleLog('DESFire get application ids, exception: %s' %(e), wx.LOG_Error)
+
+    def desfireGetApplicationIDs(self):
+        self.__desfireCommandThread = threading.Thread(target=self.__desfireGetApplicationIDs)
+        self.__desfireCommandThread.start()
+    
+    def __desfireDeleteApplication(self, app_id):
+        try:
+            self.__desfire.delete_application(app_id)
+            self.__handler.handleLog('DESFire delete application succeeded.', wx.LOG_Info)
+        except Exception, e:
+            self.__handler.handleLog('DESFire delete application, exception: %s' %(e), wx.LOG_Error)
+        # Refresh application list;
+        self.__desfireGetApplicationIDs()
+
+    def desfireDeleteApplication(self, app_id):
+        self.__desfireCommandThread = threading.Thread(target=self.__desfireDeleteApplication, args=(app_id, ))
+        self.__desfireCommandThread.start()
+    
+    def __desfireSelectApplication(self, app_id):
+        try:
+            self.__desfire.select_application(app_id)
+            self.__handler.handleLog('DESFire select application: %06X selected.' %(app_id), wx.LOG_Info)
+        except Exception, e:
+            self.__handler.handleLog('DESFire select application, exception: %s' %(e), wx.LOG_Error)
+
+    def desfireSelectApplication(self, app_id):
+        self.__desfireCommandThread = threading.Thread(target=self.__desfireSelectApplication, args=(app_id, ))
+        self.__desfireCommandThread.start()
+    
+    def __desfireCreateApplication(self, aid, key_settings, num_of_keys):
+        try:
+            self.__desfire.create_application(aid, key_settings, num_of_keys)
+            self.__handler.handleLog('DESFire create application succeeded.', wx.LOG_Info)
+        except Exception, e:
+            self.__handler.handleLog('DESFire create application, exception: %s' %(e), wx.LOG_Error)
+        # Refresh application list;
+        self.__desfireGetApplicationIDs()
+
+    def desfireCreateApplication(self, aid, key_settings, num_of_keys):
+        self.__desfireCommandThread = threading.Thread(target=self.__desfireCreateApplication, args=(aid, key_settings, num_of_keys))
+        self.__desfireCommandThread.start()
+    
+    def __desfireGetFileIDs(self):
+        try:
+            file_ids = self.__desfire.get_file_ids()
+            self.__handler.handleDESFireResponse(DESFireEx.GET_FILE_IDS, file_ids)
+            self.__handler.handleLog('DESFire get file ids succeeded.', wx.LOG_Info)
+        except Exception, e:
+            self.__handler.handleLog('DESFire get file ids, exception: %s' %(e), wx.LOG_Error)
+
+    def desfireGetFileIDs(self):
+        self.__desfireCommandThread = threading.Thread(target=self.__desfireGetFileIDs)
+        self.__desfireCommandThread.start()
+    
+    def __desfireCreateStdDataFile(self, file_no, com_set, access_rights, file_size):
+        try:
+            self.__desfire.create_std_data_file(file_no, com_set, access_rights, file_size)
+            self.__handler.handleLog('DESFire create std data file succeeded.', wx.LOG_Info)
+            self.__desfireGetFileIDs()
+        except Exception, e:
+            self.__handler.handleLog('DESFire create std data file, exception: %s' %(e), wx.LOG_Error)
+        
+    def desfireCreateStdDataFile(self, file_no, com_set, access_rights, file_size):
+        self.__desfireCommandThread = threading.Thread(target=self.__desfireCreateStdDataFile, args=(file_no, com_set, access_rights, file_size))
+        self.__desfireCommandThread.start()
+    
+    def __desfireCreateBackupDataFile(self, file_no, com_set, access_rights, file_size):
+        try:
+            self.__desfire.create_backup_data_file(file_no, com_set, access_rights, file_size)
+            self.__handler.handleLog('DESFire create backup data file succeeded.', wx.LOG_Info)
+            self.__desfireGetFileIDs()
+        except Exception, e:
+            self.__handler.handleLog('DESFire create backup data file, exception: %s' %(e), wx.LOG_Error)
+    
+    def desfireCreateBackupDataFile(self, file_no, com_set, access_rights, file_size):
+        self.__desfireCommandThread = threading.Thread(target=self.__desfireCreateBackupDataFile, args=(file_no, com_set, access_rights, file_size))
+        self.__desfireCommandThread.start()
+    
+    def __desfireCreateValueFile(self, file_no, com_set, access_rights, lower_limit, upper_limit, value, limit_debit_enabled):
+        try:
+            self.__desfire.create_value_file(file_no, com_set, access_rights, lower_limit, upper_limit, value, limit_debit_enabled)
+            self.__handler.handleLog('DESFire create value file succeeded.', wx.LOG_Info)
+            self.__desfireGetFileIDs()
+        except Exception, e:
+            self.__handler.handleLog('DESFire create value file, exception: %s' %(e), wx.LOG_Error)
+    
+    def desfireCreateValueFile(self, file_no, com_set, access_rights, lower_limit, upper_limit, value, limit_debit_enabled):
+        self.__desfireCommandThread = threading.Thread(target=self.__desfireCreateValueFile, args=(file_no, com_set, access_rights, lower_limit, upper_limit, value, limit_debit_enabled))
+        self.__desfireCommandThread.start()
+
+    def __desfireCreateLinearRecordFile(self, file_no, com_set, access_rights, record_size, max_num_of_records):
+        try:
+            self.__desfire.create_linear_record_file(file_no, com_set, access_rights, record_size, max_num_of_records)
+            self.__handler.handleLog('DESFire create linear record file succeeded.', wx.LOG_Info)
+            self.__desfireGetFileIDs()
+        except Exception, e:
+            self.__handler.handleLog('DESFire create linear record file, exception: %s' %(e), wx.LOG_Error)
+    
+    def desfireCreateLinearRecordFile(self, file_no, com_set, access_rights, record_size, max_num_of_records):
+        self.__desfireCommandThread = threading.Thread(target=self.__desfireCreateLinearRecordFile, args=(file_no, com_set, access_rights, record_size, max_num_of_records))
+        self.__desfireCommandThread.start()
+    
+    def __desfireCreateCyclicRecordFile(self, file_no, com_set, access_rights, record_size, max_num_of_records):
+        try:
+            self.__desfire.create_cyclic_record_file(file_no, com_set, access_rights, record_size, max_num_of_records)
+            self.__handler.handleLog('DESFire create cyclic record file succeeded.', wx.LOG_Info)
+            self.__desfireGetFileIDs()
+        except Exception, e:
+            self.__handler.handleLog('DESFire create cyclic record file, exception: %s' %(e), wx.LOG_Error)
+    
+    def desfireCreateCyclicRecordFile(self, file_no, com_set, access_rights, record_size, max_num_of_records):
+        self.__desfireCommandThread = threading.Thread(target=self.__desfireCreateCyclicRecordFile, args=(file_no, com_set, access_rights, record_size, max_num_of_records))
+        self.__desfireCommandThread.start()
+    
+    def __desfireDeleteFile(self, file_no):
+        try:
+            self.__desfire.delete_file(file_no)
+            self.__handler.handleLog('DESFire delete file succeeded.', wx.LOG_Info)
+            self.__desfireGetFileIDs()
+        except Exception, e:
+            self.__handler.handleLog('DESFire delete file, exception: %s' %(e), wx.LOG_Error)
+    
+    def desfireDeleteFile(self, file_no):
+        self.__desfireCommandThread = threading.Thread(target=self.__desfireDeleteFile, args=(file_no, ))
+        self.__desfireCommandThread.start()
+    
+    def __desfireGetFileSettings(self, file_no):
+        try:
+            file_settings = self.__desfire.get_file_settings(file_no)
+            file_settings.update({ 'file_no': file_no })
+            self.__handler.handleDESFireResponse(GET_FILE_SETTINGS, file_settings)
+            self.__handler.handleLog('DESFire get file settings succeeded.', wx.LOG_Info)
+        except Exception, e:
+            self.__handler.handleLog('DESFire get file settings, exception: %s' %(e), wx.LOG_Error)
+    
+    def desfireGetFileSettings(self, file_no):
+        self.__desfireCommandThread = threading.Thread(target=self.__desfireGetFileSettings, args=(file_no, ))
+        self.__desfireCommandThread.start()
+
+    def __desfireChangeKey(self, key, new_key):
+        try:
+            self.__desfire.change_key(0, 0, key, new_key)
+            self.__handler.handleLog('DESFire change key succeeded.', wx.LOG_Info)
+        except Exception, e:
+            self.__handler.handleLog('DESFire change key, exception: %s' %(e), wx.LOG_Error)
+        
+    def desfireChangeKey(self, key, new_key):
+        self.__desfireCommandThread = threading.Thread(target=self.__desfireChangeKey, args=(key, new_key, ))
+        self.__desfireCommandThread.start()
+
+    def __desfireGetKeySettings(self):
+        try:
+            key_settings, max_num_of_keys = self.__desfire.get_key_settings()
+            self.__handler.handleDESFireResponse(GET_KEY_SETTINGS, (key_settings, max_num_of_keys))
+            self.__handler.handleLog('DESFire change key succeeded.', wx.LOG_Info)
+        except Exception, e:
+            self.__handler.handleLog('DESFire change key, exception: %s' %(e), wx.LOG_Error)
+        
+    def desfireGetKeySettings(self):
+        self.__desfireCommandThread = threading.Thread(target=self.__desfireGetKeySettings)
+        self.__desfireCommandThread.start()
+    
+    def __desfireGetValue(self, file_id):
+        try:
+            value = self.__desfire.get_value(file_id)
+            self.__handler.handleDESFireResponse(GET_VALUE, (file_id, value))
+            self.__handler.handleLog('DESFire get value succeeded.', wx.LOG_Info)
+        except Exception, e:
+            self.__handler.handleLog('DESFire get value, exception: %s' %(e), wx.LOG_Error)
+    
+    def desfireGetValue(self, file_id):
+        self.__desfireCommandThread = threading.Thread(target=self.__desfireGetValue, args=(file_id, ))
+        self.__desfireCommandThread.start()
+        
+    def __desfireClearRecordFile(self, file_id):
+        try:
+            self.__desfire.clear_record_file(file_id)
+            self.__handler.handleLog('DESFire clear record file succeeded.', wx.LOG_Info)
+        except Exception, e:
+            self.__handler.handleLog('DESFire clear record file, exception: %s' %(e), wx.LOG_Error)
+    
+    def desfireClearRecordFile(self, file_id):
+        self.__desfireCommandThread = threading.Thread(target=self.__desfireClearRecordFile, args=(file_id, ))
+        self.__desfireCommandThread.start()
+        
+    def __desfireCommitTransaction(self):
+        try:
+            self.__desfire.commit_transaction()
+            self.__handler.handleLog('DESFire commit transaction succeeded.', wx.LOG_Info)
+        except Exception, e:
+            self.__handler.handleLog('DESFire commit transaction, exception: %s' %(e), wx.LOG_Error)
+    
+    def desfireCommitTransaction(self):
+        self.__desfireCommandThread = threading.Thread(target=self.__desfireCommitTransaction)
+        self.__desfireCommandThread.start()
+    
+    def __desfireAbortTransaction(self):
+        try:
+            self.__desfire.abort_transaction()
+            self.__handler.handleLog('DESFire abort transaction succeeded.', wx.LOG_Info)
+        except Exception, e:
+            self.__handler.handleLog('DESFire abort transaction, exception: %s' %(e), wx.LOG_Error)
+    
+    def desfireAbortTransaction(self):
+        self.__desfireCommandThread = threading.Thread(target=self.__desfireAbortTransaction)
+        self.__desfireCommandThread.start()
+
+    def __desfireReadData(self, file_id, offset, length):
+        try:
+            data = self.__desfire.read_data(file_id, offset, length)
+            self.__handler.handleDESFireResponse(READ_DATA, data)
+            self.__handler.handleLog('DESFire read data succeeded.', wx.LOG_Info)
+        except Exception, e:
+            self.__handler.handleLog('DESFire read data, exception: %s' %(e), wx.LOG_Error)
+    
+    def desfireReadData(self, file_id, offset, length):
+        self.__desfireCommandThread = threading.Thread(target=self.__desfireReadData, args=(file_id, offset, length))
+        self.__desfireCommandThread.start()
+    
+    def __desfireWriteData(self, file_id, offset, length, data):
+        try:
+            self.__desfire.write_data(file_id, offset, length, data)
+            self.__handler.handleLog('DESFire write data succeeded.', wx.LOG_Info)
+        except Exception, e:
+            self.__handler.handleLog('DESFire write data, exception: %s' %(e), wx.LOG_Error)
+    
+    def desfireWriteData(self, file_id, offset, length, data):
+        self.__desfireCommandThread = threading.Thread(target=self.__desfireWriteData, args=(file_id, offset, length, data))
+        self.__desfireCommandThread.start()
+        
+    def __desfireCredit(self, file_id, value):
+        try:
+            self.__desfire.credit(file_id, value)
+            self.__handler.handleLog('DESFire credit succeeded.', wx.LOG_Info)
+        except Exception, e:
+            self.__handler.handleLog('DESFire credit, exception: %s' %(e), wx.LOG_Error)
+    
+    def desfireCredit(self, file_id, value):
+        self.__desfireCommandThread = threading.Thread(target=self.__desfireCredit, args=(file_id, value))
+        self.__desfireCommandThread.start()
+        
+    def __desfireDebit(self, file_id, value):
+        try:
+            self.__desfire.debit(file_id, value)
+            self.__handler.handleLog('DESFire debit succeeded.', wx.LOG_Info)
+        except Exception, e:
+            self.__handler.handleLog('DESFire debit, exception: %s' %(e), wx.LOG_Error)
+    
+    def desfireDebit(self, file_id, value):
+        self.__desfireCommandThread = threading.Thread(target=self.__desfireDebit, args=(file_id, value))
+        self.__desfireCommandThread.start()
+        
+    def __desfireLimitedCredit(self, file_id, value):
+        try:
+            self.__desfire.limited_credit(file_id, value)
+            self.__handler.handleLog('DESFire limited credit succeeded.', wx.LOG_Info)
+        except Exception, e:
+            self.__handler.handleLog('DESFire limited credit, exception: %s' %(e), wx.LOG_Error)
+    
+    def desfireLimitedCredit(self, file_id, value):
+        self.__desfireCommandThread = threading.Thread(target=self.__desfireLimitedCredit, args=(file_id, value))
+        self.__desfireCommandThread.start()
+    
+    def __desfireWriteRecord(self, file_id, offset, length, data):
+        try:
+            self.__desfire.write_record(file_id, offset, length, data)
+            self.__handler.handleLog('DESFire write record succeeded.', wx.LOG_Info)
+        except Exception, e:
+            self.__handler.handleLog('DESFire write record, exception: %s' %(e), wx.LOG_Error)
+    
+    def desfireWriteRecord(self, file_id, offset, length, data):
+        self.__desfireCommandThread = threading.Thread(target=self.__desfireWriteRecord, args=(file_id, offset, length, data))
+        self.__desfireCommandThread.start()
+        
+    def __desfireReadRecords(self, file_id, offset, length):
+        try:
+            data = self.__desfire.read_records(file_id, offset, length)
+            self.__handler.handleDESFireResponse(READ_RECORDS, data)
+            self.__handler.handleLog('DESFire read records succeeded.', wx.LOG_Info)
+        except Exception, e:
+            self.__handler.handleLog('DESFire read records, exception: %s' %(e), wx.LOG_Error)
+    
+    def desfireReadRecords(self, file_id, offset, length):
+        self.__desfireCommandThread = threading.Thread(target=self.__desfireReadRecords, args=(file_id, offset, length))
+        self.__desfireCommandThread.start()
+    
 class pyResManControllerEventHandler(object):
     '''
     Methods to handle controller's event; The viewer (pyRsaMan) implements these methods as usual;
@@ -811,4 +1152,8 @@ class pyResManControllerEventHandler(object):
         pass
 
     def handleMifareResponse(self, action_type, result, data):
-            pass
+        pass
+    
+    def handleDESFireResponse(self, command_type, response):
+        pass
+    

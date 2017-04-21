@@ -8,12 +8,12 @@ Created on 2015-10-27
 @copyright: JavaCardOS Technologies. All rights reserved.
 '''
 
-from wx import ListItem, TreeItemId, TreeItemData
+from wx import ListItem, TreeItemId, TreeItemData, NOT_FOUND
 from pyResMan.pyResManReader import pyResManReader
 from smartcard.Exceptions import NoCardException
 from pyResMan.pyResManController import pyResManController, APDUItem
 import os
-from pyResMan.Util import Util
+from pyResMan.Util import Util, HexValidator, IDCANCEL
 from datetime import datetime
 from pyResMan.Dialogs.pyResManInstallDialog import pyResManInstallDialog
 from pyResMan.BaseDialogs.pyResManDialogBase import pyResManDialogBase
@@ -41,6 +41,15 @@ from pyResMan.Dialogs.pyResManCommandDialog_MifareTransfer import CommandDialog_
 from pyResMan.Dialogs.pyResManCommandDialog_MifareRestore import CommandDialog_MifareRestore
 from pyResMan import DebuggerUtils
 from pyResMan.DebuggerUtils import getErrorString
+import pyResMan.DESFireEx as DESFireEx
+from pyResMan.Dialogs.pyResManDialog_DESFireCreateApplication import DESFireDialog_CreateApplication
+from pyResMan.Dialogs.pyResManDialog_DESFireCreateFile import DESFireDialog_CreateFile
+from pyResMan.DESFireEx import CREATE_STDDATAFILE, CREATE_BACKUPDATAFILE,\
+    CREATE_VALUE_FILE, CREATE_LINEAR_RECORD_FILE, CREATE_CYCLIC_RECORD_FILE,\
+    GET_KEY_SETTINGS, GET_VALUE, READ_DATA, WRITE_RECORD, LIMITED_CREDIT, DEBIT,\
+    WRITE_DATA, CREDIT, READ_RECORDS
+from pyResMan.Dialogs.pyResManDialog_DESFireFileOperation import DESFireDialog_FileOperation
+from wx.lib import dialogs
 
 COMMAND_LIST_COL_INDEX = 0
 COMMAND_LIST_COL_COMMAND_NAME = 1
@@ -162,10 +171,18 @@ class pyResManDialog (pyResManDialogBase):
         
         # Init Mifare page;
         self.ClearMifareCardData()
+        self._textctrlKeyA.SetValidator(HexValidator())
+        self._textctrlUID.SetValidator(HexValidator())
+        
+        # Init DESFire page;
+        self._listctrlDESFireApplications.InsertColumn(0, 'ID')
+        self._listctrlDESFireFiles.InsertColumn(0, 'ID')
+
+        self.__desfireDisableAllFileButtons()
     
     def ClearMifareCardData(self):
-        colCount = self._gridCardData.GetNumberCols();
-        rowCount = self._gridCardData.GetNumberRows();
+        colCount = self._gridCardData.GetNumberCols()
+        rowCount = self._gridCardData.GetNumberRows()
         for rowIndex in range(rowCount):
             self._gridCardData.SetRowLabelValue(rowIndex, '%d' % (rowIndex))
             for colIndex in range(colCount):
@@ -1414,8 +1431,8 @@ class pyResManDialog (pyResManDialogBase):
         self._Log('Card data has been loaded from file: %s.' % (file_path_name), wx.LOG_Info)
         return
     
-    def _buttonUnblockCardOnButtonClick(self, event):
-        self.__controller.mifareUnblockCard()
+    def _buttonFixBrickedUIDOnButtonClick(self, event):
+        self.__controller.mifareFixBrickedUID()
     
     def _buttonChangeUIDOnButtonClick(self, event):
         uid = self._textctrlUID.GetValue()
@@ -1472,3 +1489,396 @@ class pyResManDialog (pyResManDialogBase):
     def m_splitter2OnIdle( self, event ):
 #         self.m_splitter2.SetSashPosition( 0 )
         self.m_splitter2.Unbind( wx.EVT_IDLE )
+
+    def _buttonAuthenticateOnButtonClick(self, event):
+        key = self._textctrlDESFireKey.GetValue()
+        self.__controller.desfireAuthenticate(Util.s2vl(key))
+    
+    def _buttonGetVersionOnButtonClick(self, event):
+        self.__controller.desfireGetVersion()
+    
+    def __outputDESFireVersion(self, version_data):
+        hard_info = version_data['hard_info']
+        soft_info = version_data['soft_info']
+        uid = version_data['uid']
+        self._Log('UID: %s' %(uid), wx.LOG_Message)
+        self._Log('Hardware info:', wx.LOG_Message)
+        self._Log('    Vendor: %s' %(hard_info['vendor']), wx.LOG_Message)
+        self._Log('    Type: %d.%d' %(hard_info['type'], hard_info['subtype']), wx.LOG_Message)
+        self._Log('    Version number: %d.%d' %(hard_info['major_version'], hard_info['minor_version']), wx.LOG_Message)
+        self._Log('    Storage size: %dk' %(hard_info['storage_size']), wx.LOG_Message)
+        self._Log('    Protocol type: %s' %(hard_info['protocol_type']), wx.LOG_Message)
+        self._Log('Software info:', wx.LOG_Message)
+        self._Log('    Vendor: %s' %(soft_info['vendor']), wx.LOG_Message)
+        self._Log('    Type: %d.%d' %(soft_info['type'], soft_info['subtype']), wx.LOG_Message)
+        self._Log('    Version number: %d.%d' %(soft_info['major_version'], soft_info['minor_version']), wx.LOG_Message)
+        self._Log('    Storage size: %dk' %(soft_info['storage_size']), wx.LOG_Message)
+        self._Log('    Protocol type: %s' %(soft_info['protocol_type']), wx.LOG_Message)
+    
+    def __outputDESFireApplications(self, app_ids):
+        self._Log('DESFire got %d applications.' %(len(app_ids)), wx.LOG_Info)
+        self._choiceDESFireApplications.Clear()
+        for app_id in app_ids:
+            self._choiceDESFireApplications.Append('%06X' %(app_id))
+        
+        if len(app_ids) > 0:
+            self._choiceDESFireApplications.SetSelection(0)
+        
+    
+    def __desfireDisableAllFileButtons(self):
+        self._buttonDESFireReadData.Disable()
+        self._buttonDESFireWriteData.Disable()
+        self._buttonDESFireGetValue.Disable()
+        self._buttonDESFireCredit.Disable()
+        self._buttonDESFireDebit.Disable()
+        self._buttonDESFireLimitedCredit.Disable()
+        self._buttonDESFireWriteRecord.Disable()
+        self._buttonDESFireReadRecords.Disable()
+        self._buttonDESFireClearRecordFile.Disable()
+        self._buttonDESFireCommitTransaction.Disable()
+        self._buttonDESFireAbortTransaction.Disable()
+
+    def __outputDESFireFileSettings(self, file_settings):
+        file_no = file_settings.get('file_no', 0)
+        file_type = file_settings.get('type', '')
+        file_type_str = file_settings.get('type_str', '')
+        com_set = file_settings.get('com_set', '')
+        access_rights = file_settings.get('access_rights', '')
+
+        self._Log('File no: %06X' %(file_no))
+        self._Log('    type: %s' %(file_type_str))
+        self._Log('    com. set.: %s' %(com_set))
+        self._Log('    access rights: %02X%02X' %(access_rights[0], access_rights[1]))
+        
+        if (file_type == 0x00) or (file_type == 0x01):
+            file_size = file_settings.get('file_size', 0)
+            self._Log('    file_size: %06X' %(file_size))
+        elif (file_type == 0x02):
+            lower_limit = file_settings.get('lower_limit', 0)
+            upper_limit = file_settings.get('upper_limit', 0)
+            value = file_settings.get('value', 0)
+            limited_credit_enabled = file_settings.get('limited_credit_enabled', 0)
+            self._Log('    lower_limit: %08X' %(lower_limit))
+            self._Log('    upper_limit: %08X' %(upper_limit))
+            self._Log('    value: %08X' %(value))
+            if limited_credit_enabled:
+                self._Log('    limited credit enabled')
+        elif (file_type == 0x03) or (file_type == 0x04):
+            record_size = file_settings.get('record_size', 0)
+            max_num_of_records = file_settings.get('max_num_of_records', 0)
+            current_num_of_records = file_settings.get('current_num_of_records', 0)
+            self._Log('    record_size: %06X' %(record_size))
+            self._Log('    max. num of records: %06X' %(max_num_of_records))
+            self._Log('    current num of records: %06X' %(current_num_of_records))
+        else:
+            pass
+        
+        self.__desfireDisableAllFileButtons()
+        if (file_type == 0x00) or (file_type == 0x01):
+            self._buttonDESFireReadData.Enable()
+            self._buttonDESFireWriteData.Enable()
+        elif (file_type == 0x02):
+            self._buttonDESFireGetValue.Enable()
+            self._buttonDESFireCredit.Enable()
+            self._buttonDESFireDebit.Enable()
+            self._buttonDESFireLimitedCredit.Enable()
+        elif (file_type == 0x03) or (file_type == 0x04):
+            self._buttonDESFireWriteRecord.Enable()
+            self._buttonDESFireReadRecords.Enable()
+            self._buttonDESFireClearRecordFile.Enable()
+        else:
+            pass
+        if file_type != 0x00:
+            self._buttonDESFireCommitTransaction.Enable()
+            self._buttonDESFireAbortTransaction.Enable()
+    
+    def __outputDESFireKeySettings(self, data):
+        key_settings, max_num_of_keys = data
+        self._Log('Key settings: %02X' %(key_settings), wx.LOG_Message)
+        self._Log('Max num of keys: %02X' %(max_num_of_keys), wx.LOG_Message)
+        
+    def handleDESFireResponse(self, command_type, response):
+        if command_type == DESFireEx.GET_VERSION:
+            self.__outputDESFireVersion(response)
+        elif command_type == DESFireEx.GET_APPLICATION_IDS:
+            self.__outputDESFireApplications(response)
+        elif command_type == DESFireEx.GET_FILE_IDS:
+            self.__outputDESFireFileIDs(response)
+        elif command_type == DESFireEx.GET_FILE_SETTINGS:
+            self.__outputDESFireFileSettings(response)
+        elif command_type == GET_KEY_SETTINGS:
+            self.__outputDESFireKeySettings(response)
+        elif command_type == GET_VALUE:
+            file_id, value = response
+            self._Log('Value of file %02X is %08X (%d)' %(file_id, value, value))
+        elif command_type == READ_DATA:
+            self._Log('File data: ' + ''.join('%02X' %(b) for b in response))
+        elif command_type == READ_RECORDS:
+            self._Log('Record file data: ' + ''.join('%02X' %(b) for b in response))
+        else:
+            pass
+    
+    def _buttonFormatPICCOnButtonClick(self, event):
+        self.__controller.desfireFormatPICC()
+    
+    def _buttonGetApplicationIDsOnButtonClick(self, event):
+        self.__controller.desfireGetApplicationIDs()
+    
+    def _buttonDeleteApplicationOnButtonClick(self, event):
+        app_id_index = self._choiceDESFireApplications.GetSelection()
+        if app_id_index == NOT_FOUND:
+            self._Log('DESFire select application: No application selected.', wx.LOG_Warning)
+            return
+        app_id = self._choiceDESFireApplications.GetString(app_id_index)
+        self.__controller.desfireDeleteApplication(int(app_id, 0x10))
+    
+    def _buttonSelectApplicationOnButtonClick(self, event):
+        app_id_index = self._choiceDESFireApplications.GetSelection()
+        if app_id_index == NOT_FOUND:
+            self._Log('DESFire select application: No application selected.', wx.LOG_Warning)
+            return
+        app_id = self._choiceDESFireApplications.GetString(app_id_index)
+        self.__controller.desfireSelectApplication(int(app_id, 0x10))
+    
+    def _buttonCreateApplicationOnButtonClick(self, event):
+        dialog_create_application = DESFireDialog_CreateApplication(self)
+        if IDCANCEL == dialog_create_application.ShowModal():
+            return
+        
+        aid = dialog_create_application.getAID()
+        key_settings = dialog_create_application.getKeySett()
+        num_of_keys = dialog_create_application.getNumOfKeys()
+        self.__controller.desfireCreateApplication(aid, key_settings, num_of_keys)
+    
+    def _buttonGetFileIDsOnButtonClick(self, event):
+        self.__controller.desfireGetFileIDs()
+    
+    def __outputDESFireFileIDs(self, file_ids):
+        self._Log('DESFire got %d files.' %(len(file_ids)), wx.LOG_Info)
+        self._choiceDESFireFiles.Clear()
+        for file_id in file_ids:
+            self._choiceDESFireFiles.Append('%02X' %(file_id))
+
+        if len(file_ids) > 0:
+            self._choiceDESFireFiles.SetSelection(0)
+            self.__controller.desfireGetFileSettings(file_ids[0])
+    
+    def _buttonCreateStdDataFileOnButtonClick(self, event):
+        dialog_create_file = DESFireDialog_CreateFile(self, CREATE_STDDATAFILE)
+        if IDCANCEL == dialog_create_file.ShowModal():
+            return
+        
+        file_no = dialog_create_file.getFileNo()
+        com_set = dialog_create_file.getComSet()
+        access_rights = dialog_create_file.getAccessRights()
+        file_size = dialog_create_file.getFileSize()
+        self.__controller.desfireCreateStdDataFile(file_no, com_set, access_rights, file_size)
+    
+    def _buttonCreateBackupDataFileOnButtonClick(self, event):
+        dialog_create_file = DESFireDialog_CreateFile(self, CREATE_BACKUPDATAFILE)
+        if IDCANCEL == dialog_create_file.ShowModal():
+            return
+        
+        file_no = dialog_create_file.getFileNo()
+        com_set = dialog_create_file.getComSet()
+        access_rights = dialog_create_file.getAccessRights()
+        file_size = dialog_create_file.getFileSize()
+        self.__controller.desfireCreateBackupDataFile(file_no, com_set, access_rights, file_size)
+    
+    def _buttonCreateValueFileOnButtonClick(self, event):
+        dialog_create_file = DESFireDialog_CreateFile(self, CREATE_VALUE_FILE)
+        if IDCANCEL == dialog_create_file.ShowModal():
+            return
+
+        file_no = dialog_create_file.getFileNo()
+        com_set = dialog_create_file.getComSet()
+        access_rights = dialog_create_file.getAccessRights()
+        lower_limit = dialog_create_file.getLowerLimit()
+        upper_limit = dialog_create_file.getUpperLimit()
+        value = dialog_create_file.getValue()
+        limit_debit_enabled = 0x01 if dialog_create_file.isLimitDebitEnabled() else 0x00
+        self.__controller.desfireCreateValueFile(file_no, com_set, access_rights, lower_limit, upper_limit, value, limit_debit_enabled)
+    
+    def _buttonCreateLinearRecordFileOnButtonClick(self, event):
+        dialog_create_file = DESFireDialog_CreateFile(self, CREATE_LINEAR_RECORD_FILE)
+        if IDCANCEL == dialog_create_file.ShowModal():
+            return
+
+        file_no = dialog_create_file.getFileNo()
+        com_set = dialog_create_file.getComSet()
+        access_rights = dialog_create_file.getAccessRights()
+        record_size = dialog_create_file.getRecordSize()
+        max_num_of_records = dialog_create_file.getMaxNumOfRecords()
+        self.__controller.desfireCreateLinearRecordFile(file_no, com_set, access_rights, record_size, max_num_of_records)
+    
+    def _buttonCreateCyclicRecordFileOnButtonClick(self, event):
+        dialog_create_file = DESFireDialog_CreateFile(self, CREATE_CYCLIC_RECORD_FILE)
+        if IDCANCEL == dialog_create_file.ShowModal():
+            return
+    
+        file_no = dialog_create_file.getFileNo()
+        com_set = dialog_create_file.getComSet()
+        access_rights = dialog_create_file.getAccessRights()
+        record_size = dialog_create_file.getRecordSize()
+        max_num_of_records = dialog_create_file.getMaxNumOfRecords()
+        self.__controller.desfireCreateCyclicRecordFile(file_no, com_set, access_rights, record_size, max_num_of_records)
+
+    def _buttonGetFileSettingsOnButtonClick(self, event):
+        file_id_index = self._choiceDESFireFiles.GetSelection()
+        if file_id_index == NOT_FOUND:
+            self._Log('Get file settings: no file selected.', wx.LOG_Warning)
+            return
+        file_id = self._choiceDESFireFiles.GetString(file_id_index)
+        self.__controller.desfireGetFileSettings(int(file_id, 0x10))
+    
+    def _buttonChangeFileSettingsOnButtonClick(self, event):
+        pass
+    
+    def _buttonDeleteFileOnButtonClick(self, event):
+        file_id_index = self._choiceDESFireFiles.GetSelection()
+        if file_id_index == NOT_FOUND:
+            self._Log('Get file settings: no file selected.', wx.LOG_Warning)
+            return
+        file_id = self._choiceDESFireFiles.GetString(file_id_index)
+        self.__controller.desfireDeleteFile(int(file_id, 0x10))
+    
+    def _buttonChangeKeyOnButtonClick(self, event):
+        dialogs.messageDialog(self, 'Not implemented yet.', 'DESFire change Key', wx.OK)
+#         key = self._textctrlDESFireKey.GetValue()
+#         new_key = self._textctrlDESFireNewKey.GetValue()
+#         self.__controller.desfireChangeKey(Util.s2vl(key), Util.s2vl(new_key))
+    
+    def _buttonGetKeySettingsOnButtonClick(self, event):
+        self.__controller.desfireGetKeySettings()
+    
+    def _choiceDESFireFilesOnChoice(self, event):
+        file_id_index = self._choiceDESFireFiles.GetSelection()
+        if file_id_index == NOT_FOUND:
+            self._Log('Get file settings: no file selected.', wx.LOG_Warning)
+            return
+        file_id = self._choiceDESFireFiles.GetString(file_id_index)
+        self.__controller.desfireGetFileSettings(int(file_id, 0x10))
+        
+    def _buttonDESFireGetValueOnButtonClick(self, event):
+        file_id_index = self._choiceDESFireFiles.GetSelection()
+        if file_id_index == NOT_FOUND:
+            self._Log('Get file settings: no file selected.', wx.LOG_Warning)
+            return
+        file_id = self._choiceDESFireFiles.GetString(file_id_index)
+        self.__controller.desfireGetValue(int(file_id, 0x10))
+    
+    def _buttonDESFireClearRecordFileOnButtonClick(self, event):
+        file_id_index = self._choiceDESFireFiles.GetSelection()
+        if file_id_index == NOT_FOUND:
+            self._Log('Get file settings: no file selected.', wx.LOG_Warning)
+            return
+        file_id = self._choiceDESFireFiles.GetString(file_id_index)
+        self.__controller.desfireClearRecordFile(int(file_id, 0x10))
+
+    def _buttonDESFireCommitTransactionOnButtonClick(self, event):
+        self.__controller.desfireCommitTransaction()
+    
+    def _buttonDESFireAbortTransactionOnButtonClick(self, event):
+        self.__controller.desfireAbortTransaction()
+    
+    def _buttonDESFireReadDataOnButtonClick(self, event):
+        file_id_index = self._choiceDESFireFiles.GetSelection()
+        if file_id_index == NOT_FOUND:
+            self._Log('Get file settings: no file selected.', wx.LOG_Warning)
+            return
+        file_id = self._choiceDESFireFiles.GetString(file_id_index)
+        dlg = DESFireDialog_FileOperation(self, READ_DATA, int(file_id, 0x10))
+        if IDCANCEL == dlg.ShowModal():
+            return
+        
+        file_id = dlg.getFileNo()
+        offset = dlg.getOffset()
+        length = dlg.getLength()
+        self.__controller.desfireReadData(file_id, offset, length)
+    
+    def _buttonDESFireWriteDataOnButtonClick(self, event):
+        file_id_index = self._choiceDESFireFiles.GetSelection()
+        if file_id_index == NOT_FOUND:
+            self._Log('Get file settings: no file selected.', wx.LOG_Warning)
+            return
+        file_id = self._choiceDESFireFiles.GetString(file_id_index)
+        dlg = DESFireDialog_FileOperation(self, WRITE_DATA, int(file_id, 0x10))
+        if IDCANCEL == dlg.ShowModal():
+            return
+        
+        file_id = dlg.getFileNo()
+        offset = dlg.getOffset()
+        data = dlg.getData()
+        self.__controller.desfireWriteData(file_id, offset, len(data), data)
+    
+    def _buttonDESFireCreditOnButtonClick(self, event):
+        file_id_index = self._choiceDESFireFiles.GetSelection()
+        if file_id_index == NOT_FOUND:
+            self._Log('Get file settings: no file selected.', wx.LOG_Warning)
+            return
+        file_id = self._choiceDESFireFiles.GetString(file_id_index)
+        dlg = DESFireDialog_FileOperation(self, CREDIT, int(file_id, 0x10))
+        if IDCANCEL == dlg.ShowModal():
+            return
+
+        file_id = dlg.getFileNo()
+        value = dlg.getValue()
+        self.__controller.desfireCredit(file_id, value)
+        
+    def _buttonDESFireDebitOnButtonClick(self, event):
+        file_id_index = self._choiceDESFireFiles.GetSelection()
+        if file_id_index == NOT_FOUND:
+            self._Log('Get file settings: no file selected.', wx.LOG_Warning)
+            return
+        file_id = self._choiceDESFireFiles.GetString(file_id_index)
+        dlg = DESFireDialog_FileOperation(self, DEBIT, int(file_id, 0x10))
+        if IDCANCEL == dlg.ShowModal():
+            return
+
+        file_id = dlg.getFileNo()
+        value = dlg.getValue()
+        self.__controller.desfireDebit(file_id, value)
+    
+    def _buttonDESFireLimitedCreditOnButtonClick(self, event):
+        file_id_index = self._choiceDESFireFiles.GetSelection()
+        if file_id_index == NOT_FOUND:
+            self._Log('Get file settings: no file selected.', wx.LOG_Warning)
+            return
+        file_id = self._choiceDESFireFiles.GetString(file_id_index)
+        dlg = DESFireDialog_FileOperation(self, LIMITED_CREDIT, int(file_id, 0x10))
+        if IDCANCEL == dlg.ShowModal():
+            return
+
+        file_id = dlg.getFileNo()
+        value = dlg.getValue()
+        self.__controller.desfireLimitedCredit(file_id, value)
+    
+    def _buttonDESFireWriteRecordOnButtonClick(self, event):
+        file_id_index = self._choiceDESFireFiles.GetSelection()
+        if file_id_index == NOT_FOUND:
+            self._Log('Get file settings: no file selected.', wx.LOG_Warning)
+            return
+        file_id = self._choiceDESFireFiles.GetString(file_id_index)
+        dlg = DESFireDialog_FileOperation(self, WRITE_RECORD, int(file_id, 0x10))
+        if IDCANCEL == dlg.ShowModal():
+            return
+        
+        file_id = dlg.getFileNo()
+        offset = dlg.getOffset()
+        data = dlg.getData()
+        self.__controller.desfireWriteRecord(file_id, offset, len(data), data)
+
+    def _buttonDESFireReadRecordsOnButtonClick(self, event):
+        file_id_index = self._choiceDESFireFiles.GetSelection()
+        if file_id_index == NOT_FOUND:
+            self._Log('Get file settings: no file selected.', wx.LOG_Warning)
+            return
+        file_id = self._choiceDESFireFiles.GetString(file_id_index)
+        dlg = DESFireDialog_FileOperation(self, READ_RECORDS, int(file_id, 0x10))
+        if IDCANCEL == dlg.ShowModal():
+            return
+
+        file_id = dlg.getFileNo()
+        offset = dlg.getOffset()
+        length = dlg.getLength()
+        self.__controller.desfireReadRecords(file_id, offset, length)

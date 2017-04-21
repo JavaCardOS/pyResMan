@@ -26,10 +26,12 @@ Please visit: [pyResMan Discussions](http://javacardos.com/javacardforum/viewfor
 ![pyResMan Content Viewer](./images/pyResMan-content-viewer.png)
 ### GlobalPlatform: Key Manager
 ![pyResMan Key Manager](./images/pyResMan-key-manager.png)
-### SmartCard Debugger
-![pyResMan Smartcard Debugger](./images/pyResMan-smartcard-debugger.png)
 ### Script
 ![pyResMan Script](./images/pyResMan-script.png)
+### SmartCard Debugger
+![pyResMan Smartcard Debugger](./images/pyResMan-smartcard-debugger.png)
+### Mifare Functions
+![Mifare Functions](./images/pyResMan-mifare.png)
 
 ## Module Figure
 ![pyResMan](./images/pyResMan.png)

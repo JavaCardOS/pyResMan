@@ -63,7 +63,7 @@ class pyResManDialogBase ( wx.Dialog ):
         bSizer46 = wx.BoxSizer( wx.VERTICAL )
         
         self.m_splitter2 = wx.SplitterWindow( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.SP_3D )
-        self.m_splitter2.SetSashGravity( 0.72 )
+        self.m_splitter2.SetSashGravity( 0.7 )
         self.m_splitter2.Bind( wx.EVT_IDLE, self.m_splitter2OnIdle )
         self.m_splitter2.SetMinimumPaneSize( 1 )
         
@@ -591,7 +591,7 @@ class pyResManDialogBase ( wx.Dialog ):
         
         bSizer161.Add( self.m_staticText92, 0, wx.ALIGN_CENTER_VERTICAL|wx.TOP|wx.RIGHT|wx.LEFT, 5 )
         
-        self.m_hyperlink4 = wx.HyperlinkCtrl( self._panelMifare, wx.ID_ANY, u"Mifare Clone 1K", u"https://javacardos.com/store/mifare-clone-1k.php", wx.DefaultPosition, wx.DefaultSize, wx.HL_ALIGN_LEFT )
+        self.m_hyperlink4 = wx.HyperlinkCtrl( self._panelMifare, wx.ID_ANY, u"Mifare Clone 1K", u"https://javacardos.com/store/mifare-clone-1k.php", wx.DefaultPosition, wx.DefaultSize, wx.HL_ALIGN_LEFT|wx.HL_DEFAULT_STYLE )
         bSizer161.Add( self.m_hyperlink4, 0, wx.TOP|wx.RIGHT|wx.LEFT, 5 )
         
         
@@ -678,8 +678,8 @@ class pyResManDialogBase ( wx.Dialog ):
         self._buttonChangeUID = wx.Button( self._panelMifare, wx.ID_ANY, u"Change UID", wx.DefaultPosition, wx.DefaultSize, 0 )
         bSizer158.Add( self._buttonChangeUID, 0, wx.ALL|wx.EXPAND, 5 )
         
-        self._buttonUnblockCard = wx.Button( self._panelMifare, wx.ID_ANY, u"UnblockCard", wx.DefaultPosition, wx.DefaultSize, 0 )
-        bSizer158.Add( self._buttonUnblockCard, 0, wx.ALL|wx.EXPAND, 5 )
+        self._buttonFixBrickedUID = wx.Button( self._panelMifare, wx.ID_ANY, u"Fix bricked UID", wx.DefaultPosition, wx.DefaultSize, 0 )
+        bSizer158.Add( self._buttonFixBrickedUID, 0, wx.ALL|wx.EXPAND, 5 )
         
         self.m_staticline21 = wx.StaticLine( self._panelMifare, wx.ID_ANY, wx.DefaultPosition, wx.Size( -1,-1 ), wx.LI_VERTICAL )
         bSizer158.Add( self.m_staticline21, 0, wx.EXPAND |wx.ALL, 5 )
@@ -698,6 +698,379 @@ class pyResManDialogBase ( wx.Dialog ):
         self._panelMifare.Layout()
         bSizer155.Fit( self._panelMifare )
         self._notebookPages.AddPage( self._panelMifare, u"Mifare", False )
+        self._panelDESFire = wx.Panel( self._notebookPages, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
+        bSizer1611 = wx.BoxSizer( wx.VERTICAL )
+        
+        bSizer200 = wx.BoxSizer( wx.VERTICAL )
+        
+        bSizer162 = wx.BoxSizer( wx.HORIZONTAL )
+        
+        bSizer184 = wx.BoxSizer( wx.HORIZONTAL )
+        
+        self.m_staticText107 = wx.StaticText( self._panelDESFire, wx.ID_ANY, u"Key", wx.DefaultPosition, wx.Size( 70,-1 ), wx.ALIGN_CENTRE )
+        self.m_staticText107.Wrap( -1 )
+        self.m_staticText107.SetMinSize( wx.Size( 70,-1 ) )
+        self.m_staticText107.SetMaxSize( wx.Size( 70,-1 ) )
+        
+        bSizer184.Add( self.m_staticText107, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
+        
+        self._textctrlKeyNo = wx.TextCtrl( self._panelDESFire, wx.ID_ANY, u"00", wx.DefaultPosition, wx.Size( 25,-1 ), 0 )
+        self._textctrlKeyNo.SetMaxLength( 2 ) 
+        self._textctrlKeyNo.SetMinSize( wx.Size( 25,-1 ) )
+        self._textctrlKeyNo.SetMaxSize( wx.Size( 25,-1 ) )
+        
+        bSizer184.Add( self._textctrlKeyNo, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
+        
+        self._textctrlDESFireKey = wx.TextCtrl( self._panelDESFire, wx.ID_ANY, u"00000000000000000000000000000000", wx.DefaultPosition, wx.DefaultSize, wx.TE_RIGHT )
+        self._textctrlDESFireKey.SetMaxLength( 32 ) 
+        self._textctrlDESFireKey.SetMinSize( wx.Size( 220,-1 ) )
+        
+        bSizer184.Add( self._textctrlDESFireKey, 1, wx.ALL|wx.ALIGN_CENTER_VERTICAL|wx.EXPAND, 5 )
+        
+        self._buttonAuthenticate = wx.Button( self._panelDESFire, wx.ID_ANY, u"Authenticate", wx.DefaultPosition, wx.DefaultSize, 0 )
+        bSizer184.Add( self._buttonAuthenticate, 0, wx.ALL|wx.ALIGN_CENTER_HORIZONTAL, 5 )
+        
+        
+        bSizer162.Add( bSizer184, 0, 0, 5 )
+        
+        self.m_staticline7 = wx.StaticLine( self._panelDESFire, wx.ID_ANY, wx.DefaultPosition, wx.Size( -1,5 ), wx.LI_HORIZONTAL )
+        self.m_staticline7.Hide()
+        
+        bSizer162.Add( self.m_staticline7, 0, wx.EXPAND |wx.ALL, 5 )
+        
+        bSizer190 = wx.BoxSizer( wx.HORIZONTAL )
+        
+        bSizer185 = wx.BoxSizer( wx.VERTICAL )
+        
+        bSizer189 = wx.BoxSizer( wx.HORIZONTAL )
+        
+        self.m_staticText111 = wx.StaticText( self._panelDESFire, wx.ID_ANY, u"Key No", wx.DefaultPosition, wx.Size( 75,-1 ), wx.ALIGN_CENTRE )
+        self.m_staticText111.Wrap( -1 )
+        self.m_staticText111.Hide()
+        self.m_staticText111.SetMinSize( wx.Size( 75,-1 ) )
+        self.m_staticText111.SetMaxSize( wx.Size( 50,-1 ) )
+        
+        bSizer189.Add( self.m_staticText111, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
+        
+        self.m_textCtrl81 = wx.TextCtrl( self._panelDESFire, wx.ID_ANY, u"00", wx.DefaultPosition, wx.Size( 25,-1 ), 0 )
+        self.m_textCtrl81.Hide()
+        self.m_textCtrl81.SetMinSize( wx.Size( 25,-1 ) )
+        self.m_textCtrl81.SetMaxSize( wx.Size( 25,-1 ) )
+        
+        bSizer189.Add( self.m_textCtrl81, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
+        
+        
+        bSizer185.Add( bSizer189, 1, 0, 5 )
+        
+        bSizer187 = wx.BoxSizer( wx.HORIZONTAL )
+        
+        self.m_staticText108 = wx.StaticText( self._panelDESFire, wx.ID_ANY, u"Old Key", wx.DefaultPosition, wx.Size( 75,-1 ), wx.ALIGN_CENTRE )
+        self.m_staticText108.Wrap( -1 )
+        self.m_staticText108.Hide()
+        
+        bSizer187.Add( self.m_staticText108, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
+        
+        self._textctrlDESFireNewKey = wx.TextCtrl( self._panelDESFire, wx.ID_ANY, u"11111111111111111111111111111111", wx.DefaultPosition, wx.DefaultSize, wx.TE_RIGHT )
+        self._textctrlDESFireNewKey.SetMaxLength( 32 ) 
+        self._textctrlDESFireNewKey.Hide()
+        self._textctrlDESFireNewKey.SetMinSize( wx.Size( 220,-1 ) )
+        
+        bSizer187.Add( self._textctrlDESFireNewKey, 1, wx.ALL|wx.ALIGN_CENTER_VERTICAL|wx.EXPAND, 5 )
+        
+        
+        bSizer185.Add( bSizer187, 0, 0, 5 )
+        
+        bSizer188 = wx.BoxSizer( wx.HORIZONTAL )
+        
+        self.m_staticText110 = wx.StaticText( self._panelDESFire, wx.ID_ANY, u"New Key", wx.DefaultPosition, wx.Size( 75,-1 ), wx.ALIGN_CENTRE )
+        self.m_staticText110.Wrap( -1 )
+        self.m_staticText110.Hide()
+        
+        bSizer188.Add( self.m_staticText110, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
+        
+        self.m_textCtrl82 = wx.TextCtrl( self._panelDESFire, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_textCtrl82.Hide()
+        self.m_textCtrl82.SetMinSize( wx.Size( 220,-1 ) )
+        
+        bSizer188.Add( self.m_textCtrl82, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
+        
+        
+        bSizer185.Add( bSizer188, 0, 0, 5 )
+        
+        
+        bSizer190.Add( bSizer185, 0, wx.EXPAND|wx.ALIGN_CENTER_VERTICAL, 5 )
+        
+        bSizer201 = wx.BoxSizer( wx.VERTICAL )
+        
+        self._buttonChangeKey = wx.Button( self._panelDESFire, wx.ID_ANY, u"Change Key", wx.DefaultPosition, wx.DefaultSize, 0 )
+        bSizer201.Add( self._buttonChangeKey, 0, wx.ALL|wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL, 5 )
+        
+        
+        bSizer190.Add( bSizer201, 1, wx.EXPAND, 5 )
+        
+        
+        bSizer162.Add( bSizer190, 0, wx.ALIGN_CENTER_HORIZONTAL|wx.EXPAND, 5 )
+        
+        self._buttonGetKeySettings = wx.Button( self._panelDESFire, wx.ID_ANY, u"Get key settings", wx.DefaultPosition, wx.DefaultSize, 0 )
+        bSizer162.Add( self._buttonGetKeySettings, 0, wx.ALL|wx.ALIGN_CENTER_HORIZONTAL, 5 )
+        
+        self.m_staticline15 = wx.StaticLine( self._panelDESFire, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.LI_HORIZONTAL )
+        self.m_staticline15.Hide()
+        
+        bSizer162.Add( self.m_staticline15, 0, wx.EXPAND |wx.ALL, 5 )
+        
+        bSizer186 = wx.BoxSizer( wx.HORIZONTAL )
+        
+        self.m_staticText109 = wx.StaticText( self._panelDESFire, wx.ID_ANY, u"Key Settings", wx.DefaultPosition, wx.Size( 75,-1 ), wx.ALIGN_CENTRE )
+        self.m_staticText109.Wrap( -1 )
+        self.m_staticText109.Hide()
+        self.m_staticText109.SetMinSize( wx.Size( 75,-1 ) )
+        self.m_staticText109.SetMaxSize( wx.Size( 75,-1 ) )
+        
+        bSizer186.Add( self.m_staticText109, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
+        
+        self.m_textCtrl79 = wx.TextCtrl( self._panelDESFire, wx.ID_ANY, u"0F", wx.DefaultPosition, wx.Size( 32,-1 ), 0 )
+        self.m_textCtrl79.SetMaxLength( 2 ) 
+        self.m_textCtrl79.Hide()
+        self.m_textCtrl79.SetMinSize( wx.Size( 32,-1 ) )
+        self.m_textCtrl79.SetMaxSize( wx.Size( 32,-1 ) )
+        
+        bSizer186.Add( self.m_textCtrl79, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
+        
+        
+        bSizer186.AddSpacer( ( 0, 0), 1, wx.EXPAND, 5 )
+        
+        self._buttonChangeKeySettings = wx.Button( self._panelDESFire, wx.ID_ANY, u"Change", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self._buttonChangeKeySettings.Hide()
+        
+        bSizer186.Add( self._buttonChangeKeySettings, 0, wx.ALL|wx.ALIGN_CENTER_HORIZONTAL, 5 )
+        
+        
+        bSizer162.Add( bSizer186, 0, wx.EXPAND|wx.ALIGN_CENTER_HORIZONTAL, 5 )
+        
+        self.m_staticline8 = wx.StaticLine( self._panelDESFire, wx.ID_ANY, wx.DefaultPosition, wx.Size( -1,5 ), wx.LI_HORIZONTAL )
+        self.m_staticline8.Hide()
+        
+        bSizer162.Add( self.m_staticline8, 0, wx.EXPAND |wx.ALL, 5 )
+        
+        self._buttonGetVersion = wx.Button( self._panelDESFire, wx.ID_ANY, u"Get Version", wx.DefaultPosition, wx.DefaultSize, 0 )
+        bSizer162.Add( self._buttonGetVersion, 0, wx.ALL|wx.ALIGN_CENTER_HORIZONTAL, 5 )
+        
+        self._buttonFormatPICC = wx.Button( self._panelDESFire, wx.ID_ANY, u"Format PICC", wx.DefaultPosition, wx.DefaultSize, 0 )
+        bSizer162.Add( self._buttonFormatPICC, 0, wx.ALL|wx.ALIGN_CENTER_HORIZONTAL, 5 )
+        
+        
+        bSizer200.Add( bSizer162, 0, 0, 5 )
+        
+        self.m_staticline11 = wx.StaticLine( self._panelDESFire, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.LI_HORIZONTAL )
+        bSizer200.Add( self.m_staticline11, 0, wx.EXPAND |wx.ALL, 5 )
+        
+        bSizer163 = wx.BoxSizer( wx.HORIZONTAL )
+        
+        bSizer2011 = wx.BoxSizer( wx.VERTICAL )
+        
+        bSizer202 = wx.BoxSizer( wx.HORIZONTAL )
+        
+        self.m_staticText117 = wx.StaticText( self._panelDESFire, wx.ID_ANY, u"Applications", wx.DefaultPosition, wx.Size( 70,-1 ), wx.ALIGN_CENTRE )
+        self.m_staticText117.Wrap( -1 )
+        self.m_staticText117.SetMinSize( wx.Size( 70,-1 ) )
+        self.m_staticText117.SetMaxSize( wx.Size( 70,-1 ) )
+        
+        bSizer202.Add( self.m_staticText117, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
+        
+        self._listctrlDESFireApplications = wx.ListCtrl( self._panelDESFire, wx.ID_ANY, wx.DefaultPosition, wx.Size( 70,-1 ), wx.LC_REPORT|wx.LC_SINGLE_SEL )
+        self._listctrlDESFireApplications.Hide()
+        self._listctrlDESFireApplications.SetMinSize( wx.Size( 70,-1 ) )
+        self._listctrlDESFireApplications.SetMaxSize( wx.Size( 70,-1 ) )
+        
+        bSizer202.Add( self._listctrlDESFireApplications, 1, wx.ALL|wx.EXPAND, 5 )
+        
+        self._buttonGetApplicationIDs = wx.Button( self._panelDESFire, wx.ID_ANY, u"Get Application IDs", wx.DefaultPosition, wx.DefaultSize, 0 )
+        bSizer202.Add( self._buttonGetApplicationIDs, 0, wx.ALL|wx.ALIGN_CENTER_HORIZONTAL|wx.EXPAND, 5 )
+        
+        _choiceDESFireApplicationsChoices = []
+        self._choiceDESFireApplications = wx.Choice( self._panelDESFire, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, _choiceDESFireApplicationsChoices, 0 )
+        self._choiceDESFireApplications.SetSelection( 0 )
+        bSizer202.Add( self._choiceDESFireApplications, 0, wx.ALIGN_CENTER|wx.ALL, 5 )
+        
+        
+        bSizer2011.Add( bSizer202, 1, wx.EXPAND, 5 )
+        
+        bSizer165 = wx.BoxSizer( wx.HORIZONTAL )
+        
+        
+        bSizer165.AddSpacer( ( 80, 0), 1, wx.EXPAND, 5 )
+        
+        self._buttonSelectApplication = wx.Button( self._panelDESFire, wx.ID_ANY, u"Select Application", wx.DefaultPosition, wx.DefaultSize, 0 )
+        bSizer165.Add( self._buttonSelectApplication, 0, wx.ALL|wx.ALIGN_CENTER_HORIZONTAL|wx.EXPAND, 5 )
+        
+        self._buttonCreateApplication = wx.Button( self._panelDESFire, wx.ID_ANY, u"Create Application ...", wx.DefaultPosition, wx.DefaultSize, 0 )
+        bSizer165.Add( self._buttonCreateApplication, 0, wx.ALL|wx.ALIGN_CENTER_HORIZONTAL|wx.EXPAND, 5 )
+        
+        self._buttonDeleteApplication = wx.Button( self._panelDESFire, wx.ID_ANY, u"Delete Application", wx.DefaultPosition, wx.DefaultSize, 0 )
+        bSizer165.Add( self._buttonDeleteApplication, 0, wx.ALL|wx.ALIGN_CENTER_HORIZONTAL|wx.EXPAND, 5 )
+        
+        
+        bSizer2011.Add( bSizer165, 0, wx.EXPAND, 5 )
+        
+        
+        bSizer163.Add( bSizer2011, 0, wx.EXPAND, 5 )
+        
+        
+        bSizer200.Add( bSizer163, 0, wx.EXPAND, 5 )
+        
+        self.m_staticline10 = wx.StaticLine( self._panelDESFire, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.LI_HORIZONTAL )
+        bSizer200.Add( self.m_staticline10, 0, wx.EXPAND |wx.ALL, 5 )
+        
+        bSizer164 = wx.BoxSizer( wx.VERTICAL )
+        
+        bSizer203 = wx.BoxSizer( wx.HORIZONTAL )
+        
+        self._listctrlDESFireFiles = wx.ListCtrl( self._panelDESFire, wx.ID_ANY, wx.DefaultPosition, wx.Size( 45,-1 ), wx.LC_REPORT|wx.LC_SINGLE_SEL )
+        self._listctrlDESFireFiles.Hide()
+        self._listctrlDESFireFiles.SetMinSize( wx.Size( 45,-1 ) )
+        self._listctrlDESFireFiles.SetMaxSize( wx.Size( 45,-1 ) )
+        
+        bSizer203.Add( self._listctrlDESFireFiles, 1, wx.ALL|wx.EXPAND, 5 )
+        
+        self.m_staticText118 = wx.StaticText( self._panelDESFire, wx.ID_ANY, u"Files", wx.DefaultPosition, wx.Size( 70,-1 ), wx.ALIGN_CENTRE )
+        self.m_staticText118.Wrap( -1 )
+        self.m_staticText118.SetMinSize( wx.Size( 70,-1 ) )
+        self.m_staticText118.SetMaxSize( wx.Size( 70,-1 ) )
+        
+        bSizer203.Add( self.m_staticText118, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
+        
+        self._buttonGetFileIDs = wx.Button( self._panelDESFire, wx.ID_ANY, u"Get File IDs", wx.DefaultPosition, wx.DefaultSize, 0 )
+        bSizer203.Add( self._buttonGetFileIDs, 0, wx.ALL|wx.ALIGN_CENTER_HORIZONTAL, 5 )
+        
+        _choiceDESFireFilesChoices = []
+        self._choiceDESFireFiles = wx.Choice( self._panelDESFire, wx.ID_ANY, wx.DefaultPosition, wx.Size( 35,-1 ), _choiceDESFireFilesChoices, 0 )
+        self._choiceDESFireFiles.SetSelection( 0 )
+        self._choiceDESFireFiles.SetMinSize( wx.Size( 35,-1 ) )
+        self._choiceDESFireFiles.SetMaxSize( wx.Size( 35,-1 ) )
+        
+        bSizer203.Add( self._choiceDESFireFiles, 0, wx.ALIGN_CENTER|wx.ALL, 5 )
+        
+        
+        bSizer164.Add( bSizer203, 0, wx.EXPAND, 5 )
+        
+        bSizer169 = wx.BoxSizer( wx.HORIZONTAL )
+        
+        
+        bSizer169.AddSpacer( ( 80, 0), 0, wx.EXPAND, 5 )
+        
+        self._buttonGetFileSettings = wx.Button( self._panelDESFire, wx.ID_ANY, u"Get File Settings", wx.DefaultPosition, wx.DefaultSize, 0 )
+        bSizer169.Add( self._buttonGetFileSettings, 0, wx.ALL|wx.EXPAND|wx.ALIGN_CENTER_HORIZONTAL, 5 )
+        
+        self._buttonChangeFileSettings = wx.Button( self._panelDESFire, wx.ID_ANY, u"Change File Settings ...", wx.DefaultPosition, wx.DefaultSize, 0 )
+        bSizer169.Add( self._buttonChangeFileSettings, 0, wx.ALL|wx.EXPAND|wx.ALIGN_CENTER_HORIZONTAL, 5 )
+        
+        self._buttonDeleteFile = wx.Button( self._panelDESFire, wx.ID_ANY, u"Delete File", wx.DefaultPosition, wx.DefaultSize, 0 )
+        bSizer169.Add( self._buttonDeleteFile, 0, wx.ALL|wx.EXPAND|wx.ALIGN_CENTER_HORIZONTAL, 5 )
+        
+        
+        bSizer164.Add( bSizer169, 0, wx.EXPAND, 5 )
+        
+        bSizer209 = wx.BoxSizer( wx.HORIZONTAL )
+        
+        
+        bSizer209.AddSpacer( ( 80, 0), 1, wx.EXPAND, 5 )
+        
+        self._buttonCreateStdDataFile = wx.Button( self._panelDESFire, wx.ID_ANY, u"Create Std Data File ...", wx.DefaultPosition, wx.DefaultSize, 0 )
+        bSizer209.Add( self._buttonCreateStdDataFile, 0, wx.ALL|wx.EXPAND|wx.ALIGN_CENTER_HORIZONTAL, 5 )
+        
+        self._buttonCreateBackupDataFile = wx.Button( self._panelDESFire, wx.ID_ANY, u"Create Backup Data File ...", wx.DefaultPosition, wx.DefaultSize, 0 )
+        bSizer209.Add( self._buttonCreateBackupDataFile, 0, wx.ALL|wx.EXPAND|wx.ALIGN_CENTER_HORIZONTAL, 5 )
+        
+        self._buttonCreateValueFile = wx.Button( self._panelDESFire, wx.ID_ANY, u"Create Value File ...", wx.DefaultPosition, wx.DefaultSize, 0 )
+        bSizer209.Add( self._buttonCreateValueFile, 0, wx.ALL|wx.EXPAND|wx.ALIGN_CENTER_HORIZONTAL, 5 )
+        
+        self._buttonCreateLinearRecordFile = wx.Button( self._panelDESFire, wx.ID_ANY, u"Create Linear Record File ...", wx.DefaultPosition, wx.DefaultSize, 0 )
+        bSizer209.Add( self._buttonCreateLinearRecordFile, 0, wx.ALL|wx.EXPAND|wx.ALIGN_CENTER_HORIZONTAL, 5 )
+        
+        self._buttonCreateCyclicRecordFile = wx.Button( self._panelDESFire, wx.ID_ANY, u"Create Cyclic Record File ...", wx.DefaultPosition, wx.DefaultSize, 0 )
+        bSizer209.Add( self._buttonCreateCyclicRecordFile, 0, wx.ALL|wx.EXPAND|wx.ALIGN_CENTER_HORIZONTAL, 5 )
+        
+        
+        bSizer164.Add( bSizer209, 0, 0, 5 )
+        
+        
+        bSizer200.Add( bSizer164, 0, wx.EXPAND, 5 )
+        
+        bSizer192 = wx.BoxSizer( wx.HORIZONTAL )
+        
+        
+        bSizer192.AddSpacer( ( 80, 0), 0, wx.EXPAND, 5 )
+        
+        _sizerDESFireFileOperations = wx.BoxSizer( wx.VERTICAL )
+        
+        bSizer213 = wx.BoxSizer( wx.HORIZONTAL )
+        
+        self._buttonDESFireReadData = wx.Button( self._panelDESFire, wx.ID_ANY, u"Read Data ...", wx.DefaultPosition, wx.DefaultSize, 0 )
+        bSizer213.Add( self._buttonDESFireReadData, 0, wx.ALL|wx.EXPAND, 5 )
+        
+        self._buttonDESFireWriteData = wx.Button( self._panelDESFire, wx.ID_ANY, u"Write Data ...", wx.DefaultPosition, wx.DefaultSize, 0 )
+        bSizer213.Add( self._buttonDESFireWriteData, 0, wx.ALL|wx.EXPAND, 5 )
+        
+        
+        _sizerDESFireFileOperations.Add( bSizer213, 1, wx.EXPAND, 5 )
+        
+        bSizer212 = wx.BoxSizer( wx.HORIZONTAL )
+        
+        self._buttonDESFireGetValue = wx.Button( self._panelDESFire, wx.ID_ANY, u"Get Value", wx.DefaultPosition, wx.DefaultSize, 0 )
+        bSizer212.Add( self._buttonDESFireGetValue, 0, wx.ALL|wx.EXPAND, 5 )
+        
+        self._buttonDESFireCredit = wx.Button( self._panelDESFire, wx.ID_ANY, u"Credit ...", wx.DefaultPosition, wx.DefaultSize, 0 )
+        bSizer212.Add( self._buttonDESFireCredit, 0, wx.ALL|wx.EXPAND, 5 )
+        
+        self._buttonDESFireDebit = wx.Button( self._panelDESFire, wx.ID_ANY, u"Debit ...", wx.DefaultPosition, wx.DefaultSize, 0 )
+        bSizer212.Add( self._buttonDESFireDebit, 0, wx.ALL|wx.EXPAND, 5 )
+        
+        self._buttonDESFireLimitedCredit = wx.Button( self._panelDESFire, wx.ID_ANY, u"Limited Credit ...", wx.DefaultPosition, wx.DefaultSize, 0 )
+        bSizer212.Add( self._buttonDESFireLimitedCredit, 0, wx.ALL|wx.EXPAND, 5 )
+        
+        
+        _sizerDESFireFileOperations.Add( bSizer212, 1, wx.EXPAND, 5 )
+        
+        bSizer211 = wx.BoxSizer( wx.HORIZONTAL )
+        
+        self._buttonDESFireReadRecords = wx.Button( self._panelDESFire, wx.ID_ANY, u"Read Records ...", wx.DefaultPosition, wx.DefaultSize, 0 )
+        bSizer211.Add( self._buttonDESFireReadRecords, 0, wx.ALL|wx.EXPAND, 5 )
+        
+        self._buttonDESFireWriteRecord = wx.Button( self._panelDESFire, wx.ID_ANY, u"Write Record ...", wx.DefaultPosition, wx.DefaultSize, 0 )
+        bSizer211.Add( self._buttonDESFireWriteRecord, 0, wx.ALL|wx.EXPAND, 5 )
+        
+        self._buttonDESFireClearRecordFile = wx.Button( self._panelDESFire, wx.ID_ANY, u"Clear Record File", wx.DefaultPosition, wx.DefaultSize, 0 )
+        bSizer211.Add( self._buttonDESFireClearRecordFile, 0, wx.ALL|wx.EXPAND, 5 )
+        
+        
+        _sizerDESFireFileOperations.Add( bSizer211, 1, wx.EXPAND, 5 )
+        
+        bSizer210 = wx.BoxSizer( wx.HORIZONTAL )
+        
+        self._buttonDESFireCommitTransaction = wx.Button( self._panelDESFire, wx.ID_ANY, u"Commit Transaction", wx.DefaultPosition, wx.DefaultSize, 0 )
+        bSizer210.Add( self._buttonDESFireCommitTransaction, 0, wx.ALL|wx.EXPAND, 5 )
+        
+        self._buttonDESFireAbortTransaction = wx.Button( self._panelDESFire, wx.ID_ANY, u"Abort Transaction", wx.DefaultPosition, wx.DefaultSize, 0 )
+        bSizer210.Add( self._buttonDESFireAbortTransaction, 0, wx.ALL|wx.EXPAND, 5 )
+        
+        
+        _sizerDESFireFileOperations.Add( bSizer210, 1, wx.EXPAND, 5 )
+        
+        
+        bSizer192.Add( _sizerDESFireFileOperations, 0, wx.EXPAND, 5 )
+        
+        
+        bSizer200.Add( bSizer192, 0, wx.ALIGN_CENTER_VERTICAL|wx.EXPAND, 5 )
+        
+        
+        bSizer1611.Add( bSizer200, 1, wx.EXPAND, 5 )
+        
+        
+        self._panelDESFire.SetSizer( bSizer1611 )
+        self._panelDESFire.Layout()
+        bSizer1611.Fit( self._panelDESFire )
+        self._notebookPages.AddPage( self._panelDESFire, u"DESFire", False )
         self._panelAbout = wx.Panel( self._notebookPages, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
         bSizer331 = wx.BoxSizer( wx.HORIZONTAL )
         
@@ -714,7 +1087,7 @@ class pyResManDialogBase ( wx.Dialog ):
         
         bSizer401.AddSpacer( ( 0, 0), 1, wx.EXPAND, 5 )
         
-        self.m_staticText101 = wx.StaticText( self._panelAbout, wx.ID_ANY, u"PyResMan v4.0", wx.DefaultPosition, wx.DefaultSize, wx.ALIGN_CENTRE )
+        self.m_staticText101 = wx.StaticText( self._panelAbout, wx.ID_ANY, u"PyResMan v5.0", wx.DefaultPosition, wx.DefaultSize, wx.ALIGN_CENTRE )
         self.m_staticText101.Wrap( -1 )
         bSizer401.Add( self.m_staticText101, 0, wx.ALL|wx.EXPAND|wx.ALIGN_CENTER_VERTICAL, 5 )
         
@@ -900,8 +1273,41 @@ class pyResManDialogBase ( wx.Dialog ):
         self._buttonDumpCard.Bind( wx.EVT_BUTTON, self._buttonDumpCardOnButtonClick )
         self._buttonCloneCard.Bind( wx.EVT_BUTTON, self._buttonCloneCardOnButtonClick )
         self._buttonChangeUID.Bind( wx.EVT_BUTTON, self._buttonChangeUIDOnButtonClick )
-        self._buttonUnblockCard.Bind( wx.EVT_BUTTON, self._buttonUnblockCardOnButtonClick )
+        self._buttonFixBrickedUID.Bind( wx.EVT_BUTTON, self._buttonFixBrickedUIDOnButtonClick )
         self._buttonClearCardData.Bind( wx.EVT_BUTTON, self._buttonClearCardDataOnButtonClick )
+        self._buttonAuthenticate.Bind( wx.EVT_BUTTON, self._buttonAuthenticateOnButtonClick )
+        self._buttonChangeKey.Bind( wx.EVT_BUTTON, self._buttonChangeKeyOnButtonClick )
+        self._buttonGetKeySettings.Bind( wx.EVT_BUTTON, self._buttonGetKeySettingsOnButtonClick )
+        self._buttonChangeKeySettings.Bind( wx.EVT_BUTTON, self._buttonChangeKeySettingsOnButtonClick )
+        self._buttonGetVersion.Bind( wx.EVT_BUTTON, self._buttonGetVersionOnButtonClick )
+        self._buttonFormatPICC.Bind( wx.EVT_BUTTON, self._buttonFormatPICCOnButtonClick )
+        self._buttonGetApplicationIDs.Bind( wx.EVT_BUTTON, self._buttonGetApplicationIDsOnButtonClick )
+        self._choiceDESFireApplications.Bind( wx.EVT_CHOICE, self._choiceDESFireApplicationsOnChoice )
+        self._buttonSelectApplication.Bind( wx.EVT_BUTTON, self._buttonSelectApplicationOnButtonClick )
+        self._buttonCreateApplication.Bind( wx.EVT_BUTTON, self._buttonCreateApplicationOnButtonClick )
+        self._buttonDeleteApplication.Bind( wx.EVT_BUTTON, self._buttonDeleteApplicationOnButtonClick )
+        self._listctrlDESFireFiles.Bind( wx.EVT_LIST_ITEM_SELECTED, self._listctrlDESFireFilesOnListItemSelected )
+        self._buttonGetFileIDs.Bind( wx.EVT_BUTTON, self._buttonGetFileIDsOnButtonClick )
+        self._choiceDESFireFiles.Bind( wx.EVT_CHOICE, self._choiceDESFireFilesOnChoice )
+        self._buttonGetFileSettings.Bind( wx.EVT_BUTTON, self._buttonGetFileSettingsOnButtonClick )
+        self._buttonChangeFileSettings.Bind( wx.EVT_BUTTON, self._buttonChangeFileSettingsOnButtonClick )
+        self._buttonDeleteFile.Bind( wx.EVT_BUTTON, self._buttonDeleteFileOnButtonClick )
+        self._buttonCreateStdDataFile.Bind( wx.EVT_BUTTON, self._buttonCreateStdDataFileOnButtonClick )
+        self._buttonCreateBackupDataFile.Bind( wx.EVT_BUTTON, self._buttonCreateBackupDataFileOnButtonClick )
+        self._buttonCreateValueFile.Bind( wx.EVT_BUTTON, self._buttonCreateValueFileOnButtonClick )
+        self._buttonCreateLinearRecordFile.Bind( wx.EVT_BUTTON, self._buttonCreateLinearRecordFileOnButtonClick )
+        self._buttonCreateCyclicRecordFile.Bind( wx.EVT_BUTTON, self._buttonCreateCyclicRecordFileOnButtonClick )
+        self._buttonDESFireReadData.Bind( wx.EVT_BUTTON, self._buttonDESFireReadDataOnButtonClick )
+        self._buttonDESFireWriteData.Bind( wx.EVT_BUTTON, self._buttonDESFireWriteDataOnButtonClick )
+        self._buttonDESFireGetValue.Bind( wx.EVT_BUTTON, self._buttonDESFireGetValueOnButtonClick )
+        self._buttonDESFireCredit.Bind( wx.EVT_BUTTON, self._buttonDESFireCreditOnButtonClick )
+        self._buttonDESFireDebit.Bind( wx.EVT_BUTTON, self._buttonDESFireDebitOnButtonClick )
+        self._buttonDESFireLimitedCredit.Bind( wx.EVT_BUTTON, self._buttonDESFireLimitedCreditOnButtonClick )
+        self._buttonDESFireReadRecords.Bind( wx.EVT_BUTTON, self._buttonDESFireReadRecordsOnButtonClick )
+        self._buttonDESFireWriteRecord.Bind( wx.EVT_BUTTON, self._buttonDESFireWriteRecordOnButtonClick )
+        self._buttonDESFireClearRecordFile.Bind( wx.EVT_BUTTON, self._buttonDESFireClearRecordFileOnButtonClick )
+        self._buttonDESFireCommitTransaction.Bind( wx.EVT_BUTTON, self._buttonDESFireCommitTransactionOnButtonClick )
+        self._buttonDESFireAbortTransaction.Bind( wx.EVT_BUTTON, self._buttonDESFireAbortTransactionOnButtonClick )
         self._buttonClearLog.Bind( wx.EVT_BUTTON, self._buttonClearLogOnButtonClick )
     
     def __del__( self ):
@@ -1077,10 +1483,109 @@ class pyResManDialogBase ( wx.Dialog ):
     def _buttonChangeUIDOnButtonClick( self, event ):
         event.Skip()
     
-    def _buttonUnblockCardOnButtonClick( self, event ):
+    def _buttonFixBrickedUIDOnButtonClick( self, event ):
         event.Skip()
     
     def _buttonClearCardDataOnButtonClick( self, event ):
+        event.Skip()
+    
+    def _buttonAuthenticateOnButtonClick( self, event ):
+        event.Skip()
+    
+    def _buttonChangeKeyOnButtonClick( self, event ):
+        event.Skip()
+    
+    def _buttonGetKeySettingsOnButtonClick( self, event ):
+        event.Skip()
+    
+    def _buttonChangeKeySettingsOnButtonClick( self, event ):
+        event.Skip()
+    
+    def _buttonGetVersionOnButtonClick( self, event ):
+        event.Skip()
+    
+    def _buttonFormatPICCOnButtonClick( self, event ):
+        event.Skip()
+    
+    def _buttonGetApplicationIDsOnButtonClick( self, event ):
+        event.Skip()
+    
+    def _choiceDESFireApplicationsOnChoice( self, event ):
+        event.Skip()
+    
+    def _buttonSelectApplicationOnButtonClick( self, event ):
+        event.Skip()
+    
+    def _buttonCreateApplicationOnButtonClick( self, event ):
+        event.Skip()
+    
+    def _buttonDeleteApplicationOnButtonClick( self, event ):
+        event.Skip()
+    
+    def _listctrlDESFireFilesOnListItemSelected( self, event ):
+        event.Skip()
+    
+    def _buttonGetFileIDsOnButtonClick( self, event ):
+        event.Skip()
+    
+    def _choiceDESFireFilesOnChoice( self, event ):
+        event.Skip()
+    
+    def _buttonGetFileSettingsOnButtonClick( self, event ):
+        event.Skip()
+    
+    def _buttonChangeFileSettingsOnButtonClick( self, event ):
+        event.Skip()
+    
+    def _buttonDeleteFileOnButtonClick( self, event ):
+        event.Skip()
+    
+    def _buttonCreateStdDataFileOnButtonClick( self, event ):
+        event.Skip()
+    
+    def _buttonCreateBackupDataFileOnButtonClick( self, event ):
+        event.Skip()
+    
+    def _buttonCreateValueFileOnButtonClick( self, event ):
+        event.Skip()
+    
+    def _buttonCreateLinearRecordFileOnButtonClick( self, event ):
+        event.Skip()
+    
+    def _buttonCreateCyclicRecordFileOnButtonClick( self, event ):
+        event.Skip()
+    
+    def _buttonDESFireReadDataOnButtonClick( self, event ):
+        event.Skip()
+    
+    def _buttonDESFireWriteDataOnButtonClick( self, event ):
+        event.Skip()
+    
+    def _buttonDESFireGetValueOnButtonClick( self, event ):
+        event.Skip()
+    
+    def _buttonDESFireCreditOnButtonClick( self, event ):
+        event.Skip()
+    
+    def _buttonDESFireDebitOnButtonClick( self, event ):
+        event.Skip()
+    
+    def _buttonDESFireLimitedCreditOnButtonClick( self, event ):
+        event.Skip()
+    
+    def _buttonDESFireReadRecordsOnButtonClick( self, event ):
+        event.Skip()
+    
+    def _buttonDESFireWriteRecordOnButtonClick( self, event ):
+        event.Skip()
+    
+    def _buttonDESFireClearRecordFileOnButtonClick( self, event ):
+        event.Skip()
+    
+    def _buttonDESFireCommitTransactionOnButtonClick( self, event ):
+        event.Skip()
+    
+    def _buttonDESFireAbortTransactionOnButtonClick( self, event ):
         event.Skip()
     
     def _buttonClearLogOnButtonClick( self, event ):
