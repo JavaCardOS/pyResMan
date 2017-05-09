@@ -32,6 +32,9 @@ Please visit: [pyResMan Discussions](http://javacardos.com/javacardforum/viewfor
 ![pyResMan Smartcard Debugger](./images/pyResMan-smartcard-debugger.png)
 ### Mifare Functions
 ![Mifare Functions](./images/pyResMan-mifare.png)
+### DESFire Functions
+![DESFire Functions](./images/pyResMan-desfire.png)
+
 
 ## Module Figure
 ![pyResMan](./images/pyResMan.png)
